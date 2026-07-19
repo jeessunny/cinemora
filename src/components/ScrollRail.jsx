@@ -5,11 +5,16 @@ import MovieSkeleton from './MovieSkeleton';
 
 export default function ScrollRail({ title, movies, isLoading, getStatus }) {
   return (
-    <Box sx={{ mt: 2.2, mb: 0, width: '100%' }}>
+    <Box sx={{ 
+      mt: 2.2, 
+      mb: 0, 
+      width: '100%',
+      animation: 'staggerUp 0.45s ease-out both',
+    }}>
       <Typography 
         variant="titleLarge" 
         sx={{ 
-          mb: 1.5, // 12px space to the cards below
+          mb: 1.5,
           px: 2, 
           fontWeight: 800,
           color: 'text.primary',
@@ -28,7 +33,7 @@ export default function ScrollRail({ title, movies, isLoading, getStatus }) {
           gap: 2, 
           overflowX: 'auto', 
           px: 2,
-          pt: 1.2, // pt: 1.2 (approx 10px) top padding to prevent card top scaling hover clipping
+          pt: 1.2,
           pb: 2, 
           '&::-webkit-scrollbar': { display: 'none' },
           scrollbarWidth: 'none',
@@ -39,11 +44,12 @@ export default function ScrollRail({ title, movies, isLoading, getStatus }) {
             <MovieSkeleton key={i} type="poster" />
           ))
         ) : movies.length > 0 ? (
-          movies.map((movie) => (
+          movies.map((movie, index) => (
             <PosterCard 
               key={movie.id} 
               movie={movie} 
-              status={getStatus ? getStatus(movie.id) : null} 
+              status={getStatus ? getStatus(movie.id) : null}
+              animDelay={Math.min(index * 0.06, 0.4)}
             />
           ))
         ) : (

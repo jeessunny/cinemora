@@ -12,7 +12,9 @@ export default function EmptyState({ icon: Icon, title, subtitle, actionLabel, o
         textAlign: 'center',
         p: 2,
         width: '100%',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        animation: 'fadeSlideUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        animationDelay: '0.1s',
       }}
     >
       <Box 
@@ -23,7 +25,8 @@ export default function EmptyState({ icon: Icon, title, subtitle, actionLabel, o
           mb: 2.5,
           display: 'flex',
           color: 'primary.main',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          animation: 'gentlePulse 3s ease-in-out infinite',
         }}
       >
         <Icon sx={{ fontSize: 40 }} />
@@ -44,7 +47,11 @@ export default function EmptyState({ icon: Icon, title, subtitle, actionLabel, o
             px: 4,
             py: 1.2,
             fontSize: '14px',
-            textTransform: 'none'
+            textTransform: 'none',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+            '&:active': {
+              transform: 'scale(0.96)',
+            }
           }}
         >
           {actionLabel}

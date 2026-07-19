@@ -3,7 +3,7 @@ import { Card, CardActionArea, CardMedia, Typography, Box } from '@mui/material'
 import { Favorite, Bookmark, CheckCircle } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-export default function PosterCard({ movie, status }) {
+export default function PosterCard({ movie, status, animDelay = 0 }) {
   const navigate = useNavigate();
 
   const getStatusIcon = () => {
@@ -17,7 +17,7 @@ export default function PosterCard({ movie, status }) {
 
   return (
     <Card 
-      elevation={0} // Disable default elevation to completely remove light corners/borders in dark mode
+      elevation={0}
       sx={{ 
         width: 150, 
         height: 225,
@@ -25,12 +25,18 @@ export default function PosterCard({ movie, status }) {
         borderRadius: '12px',
         position: 'relative',
         overflow: 'hidden',
-        bgcolor: 'transparent', // Transparent background to keep corners clean on any background
-        backgroundImage: 'none !important', // Bypass MUI automatic dark mode paper overlay tint
+        bgcolor: 'transparent',
+        backgroundImage: 'none !important',
         boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-        transition: 'transform 0.2s ease-in-out',
+        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease',
+        animation: 'scaleIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        animationDelay: `${animDelay}s`,
         '&:hover': {
           transform: 'scale(1.04)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.55)',
+        },
+        '&:active': {
+          transform: 'scale(0.97)',
         }
       }}
     >
@@ -118,7 +124,9 @@ export default function PosterCard({ movie, status }) {
             justifyContent: 'center',
             boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
             backdropFilter: 'blur(4px)',
-            zIndex: 2
+            zIndex: 2,
+            animation: 'scaleIn 0.3s ease-out both',
+            animationDelay: `${animDelay + 0.15}s`,
           }}>
             {getStatusIcon()}
           </Box>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { getTheme } from './theme';
 import useStore from './store';
 import NavBar from './components/NavBar';
@@ -19,6 +19,30 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Animated page wrapper that applies a fade+slide transition on route changes
+const AnimatedPage = ({ children }) => {
+  const location = useLocation();
+  const [displayChildren, setDisplayChildren] = useState(children);
+  const [transitionKey, setTransitionKey] = useState(location.key);
+
+  useEffect(() => {
+    if (location.key !== transitionKey) {
+      setTransitionKey(location.key);
+      setDisplayChildren(children);
+    }
+  }, [children, location.key, transitionKey]);
+
+  return (
+    <Box
+      key={transitionKey}
+      className="anim-page-enter"
+      sx={{ minHeight: '100vh' }}
+    >
+      {displayChildren}
+    </Box>
+  );
+};
+
 const Layout = ({ children }) => {
   const location = useLocation();
   // Support hiding navigation on both /settings and /setting routes
@@ -26,7 +50,7 @@ const Layout = ({ children }) => {
   
   return (
     <>
-      {children}
+      <AnimatedPage>{children}</AnimatedPage>
       {!hideNav && <NavBar />}
     </>
   );

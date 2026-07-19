@@ -15,7 +15,17 @@ export default function HeroCard({ movie }) {
         height: 400,
         borderRadius: '28px',
         overflow: 'hidden',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        animation: 'heroShimmer 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        animationDelay: '0.1s',
+        transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s ease',
+        '&:hover': {
+          transform: 'scale(1.01)',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+        },
+        '&:active': {
+          transform: 'scale(0.98)',
+        }
       }}
       onClick={() => navigate(`/movie/${movie.id}`)}
     >
@@ -29,6 +39,7 @@ export default function HeroCard({ movie }) {
           backgroundImage: `url(${movie.backdropUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          transition: 'transform 0.6s ease',
         }}
       />
       <Box
@@ -46,7 +57,7 @@ export default function HeroCard({ movie }) {
         }}
       >
         <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-          {movie.genres.slice(0, 2).map((g) => (
+          {movie.genres.slice(0, 2).map((g, i) => (
             <Chip 
               key={g} 
               label={g} 
@@ -54,7 +65,9 @@ export default function HeroCard({ movie }) {
               sx={{ 
                 bgcolor: 'rgba(255,255,255,0.2)', 
                 color: 'white',
-                backdropFilter: 'blur(4px)'
+                backdropFilter: 'blur(4px)',
+                animation: 'chipCascade 0.35s ease-out both',
+                animationDelay: `${0.25 + i * 0.08}s`,
               }} 
             />
           ))}
@@ -63,17 +76,38 @@ export default function HeroCard({ movie }) {
               label={`${movie.matchPercentage}% Match`} 
               size="small"
               color="primary"
+              sx={{
+                animation: 'chipCascade 0.35s ease-out both',
+                animationDelay: '0.4s',
+              }}
             />
           )}
         </Box>
-        <Typography variant="headlineMedium" color="white" fontWeight={700} gutterBottom>
+        <Typography 
+          variant="headlineMedium" 
+          color="white" 
+          fontWeight={700} 
+          gutterBottom
+          sx={{
+            animation: 'staggerUp 0.4s ease-out both',
+            animationDelay: '0.3s',
+          }}
+        >
           {movie.title}
         </Typography>
         <Button 
           variant="contained" 
           color="primary" 
           fullWidth
-          sx={{ mt: 1 }}
+          sx={{ 
+            mt: 1,
+            animation: 'staggerUp 0.4s ease-out both',
+            animationDelay: '0.4s',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+            '&:active': {
+              transform: 'scale(0.97)',
+            }
+          }}
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/movie/${movie.id}`);

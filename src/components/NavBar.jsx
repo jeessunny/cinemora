@@ -19,17 +19,19 @@ export default function NavBar() {
       elevation={0}
       sx={{ 
         position: 'fixed', 
-        bottom: 'calc(16px + env(safe-area-inset-bottom))', // Perfect safe area offsets
+        bottom: 'calc(16px + env(safe-area-inset-bottom))',
         left: 20, 
         right: 20, 
         zIndex: 1000,
-        borderRadius: '32px', // Premium curved Apple-style rounded pill
+        borderRadius: '32px',
         overflow: 'hidden',
-        bgcolor: 'surface.surfaceContainer', // Solid surface container color (no transparent glass effect)
+        bgcolor: 'surface.surfaceContainer',
         backgroundImage: 'none !important',
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)', // Premium soft drop shadow
+        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
         border: '1px solid',
-        borderColor: 'surface.surfaceContainerHighest'
+        borderColor: 'surface.surfaceContainerHighest',
+        animation: 'slideUpNav 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        animationDelay: '0.15s',
       }} 
     >
       <BottomNavigation
@@ -40,11 +42,12 @@ export default function NavBar() {
           navigate(routes[newValue]);
         }}
         sx={{
-          backgroundColor: 'transparent', // Inherits Paper solid color
-          height: 72, // Sleeker compact height
+          backgroundColor: 'transparent',
+          height: 72,
           '& .MuiBottomNavigationAction-root': {
             color: 'text.secondary',
             py: 1.2,
+            transition: 'color 0.25s ease, transform 0.25s ease',
             '&.Mui-selected': {
               color: 'primary.main',
             },
@@ -52,14 +55,15 @@ export default function NavBar() {
               mt: 0.5,
               fontSize: '11px',
               fontWeight: 600,
+              transition: 'font-size 0.2s ease',
             },
             '& .MuiSvgIcon-root': {
               fontSize: 22,
-              transition: 'transform 0.2s ease-in-out',
+              transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
             },
             '&.Mui-selected .MuiSvgIcon-root': {
               color: 'primary.main',
-              transform: 'scale(1.1)' // Micro-interaction scale feedback
+              transform: 'scale(1.1)',
             }
           }
         }}
