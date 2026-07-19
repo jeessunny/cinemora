@@ -56,11 +56,10 @@ export default function HomeScreen() {
       {/* Header with username matched to page title size (headlineMedium) and appropriate bodyLarge greeting */}
       <Box sx={{ 
         p: 2, 
-        pt: 3.5,
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between',
-        mb: 2.5
+        mb: 3
       }}>
         {/* Username set to headlineMedium, greeting set to bodyLarge with gap spacing */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0, flex: 1, pr: 2 }}>
