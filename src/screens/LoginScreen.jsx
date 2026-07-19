@@ -5,7 +5,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import useStore from '../store';
 import { genres } from '../data/mockData';
 import GenreChips from '../components/GenreChips';
-import ConfirmDialog from '../components/ConfirmDialog'; // Reusing custom M3 ConfirmDialog
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function LoginScreen() {
   const navigate = useNavigate();
@@ -21,23 +21,52 @@ export default function LoginScreen() {
   const [nameInput, setNameInput] = useState(storeUserName || '');
   const [avatarPreview, setAvatarPreview] = useState(storeAvatar);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [showDiscardDialog, setShowDiscardDialog] = useState(false); // Discard changes popup state
-  const [initialGenres, setInitialGenres] = useState([]); // Copy of selected genres on mount to restore if cancelled
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false);
+  const [initialGenres, setInitialGenres] = useState([]);
 
-  // Check if a profile already exists
   const isEditing = storeUserName !== '';
 
-  // Store a snapshot of genres on mount to identify edits
+  // Store initial genre list snapshot on mount
   useEffect(() => {
     setInitialGenres([...selectedGenres]);
   }, []);
 
-  // Only redirect if onboarded AND not in edit profile flow to resolve lag/routing race conditions
+  const hasGenreChanges = 
+    selectedGenres.length !== initialGenres.length || 
+    selectedGenres.some(g => !initialGenres.includes(g));
+
+  const hasChanges = 
+    nameInput !== (storeUserName || '') || 
+    avatarPreview !== storeAvatar || 
+    hasGenreChanges;
+
+  // Intercept browser and device back button pops to show discard confirmation dialog
+  useEffect(() => {
+    if (!isEditing) return;
+
+    // Push dummy state to history stack to intercept pop state
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = (e) => {
+      if (hasChanges) {
+        // Block pop exit by pushing dummy state back on top
+        window.history.pushState(null, '', window.location.href);
+        setShowDiscardDialog(true);
+      } else {
+        navigate('/settings', { replace: true });
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [hasChanges, isEditing]);
+
   if (isOnboarded && !isEditing) {
     return <Navigate to="/home" replace />;
   }
 
-  // Pre-generate a default random avatar seed on first load
   useEffect(() => {
     if (!avatarPreview) {
       const seed = Math.floor(Math.random() * 10000);
@@ -59,16 +88,6 @@ export default function LoginScreen() {
 
   const isFormValid = nameInput.trim() !== '' && avatarPreview !== null && selectedGenres.length > 0;
 
-  // Detect unsaved changes (compares text, avatar preview, and active genres array content)
-  const hasGenreChanges = 
-    selectedGenres.length !== initialGenres.length || 
-    selectedGenres.some(g => !initialGenres.includes(g));
-
-  const hasChanges = 
-    nameInput !== (storeUserName || '') || 
-    avatarPreview !== storeAvatar || 
-    hasGenreChanges;
-
   const handleSubmit = () => {
     if (isFormValid) {
       setUserName(nameInput.trim());
@@ -80,17 +99,17 @@ export default function LoginScreen() {
 
   const handleBack = () => {
     if (hasChanges) {
-      setShowDiscardDialog(true); // Prompts confirmation if edits were made
+      setShowDiscardDialog(true);
     } else {
-      navigate(-1);
+      navigate('/settings', { replace: true });
     }
   };
 
   const handleConfirmDiscard = () => {
-    // Reverts genre choices back to mount snapshot using Zustand direct setter
+    // Restore initial genres snapshot
     useStore.setState({ selectedGenres: initialGenres });
     setShowDiscardDialog(false);
-    navigate(-1);
+    navigate('/settings', { replace: true });
   };
 
   return (
@@ -282,15 +301,15 @@ export default function LoginScreen() {
         {isEditing ? 'Save Changes' : 'Get Started'}
       </Button>
 
-      {/* Confirm Discard Dialog popup */}
+      {/* Discard changes dialog matches Yes/No format */}
       <ConfirmDialog
         open={showDiscardDialog}
         title="Discard Changes?"
         content="You have unsaved changes. Are you sure you want to leave without saving?"
         onConfirm={handleConfirmDiscard}
         onCancel={() => setShowDiscardDialog(false)}
-        confirmText="Discard"
-        cancelText="Keep Editing"
+        confirmText="Yes"
+        cancelText="No"
       />
     </Box>
   );
