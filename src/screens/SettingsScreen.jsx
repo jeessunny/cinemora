@@ -114,7 +114,7 @@ export default function SettingsScreen() {
               variant="bodySmall" 
               color="primary.main" 
               onClick={() => {
-                setOnboarded(false);
+                // Navigate to edit profile without changing onboarded status to avoid routing race conditions
                 navigate('/');
               }}
               sx={{ 

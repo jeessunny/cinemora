@@ -5,6 +5,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import useStore from '../store';
 import { genres } from '../data/mockData';
 import GenreChips from '../components/GenreChips';
+import ConfirmDialog from '../components/ConfirmDialog'; // Reusing custom M3 ConfirmDialog
 
 export default function LoginScreen() {
   const navigate = useNavigate();
@@ -20,8 +21,19 @@ export default function LoginScreen() {
   const [nameInput, setNameInput] = useState(storeUserName || '');
   const [avatarPreview, setAvatarPreview] = useState(storeAvatar);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false); // Discard changes popup state
+  const [initialGenres, setInitialGenres] = useState([]); // Copy of selected genres on mount to restore if cancelled
 
-  if (isOnboarded) {
+  // Check if a profile already exists
+  const isEditing = storeUserName !== '';
+
+  // Store a snapshot of genres on mount to identify edits
+  useEffect(() => {
+    setInitialGenres([...selectedGenres]);
+  }, []);
+
+  // Only redirect if onboarded AND not in edit profile flow to resolve lag/routing race conditions
+  if (isOnboarded && !isEditing) {
     return <Navigate to="/home" replace />;
   }
 
@@ -45,8 +57,17 @@ export default function LoginScreen() {
     }, 600);
   };
 
-  const isEditing = storeUserName !== ''; // Check if user is editing their profile or onboarding
   const isFormValid = nameInput.trim() !== '' && avatarPreview !== null && selectedGenres.length > 0;
+
+  // Detect unsaved changes (compares text, avatar preview, and active genres array content)
+  const hasGenreChanges = 
+    selectedGenres.length !== initialGenres.length || 
+    selectedGenres.some(g => !initialGenres.includes(g));
+
+  const hasChanges = 
+    nameInput !== (storeUserName || '') || 
+    avatarPreview !== storeAvatar || 
+    hasGenreChanges;
 
   const handleSubmit = () => {
     if (isFormValid) {
@@ -58,7 +79,17 @@ export default function LoginScreen() {
   };
 
   const handleBack = () => {
-    setOnboarded(true);
+    if (hasChanges) {
+      setShowDiscardDialog(true); // Prompts confirmation if edits were made
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleConfirmDiscard = () => {
+    // Reverts genre choices back to mount snapshot using Zustand direct setter
+    useStore.setState({ selectedGenres: initialGenres });
+    setShowDiscardDialog(false);
     navigate(-1);
   };
 
@@ -73,7 +104,7 @@ export default function LoginScreen() {
       boxSizing: 'border-box',
       position: 'relative'
     }}>
-      {/* Back Button matching the exact style of the movie details back button */}
+      {/* Back Button matching details styling */}
       {isEditing && (
         <Box sx={{ 
           position: 'absolute', 
@@ -95,7 +126,7 @@ export default function LoginScreen() {
         </Box>
       )}
 
-      {/* Centered logo and tagline at the top */}
+      {/* Centered logo and tagline */}
       <Box 
         sx={{ 
           mt: isEditing ? 8 : 5, 
@@ -250,6 +281,17 @@ export default function LoginScreen() {
       >
         {isEditing ? 'Save Changes' : 'Get Started'}
       </Button>
+
+      {/* Confirm Discard Dialog popup */}
+      <ConfirmDialog
+        open={showDiscardDialog}
+        title="Discard Changes?"
+        content="You have unsaved changes. Are you sure you want to leave without saving?"
+        onConfirm={handleConfirmDiscard}
+        onCancel={() => setShowDiscardDialog(false)}
+        confirmText="Discard"
+        cancelText="Keep Editing"
+      />
     </Box>
   );
 }
