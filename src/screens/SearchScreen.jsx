@@ -95,104 +95,124 @@ export default function SearchScreen() {
         />
       </Box>
 
-      {query ? (
-        isTyping ? (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Box key={i} sx={{ width: 'calc(50% - 8px)' }}>
-                <MovieSkeleton type="poster" />
-              </Box>
-            ))}
-          </Box>
-        ) : results.length > 0 ? (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-            {results.map((movie) => (
-              <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
-                <PosterCard movie={movie} status={getStatus(movie.id)} />
-              </Box>
-            ))}
-          </Box>
+      {/* Animated content area — key forces remount on type switch for fadeSlideUp replay */}
+      <Box
+        key={type}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          animation: 'fadeSlideUp 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        }}
+      >
+        {query ? (
+          isTyping ? (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Box key={i} sx={{ width: 'calc(50% - 8px)' }}>
+                  <MovieSkeleton type="poster" />
+                </Box>
+              ))}
+            </Box>
+          ) : results.length > 0 ? (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {results.map((movie, index) => (
+                <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
+                  <PosterCard movie={movie} status={getStatus(movie.id)} animDelay={Math.min(index * 0.05, 0.3)} />
+                </Box>
+              ))}
+            </Box>
+          ) : (
+            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+              <EmptyState 
+                icon={SearchOff} 
+                title="No results found" 
+                subtitle={type === 'tv' 
+                  ? "No TV shows match your search. Try switching to Movies." 
+                  : "Try adjusting your search or filters to find what you're looking for."
+                } 
+              />
+            </Box>
+          )
         ) : (
-          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
-            <EmptyState 
-              icon={SearchOff} 
-              title="No results found" 
-              subtitle={type === 'tv' 
-                ? "No TV shows match your search. Try switching to Movies." 
-                : "Try adjusting your search or filters to find what you're looking for."
-              } 
-            />
-          </Box>
-        )
-      ) : (
-        <Box>
-          {recentSearches.length > 0 && (
-            <Box sx={{ mb: 3.5 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-                <Typography 
-                  variant="titleMedium" 
-                  sx={{ 
-                    fontWeight: 800, 
-                    textAlign: 'center', 
-                    width: '100%', 
-                    display: 'block', 
-                    mb: 1.5 
-                  }}
-                >
-                  Recent Searches
-                </Typography>
-                <Typography 
-                  variant="labelLarge" 
-                  color="primary" 
-                  sx={{ cursor: 'pointer', fontWeight: 700 }} 
-                  onClick={clearRecentSearches}
-                >
-                  Clear All
-                </Typography>
+          <Box>
+            {recentSearches.length > 0 && (
+              <Box sx={{ mb: 3.5 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+                  <Typography 
+                    variant="titleMedium" 
+                    sx={{ 
+                      fontWeight: 800, 
+                      textAlign: 'center', 
+                      width: '100%', 
+                      display: 'block', 
+                      mb: 1.5 
+                    }}
+                  >
+                    Recent Searches
+                  </Typography>
+                  <Typography 
+                    variant="labelLarge" 
+                    color="primary" 
+                    sx={{ cursor: 'pointer', fontWeight: 700 }} 
+                    onClick={clearRecentSearches}
+                  >
+                    Clear All
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.2, justifyContent: 'center' }}>
+                  {recentSearches.map((s, i) => (
+                    <Chip 
+                      key={i} 
+                      label={s} 
+                      icon={<History fontSize="small" />} 
+                      onClick={() => { setQuery(s); handleSearchSubmit(s); }}
+                      variant="outlined"
+                      sx={{ 
+                        borderRadius: '8px',
+                        animation: 'chipCascade 0.3s ease-out both',
+                        animationDelay: `${i * 0.06}s`,
+                      }}
+                    />
+                  ))}
+                </Box>
               </Box>
+            )}
+
+            {/* Conditional spacing based on recent search content presence */}
+            <Box sx={{ mt: recentSearches.length > 0 ? 3.5 : 0.5 }}>
+              <Typography 
+                variant="titleMedium" 
+                sx={{ 
+                  fontWeight: 800, 
+                  textAlign: 'center', 
+                  width: '100%', 
+                  display: 'block', 
+                  mb: 2.2 
+                }}
+              >
+                Popular Searches
+              </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.2, justifyContent: 'center' }}>
-                {recentSearches.map((s, i) => (
+                {popularSearches.map((s, i) => (
                   <Chip 
                     key={i} 
                     label={s} 
-                    icon={<History fontSize="small" />} 
+                    icon={<TrendingUp fontSize="small" />}
                     onClick={() => { setQuery(s); handleSearchSubmit(s); }}
-                    variant="outlined"
-                    sx={{ borderRadius: '8px' }}
+                    sx={{ 
+                      borderRadius: '8px', 
+                      bgcolor: 'surface.surfaceContainerLow',
+                      animation: 'chipCascade 0.3s ease-out both',
+                      animationDelay: `${i * 0.06}s`,
+                    }}
                   />
                 ))}
               </Box>
             </Box>
-          )}
-
-          {/* Conditional spacing based on recent search content presence */}
-          <Box sx={{ mt: recentSearches.length > 0 ? 3.5 : 0.5 }}>
-            <Typography 
-              variant="titleMedium" 
-              sx={{ 
-                fontWeight: 800, 
-                textAlign: 'center', 
-                width: '100%', 
-                display: 'block', 
-                mb: 2.2 
-              }}
-            >
-              Popular Searches
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.2, justifyContent: 'center' }}>
-              {popularSearches.map((s, i) => (
-                <Chip 
-                  key={i} 
-                  label={s} 
-                  icon={<TrendingUp fontSize="small" />}
-                  onClick={() => { setQuery(s); handleSearchSubmit(s); }}
-                  sx={{ borderRadius: '8px', bgcolor: 'surface.surfaceContainerLow' }}
-                />
-              ))}
-            </Box>
           </Box>
-        </Box>
-      )}
+        )}
+      </Box>
     </Box>
   );
 }

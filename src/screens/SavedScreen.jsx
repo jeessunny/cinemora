@@ -57,17 +57,16 @@ export default function SavedScreen() {
 
     if (data.length === 0) {
       return (
-        // Flexbox wrapper configured to align the EmptyState block perfectly centered on screen vertically & horizontally
         <Box 
           sx={{ 
-            flexGrow: 1, // Fills the entire remaining screen height dynamically
+            flexGrow: 1,
             display: 'flex', 
             flexDirection: 'column',
             alignItems: 'center', 
             justifyContent: 'center',
             width: '100%',
             boxSizing: 'border-box',
-            pb: 10 // offsets bottom nav bar height to make it vertically centered in the visible viewport
+            pb: 10
           }}
         >
           <EmptyState {...emptyProps} />
@@ -77,9 +76,9 @@ export default function SavedScreen() {
 
     return (
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-        {data.map((movie) => (
+        {data.map((movie, index) => (
           <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
-            <PosterCard movie={movie} status={status} />
+            <PosterCard movie={movie} status={status} animDelay={Math.min(index * 0.05, 0.3)} />
           </Box>
         ))}
       </Box>
@@ -115,7 +114,18 @@ export default function SavedScreen() {
         />
       </Box>
 
-      {renderContent()}
+      {/* Animated content area — key forces remount on tab switch for fadeSlideUp replay */}
+      <Box
+        key={tab}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          animation: 'fadeSlideUp 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        }}
+      >
+        {renderContent()}
+      </Box>
     </Box>
   );
 }
