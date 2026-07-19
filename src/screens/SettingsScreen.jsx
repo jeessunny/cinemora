@@ -114,8 +114,8 @@ export default function SettingsScreen() {
               variant="bodySmall" 
               color="primary.main" 
               onClick={() => {
-                // Navigate to edit profile without changing onboarded status to avoid routing race conditions
-                navigate('/');
+                // Pass fromSettings state to flag the edit profile flow correctly
+                navigate('/', { state: { fromSettings: true } });
               }}
               sx={{ 
                 cursor: 'pointer', 

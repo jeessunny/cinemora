@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Avatar, Button, IconButton } from '@mui/material';
 import { Refresh, ChevronLeft } from '@mui/icons-material';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 import { genres } from '../data/mockData';
 import GenreChips from '../components/GenreChips';
@@ -9,6 +9,8 @@ import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function LoginScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
+  
   const setUserName = useStore(state => state.setUserName);
   const setAvatar = useStore(state => state.setAvatar);
   const toggleGenre = useStore(state => state.toggleGenre);
@@ -24,7 +26,8 @@ export default function LoginScreen() {
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [initialGenres, setInitialGenres] = useState([]);
 
-  const isEditing = storeUserName !== '';
+  // Check router navigation state to determine if user arrived via settings profile edit click
+  const isEditing = location.state?.fromSettings === true;
 
   // Store initial genre list snapshot on mount
   useEffect(() => {
@@ -63,6 +66,7 @@ export default function LoginScreen() {
     };
   }, [hasChanges, isEditing]);
 
+  // Only redirect if onboarded AND not explicitly editing their profile (bypassed via fromSettings state)
   if (isOnboarded && !isEditing) {
     return <Navigate to="/home" replace />;
   }
@@ -106,7 +110,6 @@ export default function LoginScreen() {
   };
 
   const handleConfirmDiscard = () => {
-    // Restore initial genres snapshot
     useStore.setState({ selectedGenres: initialGenres });
     setShowDiscardDialog(false);
     navigate('/settings', { replace: true });
