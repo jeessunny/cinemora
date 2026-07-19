@@ -246,8 +246,8 @@ body, body * {
 /* Custom premium water droplet collision ripple */
 @keyframes waterRippleCustom {
   0% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.05);
   }
   100% {
     opacity: 0;
@@ -256,15 +256,22 @@ body, body * {
 }
 
 .water-ripple-custom {
-  width: 340px;
-  height: 340px;
-  /* Extremely soft gradient for a buttery smooth organic look with no sharp edges */
-  background: radial-gradient(circle, rgba(229, 9, 20, 0.25) 0%, rgba(229, 9, 20, 0.08) 35%, rgba(229, 9, 20, 0) 65%);
+  width: 400px;
+  height: 400px;
+  /* Multi-ring radial gradient to simulate realistic water wave crests and troughs */
+  background: radial-gradient(
+    circle,
+    transparent 35%,
+    rgba(229, 9, 20, 0.25) 42%,
+    transparent 50%,
+    rgba(229, 9, 20, 0.55) 60%,
+    transparent 72%
+  );
   border-radius: 50%;
   pointer-events: none;
   /* Hardware acceleration for mobile */
   will-change: transform, opacity;
-  animation: waterRippleCustom 1.1s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  animation: waterRippleCustom 1.6s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
 }
 
 /* ═══════════════════════════════════════════
