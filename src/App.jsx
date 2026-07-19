@@ -36,8 +36,8 @@ const AnimatedPage = ({ children }) => {
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  // Support hiding navigation on both /settings and /setting routes
-  const hideNav = ['/', '/settings', '/setting'].includes(location.pathname) || location.pathname.includes('/movie/');
+  // Support hiding navigation on Login (/) and MovieDetails routes
+  const hideNav = ['/'].includes(location.pathname) || location.pathname.includes('/movie/');
   
   return (
     <>

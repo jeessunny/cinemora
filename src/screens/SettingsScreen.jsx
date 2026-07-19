@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
   Box, Typography, Avatar, List, ListItem, ListItemButton, 
-  ListItemText, ListItemIcon, Divider, IconButton 
+  ListItemText, ListItemIcon, Divider 
 } from '@mui/material';
-import { DeleteSweep, RestartAlt, ChevronLeft, Palette } from '@mui/icons-material';
+import { DeleteSweep, RestartAlt, Palette } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -35,41 +35,27 @@ export default function SettingsScreen() {
   };
 
   return (
-    <Box sx={{ pb: 4, bgcolor: 'background.default', minHeight: '100vh' }}>
-      {/* Header - Centered title text with back button matched to movie details style */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', mb: 3 }}>
-        <IconButton 
-          onClick={() => navigate(-1)} 
-          sx={{ 
-            position: 'absolute', 
-            left: 16,
-            bgcolor: 'rgba(0,0,0,0.6)', 
-            color: 'white', 
-            backdropFilter: 'blur(8px)',
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } 
-          }}
-        >
-          <ChevronLeft />
-        </IconButton>
-        <Typography 
-          variant="titleLarge" 
-          sx={{ 
-            fontWeight: 800, 
-            textAlign: 'center',
-            width: '100%',
-            display: 'block'
-          }}
-        >
-          Settings
-        </Typography>
-      </Box>
+    <Box sx={{ pb: 12, p: 2, display: 'flex', flexDirection: 'column', bgcolor: 'background.default', minHeight: '100vh', boxSizing: 'border-box' }}>
+      
+      {/* Left-aligned Settings Title (matches Saved, Search, and Home) */}
+      <Typography 
+        variant="headlineMedium" 
+        fontWeight={800} 
+        sx={{ 
+          mb: 3, 
+          textAlign: 'left', 
+          width: '100%', 
+          display: 'block' 
+        }}
+      >
+        Settings
+      </Typography>
 
       {/* Profile Card Restructured */}
       <Box sx={{ 
         pl: 2.5,
         pr: 3.5,
         mb: 4, 
-        mx: 2,
         py: 3,
         bgcolor: 'surface.surfaceContainerLow',
         borderRadius: '16px',
@@ -134,7 +120,6 @@ export default function SettingsScreen() {
       <List sx={{ 
         bgcolor: 'surface.surfaceContainer', 
         borderRadius: '16px', 
-        mx: 2, 
         overflow: 'hidden' 
       }}>
         {/* Theme Mode Segmented Button */}
@@ -160,7 +145,7 @@ export default function SettingsScreen() {
           />
         </ListItem>
         
-        <Divider sx={{ mx: 2 }} />
+        <Divider />
         
         <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('history')}>
           <ListItemIcon sx={{ minWidth: 40 }}>
@@ -172,7 +157,7 @@ export default function SettingsScreen() {
           />
         </ListItemButton>
         
-        <Divider sx={{ mx: 2 }} />
+        <Divider />
         
         <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('reset')}>
           <ListItemIcon sx={{ minWidth: 40 }}>
