@@ -24,7 +24,7 @@ export default function NavBar() {
         right: 20, 
         zIndex: 1000,
         borderRadius: '32px',
-        overflow: 'hidden',
+        overflow: 'hidden', // Clips the ripple at the pill-shaped nav bar edges
         bgcolor: 'surface.surfaceContainer',
         backgroundImage: 'none !important',
         boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
@@ -44,9 +44,12 @@ export default function NavBar() {
         sx={{
           backgroundColor: 'transparent',
           height: 72,
+          overflow: 'visible', // Allow ripples to flow beyond individual buttons
           '& .MuiBottomNavigationAction-root': {
             color: 'text.secondary',
             py: 1.2,
+            overflow: 'visible', // Let the ripple escape the button boundary
+            position: 'relative',
             transition: 'color 0.25s ease, transform 0.25s ease',
             '&.Mui-selected': {
               color: 'primary.main',
@@ -64,7 +67,27 @@ export default function NavBar() {
             '&.Mui-selected .MuiSvgIcon-root': {
               color: 'primary.main',
               transform: 'scale(1.1)',
-            }
+            },
+            // Override MUI TouchRipple — allow it to overflow the button and expand to the nav bar edges
+            '& .MuiTouchRipple-root': {
+              overflow: 'visible', // Ripple is not clipped by the button
+            },
+            '& .MuiTouchRipple-ripple': {
+              // Larger ripple that reaches the nav bar edges
+              transform: 'scale(1)',
+              animation: 'waterRipple 0.7s cubic-bezier(0, 0.2, 0.4, 1) forwards',
+            },
+            '& .MuiTouchRipple-rippleVisible': {
+              opacity: 1,
+              animation: 'waterRipple 0.7s cubic-bezier(0, 0.2, 0.4, 1) forwards',
+            },
+            '& .MuiTouchRipple-child': {
+              borderRadius: '50%',
+              backgroundColor: 'currentColor',
+            },
+            '& .MuiTouchRipple-childLeaving': {
+              animation: 'waterRippleFade 0.5s ease-out forwards',
+            },
           }
         }}
       >

@@ -219,6 +219,30 @@ body, body * {
   }
 }
 
+/* Water droplet ripple for nav bar — expands outward from tap point to nav edges */
+@keyframes waterRipple {
+  0% {
+    transform: scale(0);
+    opacity: 0.35;
+  }
+  40% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes waterRippleFade {
+  from {
+    opacity: 0.15;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* ═══════════════════════════════════════════
    ANIMATION UTILITY CLASSES
    ═══════════════════════════════════════════ */
