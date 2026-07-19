@@ -36,12 +36,18 @@ export default function SettingsScreen() {
 
   return (
     <Box sx={{ pb: 4, bgcolor: 'background.default', minHeight: '100vh' }}>
-      {/* Header - Centered title text with back button absolutely positioned on the left */}
+      {/* Header - Centered title text with back button matched to movie details style */}
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', mb: 3 }}>
         <IconButton 
           onClick={() => navigate(-1)} 
-          edge="start"
-          sx={{ position: 'absolute', left: 16 }}
+          sx={{ 
+            position: 'absolute', 
+            left: 16,
+            bgcolor: 'rgba(0,0,0,0.6)', 
+            color: 'white', 
+            backdropFilter: 'blur(8px)',
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } 
+          }}
         >
           <ChevronLeft />
         </IconButton>
@@ -58,10 +64,10 @@ export default function SettingsScreen() {
         </Typography>
       </Box>
 
-      {/* Item 8: Profile Card Restructured with layout padding, vertical alignment, and spacing to prevent overflow */}
+      {/* Profile Card Restructured */}
       <Box sx={{ 
         pl: 2.5,
-        pr: 3.5, // Generous right padding to prevent clipping
+        pr: 3.5,
         mb: 4, 
         mx: 2,
         py: 3,
@@ -69,7 +75,7 @@ export default function SettingsScreen() {
         borderRadius: '16px',
         display: 'flex', 
         alignItems: 'center', 
-        gap: 2.5, // Spacing gap between avatar circle and text block
+        gap: 2.5,
         boxSizing: 'border-box'
       }}>
         <Avatar 
@@ -82,7 +88,6 @@ export default function SettingsScreen() {
             flexShrink: 0
           }} 
         />
-        {/* Vertically centered layout wrapper */}
         <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0, flex: 1 }}>
           <Typography 
             variant="titleMedium" 
@@ -90,7 +95,7 @@ export default function SettingsScreen() {
             color="text.primary"
             sx={{ 
               lineHeight: 1.2,
-              mb: 0.8, // Gap below user name
+              mb: 0.8,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis'
@@ -98,7 +103,6 @@ export default function SettingsScreen() {
           >
             {userName || 'Movie Lover'}
           </Typography>
-          {/* Second line grouping genre count and edit link */}
           <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
             <Typography variant="bodySmall" color="text.secondary" sx={{ fontWeight: 500 }}>
               {selectedGenres.length} genre{selectedGenres.length !== 1 ? 's' : ''} selected

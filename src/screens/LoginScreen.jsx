@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Avatar, Button, IconButton } from '@mui/material';
-import { Refresh } from '@mui/icons-material';
+import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate } from 'react-router-dom';
 import useStore from '../store';
 import { genres } from '../data/mockData';
@@ -19,7 +19,7 @@ export default function LoginScreen() {
   
   const [nameInput, setNameInput] = useState(storeUserName || '');
   const [avatarPreview, setAvatarPreview] = useState(storeAvatar);
-  const [isSpinning, setIsSpinning] = useState(false); // Track spinning state for refresh icon
+  const [isSpinning, setIsSpinning] = useState(false);
 
   if (isOnboarded) {
     return <Navigate to="/home" replace />;
@@ -40,12 +40,12 @@ export default function LoginScreen() {
     const mockAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
     setAvatarPreview(mockAvatar);
     
-    // Stop spinning after 600ms (duration of transition) to reset state instantly
     setTimeout(() => {
       setIsSpinning(false);
     }, 600);
   };
 
+  const isEditing = storeUserName !== ''; // Check if user is editing their profile or onboarding
   const isFormValid = nameInput.trim() !== '' && avatarPreview !== null && selectedGenres.length > 0;
 
   const handleSubmit = () => {
@@ -57,6 +57,11 @@ export default function LoginScreen() {
     }
   };
 
+  const handleBack = () => {
+    setOnboarded(true);
+    navigate(-1);
+  };
+
   return (
     <Box sx={{ 
       p: 3, 
@@ -65,12 +70,35 @@ export default function LoginScreen() {
       minHeight: '100vh',
       bgcolor: 'background.default',
       alignItems: 'center',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      position: 'relative'
     }}>
+      {/* Back Button matching the exact style of the movie details back button */}
+      {isEditing && (
+        <Box sx={{ 
+          position: 'absolute', 
+          top: 16, 
+          left: 16,
+          zIndex: 2,
+        }}>
+          <IconButton 
+            onClick={handleBack} 
+            sx={{ 
+              bgcolor: 'rgba(0,0,0,0.6)', 
+              color: 'white', 
+              backdropFilter: 'blur(8px)',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } 
+            }}
+          >
+            <ChevronLeft />
+          </IconButton>
+        </Box>
+      )}
+
       {/* Centered logo and tagline at the top */}
       <Box 
         sx={{ 
-          mt: 5, 
+          mt: isEditing ? 8 : 5, 
           mb: 4.5, 
           display: 'flex', 
           flexDirection: 'column', 
@@ -107,7 +135,7 @@ export default function LoginScreen() {
             lineHeight: 1.3
           }}
         >
-          Discover your next favorite movie
+          {isEditing ? 'Update your profile preferences' : 'Discover your next favorite movie'}
         </Typography>
       </Box>
 
@@ -149,7 +177,6 @@ export default function LoginScreen() {
               sx={{ 
                 fontSize: 20, 
                 color: '#FFFFFF',
-                // Dynamic rotation transition effect
                 transition: isSpinning ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
                 transform: isSpinning ? 'rotate(360deg)' : 'rotate(0deg)'
               }} 
@@ -221,7 +248,7 @@ export default function LoginScreen() {
           }
         }}
       >
-        Get Started
+        {isEditing ? 'Save Changes' : 'Get Started'}
       </Button>
     </Box>
   );
