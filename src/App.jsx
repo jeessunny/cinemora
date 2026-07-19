@@ -19,26 +19,17 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Animated page wrapper that applies a fade+slide transition on route changes
+// Animated page wrapper — uses pathname as key to force remount and replay the fadeSlideUp animation on every screen switch
 const AnimatedPage = ({ children }) => {
   const location = useLocation();
-  const [displayChildren, setDisplayChildren] = useState(children);
-  const [transitionKey, setTransitionKey] = useState(location.key);
-
-  useEffect(() => {
-    if (location.key !== transitionKey) {
-      setTransitionKey(location.key);
-      setDisplayChildren(children);
-    }
-  }, [children, location.key, transitionKey]);
 
   return (
     <Box
-      key={transitionKey}
+      key={location.pathname}
       className="anim-page-enter"
       sx={{ minHeight: '100vh' }}
     >
-      {displayChildren}
+      {children}
     </Box>
   );
 };
