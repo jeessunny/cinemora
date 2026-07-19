@@ -243,6 +243,36 @@ body, body * {
   }
 }
 
+/* Custom premium water droplet collision ripple */
+@keyframes waterRippleCustom {
+  0% {
+    width: 0px;
+    height: 0px;
+    opacity: 0.6;
+    border: 1px solid rgba(229, 9, 20, 0.85);
+    background-color: rgba(229, 9, 20, 0.25);
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.15);
+  }
+  50% {
+    opacity: 0.35;
+    background-color: rgba(229, 9, 20, 0.12);
+    border: 1.5px solid rgba(229, 9, 20, 0.45);
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.1);
+  }
+  100% {
+    width: 380px;
+    height: 380px;
+    opacity: 0;
+    border: 2px solid rgba(229, 9, 20, 0);
+    background-color: rgba(229, 9, 20, 0);
+    box-shadow: 0 0 30px rgba(229, 9, 20, 0);
+  }
+}
+
+.water-ripple-custom {
+  animation: waterRippleCustom 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
 /* ═══════════════════════════════════════════
    ANIMATION UTILITY CLASSES
    ═══════════════════════════════════════════ */
