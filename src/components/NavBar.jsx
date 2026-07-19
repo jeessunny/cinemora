@@ -15,7 +15,10 @@ export default function NavBar() {
     return 0;
   };
 
-  const handleActionClick = (e, index, route) => {
+  const handleRipple = (e) => {
+    // Only trigger ripple for primary pointers (mouse left click or touch)
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
     const buttonRect = e.currentTarget.getBoundingClientRect();
     const navRect = e.currentTarget.parentElement.getBoundingClientRect();
     
@@ -35,8 +38,6 @@ export default function NavBar() {
     setTimeout(() => {
       setRipples(prev => prev.filter(r => r.id !== newRipple.id));
     }, 1200);
-
-    navigate(route);
   };
 
   return (
@@ -89,8 +90,17 @@ export default function NavBar() {
             color: 'text.secondary',
             py: 1.2,
             transition: 'color 0.25s ease, transform 0.25s ease',
+            // Aggressively hide default MUI white ripple and background highlight
+            WebkitTapHighlightColor: 'transparent',
+            '& .MuiTouchRipple-root': {
+              display: 'none !important',
+            },
+            '&:hover': {
+              backgroundColor: 'transparent',
+            },
             '&.Mui-selected': {
               color: 'primary.main',
+              backgroundColor: 'transparent',
             },
             '& .MuiBottomNavigationAction-label': {
               mt: 0.5,
@@ -113,19 +123,22 @@ export default function NavBar() {
           label="Home" 
           icon={<Home />} 
           disableRipple
-          onClick={(e) => handleActionClick(e, 0, '/home')}
+          onPointerDown={handleRipple}
+          onClick={() => navigate('/home')}
         />
         <BottomNavigationAction 
           label="Search" 
           icon={<Search />} 
           disableRipple
-          onClick={(e) => handleActionClick(e, 1, '/search')}
+          onPointerDown={handleRipple}
+          onClick={() => navigate('/search')}
         />
         <BottomNavigationAction 
           label="Saved" 
           icon={<Bookmark />} 
           disableRipple
-          onClick={(e) => handleActionClick(e, 2, '/saved')}
+          onPointerDown={handleRipple}
+          onClick={() => navigate('/saved')}
         />
       </BottomNavigation>
     </Paper>
