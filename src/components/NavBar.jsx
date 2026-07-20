@@ -112,7 +112,7 @@ export default function NavBar() {
             minWidth: 'auto',
             color: 'text.secondary',
             opacity: 0.8,
-            transition: 'color 0.3s, opacity 0.3s, transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1)',
+            transition: animationsEnabled ? 'color 0.3s, opacity 0.3s, transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1), max-width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), min-width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), padding 0.5s ease' : 'none',
             '&.Mui-selected': {
               color: 'primary.main',
               opacity: 1,
@@ -129,6 +129,7 @@ export default function NavBar() {
             '& .MuiBottomNavigationAction-label': {
               fontSize: '11px',
               fontWeight: 600,
+              whiteSpace: 'nowrap',
               transition: 'all 0.3s',
             },
             '&.Mui-selected .MuiBottomNavigationAction-label': {
@@ -146,16 +147,22 @@ export default function NavBar() {
           onPointerDown={handleRipple}
           onClick={() => navigate('/home')}
         />
-        {navSearchEnabled && (
-          <BottomNavigationAction 
-            label="Search" 
-            value="search"
-            icon={<SearchRounded />} 
-            disableRipple
-            onPointerDown={handleRipple}
-            onClick={() => navigate('/search')}
-          />
-        )}
+        <BottomNavigationAction 
+          label="Search" 
+          value="search"
+          icon={<SearchRounded />} 
+          disableRipple
+          onPointerDown={handleRipple}
+          onClick={() => navigate('/search')}
+          sx={{
+            maxWidth: navSearchEnabled ? 168 : 0,
+            minWidth: navSearchEnabled ? 'auto' : 0,
+            padding: navSearchEnabled ? undefined : 0,
+            opacity: navSearchEnabled ? undefined : '0 !important',
+            pointerEvents: navSearchEnabled ? 'auto' : 'none',
+            overflow: 'hidden'
+          }}
+        />
         <BottomNavigationAction 
           label="Saved" 
           value="saved"
@@ -164,16 +171,22 @@ export default function NavBar() {
           onPointerDown={handleRipple}
           onClick={() => navigate('/saved')}
         />
-        {navSettingsEnabled && (
-          <BottomNavigationAction 
-            label="Settings" 
-            value="settings"
-            icon={<SettingsRounded />} 
-            disableRipple
-            onPointerDown={handleRipple}
-            onClick={() => navigate('/settings')}
-          />
-        )}
+        <BottomNavigationAction 
+          label="Settings" 
+          value="settings"
+          icon={<SettingsRounded />} 
+          disableRipple
+          onPointerDown={handleRipple}
+          onClick={() => navigate('/settings')}
+          sx={{
+            maxWidth: navSettingsEnabled ? 168 : 0,
+            minWidth: navSettingsEnabled ? 'auto' : 0,
+            padding: navSettingsEnabled ? undefined : 0,
+            opacity: navSettingsEnabled ? undefined : '0 !important',
+            pointerEvents: navSettingsEnabled ? 'auto' : 'none',
+            overflow: 'hidden'
+          }}
+        />
       </BottomNavigation>
     </Paper>
   );
