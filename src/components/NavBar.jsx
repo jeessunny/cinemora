@@ -11,14 +11,17 @@ export default function NavBar() {
   const floatingNavBar = useStore(state => state.floatingNavBar);
   const animationsEnabled = useStore(state => state.animationsEnabled);
   const navBarAnimationEnabled = useStore(state => state.navBarAnimationEnabled);
+  const navSearchEnabled = useStore(state => state.navSearchEnabled);
+  const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
 
   const showRipple = animationsEnabled && navBarAnimationEnabled;
 
-  const getActiveIndex = () => {
+  const getTabValue = () => {
     const path = location.pathname;
-    if (path.includes('/search')) return 1;
-    if (path.includes('/saved')) return 2;
-    if (path.includes('/settings') || path.includes('/setting')) return 3;
+    if (path.includes('/home')) return 0;
+    if (path.includes('/search')) return navSearchEnabled ? 1 : false;
+    if (path.includes('/saved')) return navSearchEnabled ? 2 : 1;
+    if (path.includes('/settings') || path.includes('/setting')) return (navSearchEnabled && navSettingsEnabled) ? 3 : (!navSearchEnabled && navSettingsEnabled) ? 2 : false;
     return 0;
   };
 
