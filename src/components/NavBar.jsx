@@ -19,10 +19,13 @@ export default function NavBar() {
   const getTabValue = () => {
     const path = location.pathname;
     if (path.includes('/home')) return 0;
-    if (path.includes('/search')) return navSearchEnabled ? 1 : false;
+    if (path.includes('/search')) return navSearchEnabled ? 1 : -1;
     if (path.includes('/saved')) return navSearchEnabled ? 2 : 1;
-    if (path.includes('/settings') || path.includes('/setting')) return (navSearchEnabled && navSettingsEnabled) ? 3 : (!navSearchEnabled && navSettingsEnabled) ? 2 : false;
-    return 0;
+    if (path.includes('/settings') || path.includes('/setting')) {
+      if (navSettingsEnabled) return navSearchEnabled ? 3 : 2;
+      return -1;
+    }
+    return -1;
   };
 
   const handleRipple = (e) => {
