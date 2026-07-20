@@ -48,45 +48,36 @@ export default function NavBar() {
     }, 1600);
   };
 
-  // Floating pill style
-  const floatingStyle = {
-    position: 'fixed', 
-    bottom: 'calc(16px + env(safe-area-inset-bottom))',
-    left: 20, 
-    right: 20, 
+  // Dynamic animated style for the nav bar
+  const navStyle = {
+    position: 'fixed',
+    bottom: floatingNavBar ? 'calc(16px + env(safe-area-inset-bottom))' : 0,
+    left: floatingNavBar ? 20 : 0,
+    right: floatingNavBar ? 20 : 0,
     zIndex: 1000,
-    borderRadius: '32px',
+    borderRadius: floatingNavBar ? '32px' : 0,
     overflow: 'hidden',
     bgcolor: 'surface.surfaceContainer',
     backgroundImage: 'none !important',
-    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
+    boxShadow: floatingNavBar ? '0 8px 30px rgba(0, 0, 0, 0.45)' : '0 -1px 8px rgba(0, 0, 0, 0.2)',
     border: '1px solid',
+    borderBottomWidth: floatingNavBar ? '1px' : 0,
+    borderLeftWidth: floatingNavBar ? '1px' : 0,
+    borderRightWidth: floatingNavBar ? '1px' : 0,
     borderColor: 'surface.surfaceContainerHighest',
+    paddingBottom: floatingNavBar ? 0 : 'env(safe-area-inset-bottom)',
+    // Premium spring-like transition for morphing between floating and fixed states
+    transition: animationsEnabled ? 'all 0.5s cubic-bezier(0.34, 1.3, 0.64, 1)' : 'none',
+    
+    // Initial entrance animation
     animation: animationsEnabled ? 'slideUpNav 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both' : 'none',
     animationDelay: animationsEnabled ? '0.15s' : '0s',
-  };
-
-  // Fixed bottom style (traditional)
-  const fixedStyle = {
-    position: 'fixed', 
-    bottom: 0,
-    left: 0, 
-    right: 0, 
-    zIndex: 1000,
-    borderRadius: 0,
-    overflow: 'hidden',
-    bgcolor: 'surface.surfaceContainer',
-    backgroundImage: 'none !important',
-    boxShadow: '0 -1px 8px rgba(0, 0, 0, 0.2)',
-    borderTop: '1px solid',
-    borderColor: 'surface.surfaceContainerHighest',
-    paddingBottom: 'env(safe-area-inset-bottom)',
   };
 
   return (
     <Paper 
       elevation={0}
-      sx={floatingNavBar ? floatingStyle : fixedStyle} 
+      sx={navStyle} 
     >
       {/* Custom Water Ripples container */}
       {showRipple && (
