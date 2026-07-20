@@ -27,6 +27,10 @@ export default function SegmentedButton({ value, onChange, options, fullWidth = 
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               fontWeight: 700,
+              '&:hover, &:focus, &:active': {
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+              }
             }
           }
         }}
