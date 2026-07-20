@@ -6,7 +6,7 @@ import {
 import { 
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
-  Animation, ViewDay, MotionPhotosOff
+  Animation, ViewDay, MotionPhotosOff, Search, Settings
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -128,6 +128,10 @@ export default function SettingsScreen() {
   const setAnimationsEnabled = useStore(state => state.setAnimationsEnabled);
   const navBarAnimationEnabled = useStore(state => state.navBarAnimationEnabled);
   const setNavBarAnimationEnabled = useStore(state => state.setNavBarAnimationEnabled);
+  const navSearchEnabled = useStore(state => state.navSearchEnabled);
+  const setNavSearchEnabled = useStore(state => state.setNavSearchEnabled);
+  const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
+  const setNavSettingsEnabled = useStore(state => state.setNavSettingsEnabled);
 
   const [confirmDialog, setConfirmDialog] = useState(null);
 
@@ -275,6 +279,26 @@ export default function SettingsScreen() {
           <Switch 
             checked={!!floatingNavBar} 
             onChange={(e) => setFloatingNavBar(e.target.checked)}
+            color="primary"
+          />
+        </ListItem>
+        <Divider />
+        <ListItem sx={{ py: 1.5, px: 2 }}>
+          <ListItemIcon sx={{ minWidth: 40 }}><Search color="primary" /></ListItemIcon>
+          <ListItemText primary="Show Search Tab" primaryTypographyProps={{ fontWeight: 600 }} />
+          <Switch 
+            checked={!!navSearchEnabled} 
+            onChange={(e) => setNavSearchEnabled(e.target.checked)}
+            color="primary"
+          />
+        </ListItem>
+        <Divider />
+        <ListItem sx={{ py: 1.5, px: 2 }}>
+          <ListItemIcon sx={{ minWidth: 40 }}><Settings color="primary" /></ListItemIcon>
+          <ListItemText primary="Show Settings Tab" primaryTypographyProps={{ fontWeight: 600 }} />
+          <Switch 
+            checked={!!navSettingsEnabled} 
+            onChange={(e) => setNavSettingsEnabled(e.target.checked)}
             color="primary"
           />
         </ListItem>

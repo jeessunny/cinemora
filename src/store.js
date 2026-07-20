@@ -29,12 +29,16 @@ const useStore = create(
       homeSections: DEFAULT_SECTIONS,
       animationsEnabled: true, // Master toggle for all animations
       navBarAnimationEnabled: true, // Toggle for just navbar water ripple
+      navSearchEnabled: true, // Toggle for Search tab visibility in NavBar
+      navSettingsEnabled: true, // Toggle for Settings tab visibility in NavBar
 
       // === Customization Actions ===
       setAccentColor: (color) => set({ accentColor: color }),
       setFloatingNavBar: (val) => set({ floatingNavBar: val }),
       setAnimationsEnabled: (val) => set({ animationsEnabled: val }),
       setNavBarAnimationEnabled: (val) => set({ navBarAnimationEnabled: val }),
+      setNavSearchEnabled: (val) => set({ navSearchEnabled: val }),
+      setNavSettingsEnabled: (val) => set({ navSettingsEnabled: val }),
 
       toggleHomeSection: (id) => set((state) => ({
         homeSections: state.homeSections.map(s =>

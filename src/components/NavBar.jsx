@@ -26,7 +26,6 @@ export default function NavBar() {
     if (!showRipple) return;
     // Only trigger ripple for primary pointers (mouse left click or touch)
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-
     const buttonRect = e.currentTarget.getBoundingClientRect();
     const navRect = e.currentTarget.parentElement.getBoundingClientRect();
     
@@ -66,7 +65,7 @@ export default function NavBar() {
     borderRightWidth: floatingNavBar ? '1px' : 0,
     borderColor: 'surface.surfaceContainerHighest',
     paddingBottom: floatingNavBar ? 0 : 'env(safe-area-inset-bottom)',
-    // Premium spring-like transition for morphing between floating and fixed states
+    // Premium spring-like transition for morphing between floating and fixed states, and changing items
     transition: animationsEnabled ? 'all 0.5s cubic-bezier(0.34, 1.3, 0.64, 1)' : 'none',
     
     // Initial entrance animation
@@ -100,42 +99,38 @@ export default function NavBar() {
       )}
 
       <BottomNavigation
+        value={getTabValue()}
         showLabels
-        value={getActiveIndex()}
         sx={{
-          backgroundColor: 'transparent',
-          height: 72,
-          position: 'relative',
-          zIndex: 2,
+          bgcolor: 'transparent',
+          height: floatingNavBar ? 64 : 72,
+          transition: animationsEnabled ? 'all 0.5s cubic-bezier(0.34, 1.3, 0.64, 1)' : 'none',
           '& .MuiBottomNavigationAction-root': {
+            minWidth: 'auto',
             color: 'text.secondary',
-            py: 1.2,
-            transition: 'color 0.25s ease, transform 0.25s ease',
-            // Aggressively hide default MUI white ripple and background highlight
-            WebkitTapHighlightColor: 'transparent',
-            '& .MuiTouchRipple-root': {
-              display: 'none !important',
-            },
-            '&:hover': {
-              backgroundColor: 'transparent',
-            },
+            opacity: 0.8,
+            transition: 'color 0.3s, opacity 0.3s, transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1)',
             '&.Mui-selected': {
               color: 'primary.main',
-              backgroundColor: 'transparent',
-            },
-            '& .MuiBottomNavigationAction-label': {
-              mt: 0.5,
-              fontSize: '11px',
-              fontWeight: 600,
-              transition: 'font-size 0.2s ease',
+              opacity: 1,
+              transform: 'scale(1.1)',
             },
             '& .MuiSvgIcon-root': {
-              fontSize: 22,
-              transition: animationsEnabled ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
+              fontSize: 26,
+              mb: 0.5,
+              transition: 'transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1)',
             },
             '&.Mui-selected .MuiSvgIcon-root': {
-              color: 'primary.main',
-              transform: animationsEnabled ? 'scale(1.1)' : 'none',
+              transform: 'scale(1.15)',
+            },
+            '& .MuiBottomNavigationAction-label': {
+              fontSize: '11px',
+              fontWeight: 600,
+              transition: 'all 0.3s',
+            },
+            '&.Mui-selected .MuiBottomNavigationAction-label': {
+              fontSize: '12px',
+              fontWeight: 700,
             }
           }
         }}
@@ -147,13 +142,15 @@ export default function NavBar() {
           onPointerDown={handleRipple}
           onClick={() => navigate('/home')}
         />
-        <BottomNavigationAction 
-          label="Search" 
-          icon={<SearchRounded />} 
-          disableRipple
-          onPointerDown={handleRipple}
-          onClick={() => navigate('/search')}
-        />
+        {navSearchEnabled && (
+          <BottomNavigationAction 
+            label="Search" 
+            icon={<SearchRounded />} 
+            disableRipple
+            onPointerDown={handleRipple}
+            onClick={() => navigate('/search')}
+          />
+        )}
         <BottomNavigationAction 
           label="Saved" 
           icon={<BookmarkRounded />} 
@@ -161,13 +158,15 @@ export default function NavBar() {
           onPointerDown={handleRipple}
           onClick={() => navigate('/saved')}
         />
-        <BottomNavigationAction 
-          label="Settings" 
-          icon={<SettingsRounded />} 
-          disableRipple
-          onPointerDown={handleRipple}
-          onClick={() => navigate('/settings')}
-        />
+        {navSettingsEnabled && (
+          <BottomNavigationAction 
+            label="Settings" 
+            icon={<SettingsRounded />} 
+            disableRipple
+            onPointerDown={handleRipple}
+            onClick={() => navigate('/settings')}
+          />
+        )}
       </BottomNavigation>
     </Paper>
   );
