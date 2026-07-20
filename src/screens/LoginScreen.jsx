@@ -43,15 +43,21 @@ export default function LoginScreen() {
     avatarPreview !== storeAvatar || 
     hasGenreChanges;
 
+  // Use a ref to track changes without re-triggering useEffect and pushing multiple history states
+  const hasChangesRef = React.useRef(hasChanges);
+  useEffect(() => {
+    hasChangesRef.current = hasChanges;
+  }, [hasChanges]);
+
   // Intercept browser and device back button pops to show discard confirmation dialog
   useEffect(() => {
     if (!isEditing) return;
 
-    // Push dummy state to history stack to intercept pop state
+    // Push ONE dummy state to history stack to intercept pop state
     window.history.pushState(null, '', window.location.href);
 
     const handlePopState = (e) => {
-      if (hasChanges) {
+      if (hasChangesRef.current) {
         // Block pop exit by pushing dummy state back on top
         window.history.pushState(null, '', window.location.href);
         setShowDiscardDialog(true);
@@ -64,7 +70,7 @@ export default function LoginScreen() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [hasChanges, isEditing]);
+  }, [isEditing, navigate]); // Removed hasChanges from dependency array to prevent multiple pushState calls
 
   // Only redirect if onboarded AND not explicitly editing their profile (bypassed via fromSettings state)
   if (isOnboarded && !isEditing) {

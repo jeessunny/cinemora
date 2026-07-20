@@ -258,7 +258,7 @@ export default function SettingsScreen() {
                   borderColor: accentColor === c.value ? 'text.primary' : 'transparent',
                   transform: accentColor === c.value ? 'scale(1.15)' : 'scale(1)',
                   transition: 'all 0.2s ease',
-                  boxShadow: accentColor === c.value ? `0 0 12px ${c.value}60` : 'none',
+                  boxShadow: 'none',
                 }}
               />
             ))}

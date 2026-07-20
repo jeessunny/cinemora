@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Paper, BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
-import { Home, Search, Bookmark, Settings } from '@mui/icons-material';
+import { HomeRounded, SearchRounded, BookmarkRounded, SettingsRounded } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 
@@ -151,28 +151,28 @@ export default function NavBar() {
       >
         <BottomNavigationAction 
           label="Home" 
-          icon={<Home />} 
+          icon={<HomeRounded />} 
           disableRipple
           onPointerDown={handleRipple}
           onClick={() => navigate('/home')}
         />
         <BottomNavigationAction 
           label="Search" 
-          icon={<Search />} 
+          icon={<SearchRounded />} 
           disableRipple
           onPointerDown={handleRipple}
           onClick={() => navigate('/search')}
         />
         <BottomNavigationAction 
           label="Saved" 
-          icon={<Bookmark />} 
+          icon={<BookmarkRounded />} 
           disableRipple
           onPointerDown={handleRipple}
           onClick={() => navigate('/saved')}
         />
         <BottomNavigationAction 
           label="Settings" 
-          icon={<Settings />} 
+          icon={<SettingsRounded />} 
           disableRipple
           onPointerDown={handleRipple}
           onClick={() => navigate('/settings')}

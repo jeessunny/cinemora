@@ -69,6 +69,16 @@ export default function App() {
     }
   }, [themeMode]);
 
+  // Disable all animations globally if user turns them off
+  const animationsEnabled = useStore(state => state.animationsEnabled);
+  useEffect(() => {
+    if (!animationsEnabled) {
+      document.body.classList.add('disable-animations');
+    } else {
+      document.body.classList.remove('disable-animations');
+    }
+  }, [animationsEnabled]);
+
   // Inject accent color as CSS variable for index.css animations
   useEffect(() => {
     document.documentElement.style.setProperty('--accent-color', accentColor);
