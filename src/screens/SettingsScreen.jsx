@@ -176,7 +176,7 @@ export default function SettingsScreen() {
         align="center" 
         sx={{ mt: 4, display: 'block', opacity: 0.6 }}
       >
-        Cinemora v1.0.0
+        Cinemora v1.0.5
       </Typography>
 
       <ConfirmDialog
