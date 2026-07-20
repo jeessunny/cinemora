@@ -22,21 +22,20 @@ export default function SegmentedButton({ value, onChange, options, fullWidth = 
             textTransform: 'none',
             fontWeight: 500,
             color: 'text.secondary',
-            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            transition: 'background-color 0.3s ease, color 0.3s ease',
             '&.Mui-selected': {
-              bgcolor: 'primary.primaryContainer',
-              color: 'primary.onPrimaryContainer',
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
               fontWeight: 700,
-              transform: 'scale(1.03)',
               '&:hover': {
-                bgcolor: 'primary.primaryContainer',
+                bgcolor: 'primary.dark',
               }
             }
           }
         }}
       >
         {options.map((opt) => (
-          <ToggleButton key={opt.value} value={opt.value}>
+          <ToggleButton key={opt.value} value={opt.value} disableRipple>
             {opt.label}
           </ToggleButton>
         ))}
