@@ -33,18 +33,18 @@ export default function GenreChips({ genres, selected, onChange, wrap = false })
               color: isSelected ? 'primary.contrastText' : 'text.primary',
               border: '1px solid',
               borderColor: isSelected ? 'primary.main' : 'divider',
-              boxShadow: isSelected ? '0 2px 8px rgba(229, 9, 20, 0.3)' : 'none',
+              boxShadow: 'none',
               // Override hover state
               '&:hover': {
                 transform: 'scale(1.04)',
-                bgcolor: isSelected ? 'primary.dark' : 'surface.surfaceContainerHigh',
+                bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainerHigh',
               },
               // Override focus, active, and selection indicators to prevent color shift on the last clicked tile
               '&:focus, &:active, &.Mui-focusVisible, &.Mui-focused': {
                 bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainer',
                 color: isSelected ? 'primary.contrastText' : 'text.primary',
                 borderColor: isSelected ? 'primary.main' : 'divider',
-                boxShadow: isSelected ? '0 2px 8px rgba(229, 9, 20, 0.3)' : 'none',
+                boxShadow: 'none',
               },
               '& .MuiChip-label': {
                 px: 1.5

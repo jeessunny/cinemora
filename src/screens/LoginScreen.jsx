@@ -166,7 +166,7 @@ export default function LoginScreen() {
           sx={{ 
             fontWeight: 900, 
             letterSpacing: '-2px', 
-            color: '#E50914',
+            color: 'primary.main',
             mb: 1.5, 
             textAlign: 'center',
             width: '100%',
@@ -202,7 +202,7 @@ export default function LoginScreen() {
               height: 110, 
               bgcolor: 'surface.surfaceContainerHighest',
               border: '3px solid',
-              borderColor: avatarPreview ? '#E50914' : 'surface.surfaceContainerHighest',
+              borderColor: avatarPreview ? 'primary.main' : 'surface.surfaceContainerHighest',
               transition: 'border-color 0.3s ease',
             }}
           />
@@ -211,11 +211,11 @@ export default function LoginScreen() {
               position: 'absolute', 
               bottom: -4, 
               right: -4,
-              bgcolor: '#E50914',
-              color: '#FFFFFF',
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
               border: '3px solid',
               borderColor: 'background.default',
-              '&:hover': { bgcolor: '#B20710' },
+              '&:hover': { bgcolor: 'primary.dark' },
               width: 36,
               height: 36,
               boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
@@ -229,7 +229,7 @@ export default function LoginScreen() {
             <Refresh 
               sx={{ 
                 fontSize: 20, 
-                color: '#FFFFFF',
+                color: 'primary.contrastText',
                 transition: isSpinning ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
                 transform: isSpinning ? 'rotate(360deg)' : 'rotate(0deg)'
               }} 
@@ -294,10 +294,10 @@ export default function LoginScreen() {
           fontSize: '16px',
           fontWeight: 700,
           textTransform: 'none',
-          bgcolor: isFormValid ? '#E50914' : 'action.disabledBackground',
+          bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
           color: isFormValid ? 'primary.contrastText' : 'action.disabled',
           '&:hover': {
-            bgcolor: '#B20710'
+            bgcolor: 'primary.dark'
           }
         }}
       >

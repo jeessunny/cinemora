@@ -6,7 +6,7 @@ import {
 import { 
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
-  Animation, NavigationOutlined, MotionPhotosOff
+  Animation, ViewDay, MotionPhotosOff
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -168,7 +168,7 @@ export default function SettingsScreen() {
     <Typography 
       variant="titleMedium" 
       fontWeight={700} 
-      color="text.secondary"
+      color="primary.main"
       sx={{ mb: 1.5, mt: 3, px: 0.5, textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '12px' }}
     >
       {text}
@@ -270,10 +270,10 @@ export default function SettingsScreen() {
       {sectionTitle('Navigation')}
       <List sx={{ bgcolor: 'surface.surfaceContainer', borderRadius: '16px', overflow: 'hidden', mb: 1 }}>
         <ListItem sx={{ py: 1.5, px: 2 }}>
-          <ListItemIcon sx={{ minWidth: 40 }}><NavigationOutlined color="primary" /></ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 40 }}><ViewDay color="primary" /></ListItemIcon>
           <ListItemText primary="Floating Navigation Bar" primaryTypographyProps={{ fontWeight: 600 }} />
           <Switch 
-            checked={floatingNavBar} 
+            checked={!!floatingNavBar} 
             onChange={(e) => setFloatingNavBar(e.target.checked)}
             color="primary"
           />
@@ -292,7 +292,7 @@ export default function SettingsScreen() {
             secondaryTypographyProps={{ fontSize: '12px' }}
           />
           <Switch 
-            checked={animationsEnabled} 
+            checked={!!animationsEnabled} 
             onChange={(e) => setAnimationsEnabled(e.target.checked)}
             color="primary"
           />
