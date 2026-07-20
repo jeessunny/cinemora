@@ -1,11 +1,29 @@
 import { createTheme } from '@mui/material/styles';
 
-const darkPalette = {
+// Helper to darken a hex color by a percentage
+const darkenHex = (hex, percent) => {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.max(0, Math.floor((num >> 16) * (1 - percent)));
+  const g = Math.max(0, Math.floor(((num >> 8) & 0x00FF) * (1 - percent)));
+  const b = Math.max(0, Math.floor((num & 0x0000FF) * (1 - percent)));
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+};
+
+// Helper to lighten a hex color
+const lightenHex = (hex, percent) => {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.floor((num >> 16) + (255 - (num >> 16)) * percent));
+  const g = Math.min(255, Math.floor(((num >> 8) & 0x00FF) + (255 - ((num >> 8) & 0x00FF)) * percent));
+  const b = Math.min(255, Math.floor((num & 0x0000FF) + (255 - (num & 0x0000FF)) * percent));
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+};
+
+const getDarkPalette = (accent) => ({
   mode: 'dark',
   primary: {
-    main: '#E50914', // Netflix Red
-    light: '#FF3333',
-    dark: '#B20710',
+    main: accent,
+    light: lightenHex(accent, 0.3),
+    dark: darkenHex(accent, 0.3),
     contrastText: '#FFFFFF',
   },
   secondary: {
@@ -26,7 +44,7 @@ const darkPalette = {
     contrastText: '#FFFFFF',
   },
   background: {
-    default: '#0F0D0D', // Netflix style black
+    default: '#0F0D0D',
     paper: '#181818',
   },
   surface: {
@@ -42,14 +60,14 @@ const darkPalette = {
     disabled: '#7F7F7F',
   },
   divider: 'rgba(255, 255, 255, 0.1)',
-};
+});
 
-const lightPalette = {
+const getLightPalette = (accent) => ({
   mode: 'light',
   primary: {
-    main: '#E50914', // Netflix Red
-    light: '#FF3333',
-    dark: '#B20710',
+    main: accent,
+    light: lightenHex(accent, 0.3),
+    dark: darkenHex(accent, 0.3),
     contrastText: '#FFFFFF',
   },
   secondary: {
@@ -70,7 +88,7 @@ const lightPalette = {
     contrastText: '#FFFFFF',
   },
   background: {
-    default: '#FFFFFF', // Pure clean white
+    default: '#FFFFFF',
     paper: '#F8F9FA',
   },
   surface: {
@@ -81,12 +99,12 @@ const lightPalette = {
     surfaceContainerHighest: '#DEE2E6',
   },
   text: {
-    primary: '#121212', // Sharp dark text
+    primary: '#121212',
     secondary: '#495057',
     disabled: '#868E96',
   },
   divider: 'rgba(0, 0, 0, 0.1)',
-};
+});
 
 const typography = {
   fontFamily: '"Roboto Flex", "Helvetica", "Arial", sans-serif',
@@ -115,8 +133,8 @@ const shape = {
   small: 8,
 };
 
-export const getTheme = (mode) => createTheme({
-  palette: mode === 'dark' ? darkPalette : lightPalette,
+export const getTheme = (mode, accentColor = '#E50914') => createTheme({
+  palette: mode === 'dark' ? getDarkPalette(accentColor) : getLightPalette(accentColor),
   typography,
   shape,
   components: {
@@ -132,12 +150,12 @@ export const getTheme = (mode) => createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8, // Netflix style slightly rounded but clean corners
+          borderRadius: 8,
           textTransform: 'none',
           padding: '10px 24px',
           fontWeight: 600,
           transition: 'all 0.2s ease',
-          boxShadow: 'none !important', // Force flat buttons in both modes
+          boxShadow: 'none !important',
         },
         contained: {
           boxShadow: 'none !important',
@@ -152,7 +170,7 @@ export const getTheme = (mode) => createTheme({
         root: {
           borderRadius: 12,
           backgroundImage: 'none !important',
-          boxShadow: 'none !important', // Force flat cards in all themes (light & dark)
+          boxShadow: 'none !important',
           border: 'none !important',
         },
       },
@@ -161,7 +179,7 @@ export const getTheme = (mode) => createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none !important',
-          boxShadow: 'none !important', // Force flat paper elements (cards, rails) to match flat look
+          boxShadow: 'none !important',
         },
       },
     },
@@ -177,7 +195,7 @@ export const getTheme = (mode) => createTheme({
       styleOverrides: {
         paper: {
           borderRadius: 16,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5) !important', // keep shadows on modal dialogs for separation
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5) !important',
         },
       },
     },

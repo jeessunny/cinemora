@@ -22,11 +22,12 @@ const ProtectedRoute = ({ children }) => {
 // Animated page wrapper — uses pathname as key to force remount and replay the fadeSlideUp animation on every screen switch
 const AnimatedPage = ({ children }) => {
   const location = useLocation();
+  const animationsEnabled = useStore(state => state.animationsEnabled);
 
   return (
     <Box
       key={location.pathname}
-      className="anim-page-enter"
+      className={animationsEnabled ? 'anim-page-enter' : undefined}
       sx={{ minHeight: '100vh' }}
     >
       {children}
@@ -49,6 +50,7 @@ const Layout = ({ children }) => {
 
 export default function App() {
   const themeMode = useStore(state => state.themeMode);
+  const accentColor = useStore(state => state.accentColor);
   
   // State to hold active resolved theme mode
   const [resolvedMode, setResolvedMode] = useState('dark');
@@ -67,7 +69,12 @@ export default function App() {
     }
   }, [themeMode]);
 
-  const theme = getTheme(resolvedMode);
+  // Inject accent color as CSS variable for index.css animations
+  useEffect(() => {
+    document.documentElement.style.setProperty('--accent-color', accentColor);
+  }, [accentColor]);
+
+  const theme = getTheme(resolvedMode, accentColor);
 
   return (
     <ThemeProvider theme={theme}>

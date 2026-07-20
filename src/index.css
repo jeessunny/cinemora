@@ -255,16 +255,20 @@ body, body * {
   }
 }
 
+:root {
+  --accent-color: #E50914;
+}
+
 .water-ripple-custom {
   width: 400px;
   height: 400px;
-  /* Multi-ring radial gradient to simulate realistic water wave crests and troughs */
+  /* Multi-ring radial gradient using dynamic accent color */
   background: radial-gradient(
     circle,
     transparent 35%,
-    rgba(229, 9, 20, 0.25) 42%,
+    color-mix(in srgb, var(--accent-color) 25%, transparent) 42%,
     transparent 50%,
-    rgba(229, 9, 20, 0.55) 60%,
+    color-mix(in srgb, var(--accent-color) 55%, transparent) 60%,
     transparent 72%
   );
   border-radius: 50%;

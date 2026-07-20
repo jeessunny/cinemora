@@ -15,6 +15,7 @@ export default function HomeScreen() {
   const watchlist = useStore(state => state.watchlist);
   const favorites = useStore(state => state.favorites);
   const history = useStore(state => state.history);
+  const homeSections = useStore(state => state.homeSections);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -51,9 +52,63 @@ export default function HomeScreen() {
     return null;
   };
 
+  // Build a map of section id -> render function
+  const sectionMap = {
+    recommended: () => (
+      <ScrollRail 
+        key="recommended"
+        title="Recommended For You" 
+        movies={recommended} 
+        getStatus={getStatus}
+      />
+    ),
+    genre1: () => (
+      <ScrollRail 
+        key="genre1"
+        title={`Because You Like ${firstGenre}`} 
+        movies={genreMovies} 
+        getStatus={getStatus}
+      />
+    ),
+    genre2: () => (
+      secondGenre && secondGenreMovies.length > 0 ? (
+        <ScrollRail 
+          key="genre2"
+          title={`More ${secondGenre}`} 
+          movies={secondGenreMovies} 
+          getStatus={getStatus}
+        />
+      ) : null
+    ),
+    trending: () => (
+      <ScrollRail 
+        key="trending"
+        title="Trending Now" 
+        movies={trending} 
+        getStatus={getStatus}
+      />
+    ),
+    popular: () => (
+      <ScrollRail 
+        key="popular"
+        title="Popular in Your Taste" 
+        movies={recommended.slice().reverse()} 
+        getStatus={getStatus}
+      />
+    ),
+    newReleases: () => (
+      <ScrollRail 
+        key="newReleases"
+        title="New Releases" 
+        movies={newReleases} 
+        getStatus={getStatus}
+      />
+    ),
+  };
+
   return (
     <Box sx={{ pb: 12, bgcolor: 'background.default', minHeight: '100vh' }}>
-      {/* Header with username matched to page title size (headlineMedium) and appropriate bodyLarge greeting */}
+      {/* Header */}
       <Box sx={{ 
         p: 2, 
         display: 'flex', 
@@ -61,10 +116,9 @@ export default function HomeScreen() {
         justifyContent: 'space-between',
         mb: 1
       }}>
-        {/* Username set to headlineMedium, greeting set to bodyLarge with gap spacing */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0, flex: 1, pr: 2 }}>
           <Typography 
-            variant="headlineMedium" // Changed from titleLarge to headlineMedium to match Saved/Search headings
+            variant="headlineMedium"
             fontWeight={800} 
             color="text.primary" 
             sx={{ 
@@ -77,7 +131,7 @@ export default function HomeScreen() {
             {userName || 'Movie Lover'}
           </Typography>
           <Typography 
-            variant="bodyLarge" // Changed from bodyMedium to bodyLarge to match the larger header
+            variant="bodyLarge"
             color="text.secondary" 
             sx={{ fontWeight: 600 }}
           >
@@ -117,44 +171,14 @@ export default function HomeScreen() {
         </Box>
       )}
 
-      {/* Scroll Rails */}
-      <ScrollRail 
-        title="Recommended For You" 
-        movies={recommended} 
-        getStatus={getStatus}
-      />
-      
-      <ScrollRail 
-        title={`Because You Like ${firstGenre}`} 
-        movies={genreMovies} 
-        getStatus={getStatus}
-      />
-
-      {secondGenre && secondGenreMovies.length > 0 && (
-        <ScrollRail 
-          title={`More ${secondGenre}`} 
-          movies={secondGenreMovies} 
-          getStatus={getStatus}
-        />
-      )}
-
-      <ScrollRail 
-        title="Trending Now" 
-        movies={trending} 
-        getStatus={getStatus}
-      />
-
-      <ScrollRail 
-        title="Popular in Your Taste" 
-        movies={recommended.slice().reverse()} 
-        getStatus={getStatus}
-      />
-
-      <ScrollRail 
-        title="New Releases" 
-        movies={newReleases} 
-        getStatus={getStatus}
-      />
+      {/* Scroll Rails — rendered in the user's custom order, only if enabled */}
+      {homeSections
+        .filter(section => section.enabled)
+        .map(section => {
+          const renderFn = sectionMap[section.id];
+          return renderFn ? renderFn() : null;
+        })
+      }
     </Box>
   );
 }

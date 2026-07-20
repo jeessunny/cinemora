@@ -1,21 +1,29 @@
 import React, { useState } from 'react';
 import { Paper, BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
-import { Home, Search, Bookmark } from '@mui/icons-material';
+import { Home, Search, Bookmark, Settings } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import useStore from '../store';
 
 export default function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [ripples, setRipples] = useState([]);
+  const floatingNavBar = useStore(state => state.floatingNavBar);
+  const animationsEnabled = useStore(state => state.animationsEnabled);
+  const navBarAnimationEnabled = useStore(state => state.navBarAnimationEnabled);
+
+  const showRipple = animationsEnabled && navBarAnimationEnabled;
 
   const getActiveIndex = () => {
     const path = location.pathname;
     if (path.includes('/search')) return 1;
     if (path.includes('/saved')) return 2;
+    if (path.includes('/settings') || path.includes('/setting')) return 3;
     return 0;
   };
 
   const handleRipple = (e) => {
+    if (!showRipple) return;
     // Only trigger ripple for primary pointers (mouse left click or touch)
     if (e.pointerType === 'mouse' && e.button !== 0) return;
 
@@ -34,49 +42,70 @@ export default function NavBar() {
 
     setRipples(prev => [...prev, newRipple]);
 
-    // Clean up ripple element after animation finishes (1.2s)
+    // Clean up ripple element after animation finishes (1.6s)
     setTimeout(() => {
       setRipples(prev => prev.filter(r => r.id !== newRipple.id));
-    }, 1200);
+    }, 1600);
+  };
+
+  // Floating pill style
+  const floatingStyle = {
+    position: 'fixed', 
+    bottom: 'calc(16px + env(safe-area-inset-bottom))',
+    left: 20, 
+    right: 20, 
+    zIndex: 1000,
+    borderRadius: '32px',
+    overflow: 'hidden',
+    bgcolor: 'surface.surfaceContainer',
+    backgroundImage: 'none !important',
+    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
+    border: '1px solid',
+    borderColor: 'surface.surfaceContainerHighest',
+    animation: animationsEnabled ? 'slideUpNav 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both' : 'none',
+    animationDelay: animationsEnabled ? '0.15s' : '0s',
+  };
+
+  // Fixed bottom style (traditional)
+  const fixedStyle = {
+    position: 'fixed', 
+    bottom: 0,
+    left: 0, 
+    right: 0, 
+    zIndex: 1000,
+    borderRadius: 0,
+    overflow: 'hidden',
+    bgcolor: 'surface.surfaceContainer',
+    backgroundImage: 'none !important',
+    boxShadow: '0 -1px 8px rgba(0, 0, 0, 0.2)',
+    borderTop: '1px solid',
+    borderColor: 'surface.surfaceContainerHighest',
   };
 
   return (
     <Paper 
       elevation={0}
-      sx={{ 
-        position: 'fixed', 
-        bottom: 'calc(16px + env(safe-area-inset-bottom))',
-        left: 20, 
-        right: 20, 
-        zIndex: 1000,
-        borderRadius: '32px',
-        overflow: 'hidden',
-        bgcolor: 'surface.surfaceContainer',
-        backgroundImage: 'none !important',
-        boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
-        border: '1px solid',
-        borderColor: 'surface.surfaceContainerHighest',
-        animation: 'slideUpNav 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
-        animationDelay: '0.15s',
-      }} 
+      sx={floatingNavBar ? floatingStyle : fixedStyle} 
     >
-      {/* Custom Red Water Ripples container - placed between background and buttons */}
-      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 1 }}>
-        {ripples.map(ripple => (
-          <Box
-            key={ripple.id}
-            className="water-ripple-custom"
-            sx={{
-              position: 'absolute',
-              left: ripple.x,
-              top: ripple.y,
-              transform: 'translate(-50%, -50%)',
-              borderRadius: '50%',
-              pointerEvents: 'none',
-            }}
-          />
-        ))}
-      </Box>
+      {/* Custom Water Ripples container */}
+      {showRipple && (
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 1 }}>
+          {ripples.map(ripple => (
+            <Box
+              key={ripple.id}
+              className="water-ripple-custom"
+              sx={{
+                position: 'absolute',
+                left: ripple.x,
+                top: ripple.y,
+                transform: 'translate(-50%, -50%)',
+                borderRadius: '50%',
+                pointerEvents: 'none',
+              }}
+            />
+          ))}
+        </Box>
+      )}
 
       <BottomNavigation
         showLabels
@@ -110,11 +139,11 @@ export default function NavBar() {
             },
             '& .MuiSvgIcon-root': {
               fontSize: 22,
-              transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transition: animationsEnabled ? 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
             },
             '&.Mui-selected .MuiSvgIcon-root': {
               color: 'primary.main',
-              transform: 'scale(1.1)',
+              transform: animationsEnabled ? 'scale(1.1)' : 'none',
             }
           }
         }}
@@ -139,6 +168,13 @@ export default function NavBar() {
           disableRipple
           onPointerDown={handleRipple}
           onClick={() => navigate('/saved')}
+        />
+        <BottomNavigationAction 
+          label="Settings" 
+          icon={<Settings />} 
+          disableRipple
+          onPointerDown={handleRipple}
+          onClick={() => navigate('/settings')}
         />
       </BottomNavigation>
     </Paper>
