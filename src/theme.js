@@ -53,39 +53,39 @@ const lightPalette = {
     contrastText: '#FFFFFF',
   },
   secondary: {
-    main: '#2F2F2F',
-    light: '#4F4F4F',
-    dark: '#1A1A1A',
-    contrastText: '#FFFFFF',
+    main: '#E0E0E0',
+    light: '#F5F5F5',
+    dark: '#AEAEAE',
+    contrastText: '#0F0D0D',
   },
   tertiary: {
-    main: '#E7C08D',
+    main: '#765930',
   },
   error: {
-    main: '#E50914',
+    main: '#BA1A1A',
     contrastText: '#FFFFFF',
   },
   success: {
-    main: '#46D369',
+    main: '#006D1C',
     contrastText: '#FFFFFF',
   },
   background: {
-    default: '#0F0D0D', // Netflix style black
-    paper: '#181818',
+    default: '#FFFFFF', // Pure clean white
+    paper: '#F8F9FA',
   },
   surface: {
-    main: '#0F0D0D',
-    surfaceContainerLow: '#141414',
-    surfaceContainer: '#181818',
-    surfaceContainerHigh: '#202020',
-    surfaceContainerHighest: '#282828',
+    main: '#FFFFFF',
+    surfaceContainerLow: '#F8F9FA',
+    surfaceContainer: '#F1F3F5',
+    surfaceContainerHigh: '#E9ECEF',
+    surfaceContainerHighest: '#DEE2E6',
   },
   text: {
-    primary: '#FFFFFF',
-    secondary: '#B3B3B3',
-    disabled: '#7F7F7F',
+    primary: '#121212', // Sharp dark text
+    secondary: '#495057',
+    disabled: '#868E96',
   },
-  divider: 'rgba(255, 255, 255, 0.1)',
+  divider: 'rgba(0, 0, 0, 0.1)',
 };
 
 const typography = {
@@ -116,15 +116,15 @@ const shape = {
 };
 
 export const getTheme = (mode) => createTheme({
-  palette: darkPalette,
+  palette: mode === 'dark' ? darkPalette : lightPalette,
   typography,
   shape,
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: '#0F0D0D',
-          color: '#FFFFFF',
+          backgroundColor: mode === 'dark' ? '#0F0D0D' : '#FFFFFF',
+          color: mode === 'dark' ? '#FFFFFF' : '#121212',
           transition: 'background-color 0.3s ease, color 0.3s ease',
         },
       },
@@ -184,7 +184,7 @@ export const getTheme = (mode) => createTheme({
     MuiBottomNavigation: {
       styleOverrides: {
         root: {
-          backgroundColor: '#141414',
+          backgroundColor: mode === 'dark' ? '#141414' : '#F1F3F5',
         },
       },
     },

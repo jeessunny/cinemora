@@ -138,7 +138,7 @@ export default function LoginScreen() {
             onClick={handleBack} 
             sx={{ 
               bgcolor: 'rgba(0,0,0,0.6)', 
-              color: 'white', 
+              color: 'primary.contrastText', 
               backdropFilter: 'blur(8px)',
               '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } 
             }}
@@ -295,7 +295,7 @@ export default function LoginScreen() {
           fontWeight: 700,
           textTransform: 'none',
           bgcolor: isFormValid ? '#E50914' : 'action.disabledBackground',
-          color: isFormValid ? '#FFFFFF' : 'action.disabled',
+          color: isFormValid ? 'primary.contrastText' : 'action.disabled',
           '&:hover': {
             bgcolor: '#B20710'
           }
