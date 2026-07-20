@@ -18,14 +18,11 @@ export default function NavBar() {
 
   const getTabValue = () => {
     const path = location.pathname;
-    if (path.includes('/home')) return 0;
-    if (path.includes('/search')) return navSearchEnabled ? 1 : -1;
-    if (path.includes('/saved')) return navSearchEnabled ? 2 : 1;
-    if (path.includes('/settings') || path.includes('/setting')) {
-      if (navSettingsEnabled) return navSearchEnabled ? 3 : 2;
-      return -1;
-    }
-    return -1;
+    if (path.includes('/home')) return 'home';
+    if (path.includes('/search')) return 'search';
+    if (path.includes('/saved')) return 'saved';
+    if (path.includes('/settings') || path.includes('/setting')) return 'settings';
+    return 'none';
   };
 
   const handleRipple = (e) => {
@@ -119,7 +116,7 @@ export default function NavBar() {
             '&.Mui-selected': {
               color: 'primary.main',
               opacity: 1,
-              transform: 'scale(1.1)',
+              transform: 'none',
             },
             '& .MuiSvgIcon-root': {
               fontSize: 26,
@@ -127,7 +124,7 @@ export default function NavBar() {
               transition: 'transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1)',
             },
             '&.Mui-selected .MuiSvgIcon-root': {
-              transform: 'scale(1.15)',
+              transform: 'scale(1.1)',
             },
             '& .MuiBottomNavigationAction-label': {
               fontSize: '11px',
@@ -143,6 +140,7 @@ export default function NavBar() {
       >
         <BottomNavigationAction 
           label="Home" 
+          value="home"
           icon={<HomeRounded />} 
           disableRipple
           onPointerDown={handleRipple}
@@ -151,6 +149,7 @@ export default function NavBar() {
         {navSearchEnabled && (
           <BottomNavigationAction 
             label="Search" 
+            value="search"
             icon={<SearchRounded />} 
             disableRipple
             onPointerDown={handleRipple}
@@ -159,6 +158,7 @@ export default function NavBar() {
         )}
         <BottomNavigationAction 
           label="Saved" 
+          value="saved"
           icon={<BookmarkRounded />} 
           disableRipple
           onPointerDown={handleRipple}
@@ -167,6 +167,7 @@ export default function NavBar() {
         {navSettingsEnabled && (
           <BottomNavigationAction 
             label="Settings" 
+            value="settings"
             icon={<SettingsRounded />} 
             disableRipple
             onPointerDown={handleRipple}
