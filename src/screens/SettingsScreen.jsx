@@ -9,6 +9,23 @@ import {
   Animation, NavigationOutlined, MotionPhotosOff
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 import useStore from '../store';
 import ConfirmDialog from '../components/ConfirmDialog';
 import SegmentedButton from '../components/SegmentedButton';
@@ -33,6 +50,60 @@ const getSectionLabel = (section, selectedGenres) => {
   return section.label;
 };
 
+// Sortable item wrapper component
+function SortableSectionItem({ section, index, selectedGenres, toggleHomeSection }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: section.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 100 : 'auto',
+    position: 'relative'
+  };
+
+  return (
+    <Box ref={setNodeRef} style={style}>
+      {index > 0 && !isDragging && <Divider />}
+      <ListItem sx={{ py: 1, px: 1.5, gap: 0.5, bgcolor: isDragging ? 'surface.surfaceContainerHighest' : 'transparent', borderRadius: isDragging ? '8px' : 0 }}>
+        {/* Drag handle */}
+        <Box
+          {...attributes}
+          {...listeners}
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            cursor: 'grab',
+            p: 1,
+            mr: 0.5,
+            touchAction: 'none'
+          }}
+        >
+          <DragIndicator sx={{ color: 'text.disabled', fontSize: 22 }} />
+        </Box>
+
+        <ListItemText 
+          primary={getSectionLabel(section, selectedGenres)}
+          primaryTypographyProps={{ fontWeight: 600, fontSize: '14px' }}
+        />
+
+        <IconButton 
+          onClick={() => toggleHomeSection(section.id)}
+          sx={{ color: section.enabled ? 'primary.main' : 'text.disabled' }}
+        >
+          {section.enabled ? <Visibility /> : <VisibilityOff />}
+        </IconButton>
+      </ListItem>
+    </Box>
+  );
+}
+
 export default function SettingsScreen() {
   const navigate = useNavigate();
   const userName = useStore(state => state.userName);
@@ -52,6 +123,7 @@ export default function SettingsScreen() {
   const homeSections = useStore(state => state.homeSections);
   const toggleHomeSection = useStore(state => state.toggleHomeSection);
   const reorderHomeSections = useStore(state => state.reorderHomeSections);
+  const resetHomeSections = useStore(state => state.resetHomeSections);
   const animationsEnabled = useStore(state => state.animationsEnabled);
   const setAnimationsEnabled = useStore(state => state.setAnimationsEnabled);
   const navBarAnimationEnabled = useStore(state => state.navBarAnimationEnabled);
@@ -71,10 +143,24 @@ export default function SettingsScreen() {
     navigate('/');
   };
 
-  const moveSection = (index, direction) => {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= homeSections.length) return;
-    reorderHomeSections(index, newIndex);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Requires 5px movement before drag starts to allow for taps on the visibility button
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      const oldIndex = homeSections.findIndex(s => s.id === active.id);
+      const newIndex = homeSections.findIndex(s => s.id === over.id);
+      reorderHomeSections(oldIndex, newIndex);
+    }
   };
 
   // Shared section title style
@@ -90,7 +176,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <Box sx={{ pb: 12, p: 2, display: 'flex', flexDirection: 'column', bgcolor: 'background.default', minHeight: '100vh', boxSizing: 'border-box' }}>
+    <Box sx={{ px: 2, pt: 2, pb: 16, display: 'flex', flexDirection: 'column', bgcolor: 'background.default', minHeight: '100vh', boxSizing: 'border-box' }}>
       
       {/* Left-aligned Settings Title */}
       <Typography 
@@ -232,48 +318,37 @@ export default function SettingsScreen() {
       </List>
 
       {/* ═══════ HOME SCREEN SECTIONS ═══════ */}
-      {sectionTitle('Home Screen Sections')}
-      <List sx={{ bgcolor: 'surface.surfaceContainer', borderRadius: '16px', overflow: 'hidden', mb: 1 }}>
-        {homeSections.map((section, index) => (
-          <React.Fragment key={section.id}>
-            {index > 0 && <Divider />}
-            <ListItem sx={{ py: 1, px: 1.5, gap: 0.5 }}>
-              {/* Drag handle area with up/down buttons */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', mr: 0.5 }}>
-                <IconButton 
-                  size="small" 
-                  disabled={index === 0}
-                  onClick={() => moveSection(index, -1)}
-                  sx={{ p: 0.3 }}
-                >
-                  <ArrowUpward sx={{ fontSize: 16 }} />
-                </IconButton>
-                <IconButton 
-                  size="small" 
-                  disabled={index === homeSections.length - 1}
-                  onClick={() => moveSection(index, 1)}
-                  sx={{ p: 0.3 }}
-                >
-                  <ArrowDownward sx={{ fontSize: 16 }} />
-                </IconButton>
-              </Box>
-
-              <DragIndicator sx={{ color: 'text.disabled', fontSize: 20, mr: 1 }} />
-
-              <ListItemText 
-                primary={getSectionLabel(section, selectedGenres)}
-                primaryTypographyProps={{ fontWeight: 600, fontSize: '14px' }}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {sectionTitle('Home Screen Sections')}
+        <Typography 
+          variant="bodySmall" 
+          onClick={resetHomeSections}
+          sx={{ color: 'primary.main', fontWeight: 600, cursor: 'pointer', mt: 3, mb: 1.5, mr: 1, textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}
+        >
+          Reset
+        </Typography>
+      </Box>
+      <List sx={{ bgcolor: 'surface.surfaceContainer', borderRadius: '16px', overflow: 'hidden', mb: 1, p: 0 }}>
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext 
+            items={homeSections.map(s => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {homeSections.map((section, index) => (
+              <SortableSectionItem
+                key={section.id}
+                section={section}
+                index={index}
+                selectedGenres={selectedGenres}
+                toggleHomeSection={toggleHomeSection}
               />
-
-              <IconButton 
-                onClick={() => toggleHomeSection(section.id)}
-                sx={{ color: section.enabled ? 'primary.main' : 'text.disabled' }}
-              >
-                {section.enabled ? <Visibility /> : <VisibilityOff />}
-              </IconButton>
-            </ListItem>
-          </React.Fragment>
-        ))}
+            ))}
+          </SortableContext>
+        </DndContext>
       </List>
 
       {/* ═══════ DATA ═══════ */}

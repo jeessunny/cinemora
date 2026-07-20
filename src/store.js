@@ -49,6 +49,8 @@ const useStore = create(
         return { homeSections: sections };
       }),
 
+      resetHomeSections: () => set({ homeSections: DEFAULT_SECTIONS }),
+
       // === Existing Actions ===
       setAvatar: (url) => set({ avatar: url }),
       setUserName: (name) => set({ userName: name }),

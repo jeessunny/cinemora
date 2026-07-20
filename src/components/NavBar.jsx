@@ -80,6 +80,7 @@ export default function NavBar() {
     boxShadow: '0 -1px 8px rgba(0, 0, 0, 0.2)',
     borderTop: '1px solid',
     borderColor: 'surface.surfaceContainerHighest',
+    paddingBottom: 'env(safe-area-inset-bottom)',
   };
 
   return (
