@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { SearchOff, History, TrendingUp } from '@mui/icons-material';
 import useStore from '../store';
-import { popularSearches } from '../data/mockData';
-import { searchMovies } from '../services/tmdb';
+import { searchMovies, getPopularSearches } from '../services/tmdb';
 import SearchBar from '../components/SearchBar';
 import SegmentedButton from '../components/SegmentedButton';
 import PosterCard from '../components/PosterCard';
@@ -22,13 +21,25 @@ export default function SearchScreen() {
   const [type, setType] = useState('movies');
   const [isTyping, setIsTyping] = useState(false);
   const [results, setResults] = useState([]);
+  const [dynamicPopularSearches, setDynamicPopularSearches] = useState([]);
+
+  useEffect(() => {
+    const fetchPopular = async () => {
+      try {
+        const pops = await getPopularSearches(type);
+        setDynamicPopularSearches(pops);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPopular();
+  }, [type]);
 
   useEffect(() => {
     const fetchResults = async () => {
       if (query.trim()) {
         try {
-          // You could conditionally search TMDB TV vs Movies here, but we are using movie search
-          const res = await searchMovies(query);
+          const res = await searchMovies(query, type);
           setResults(res);
         } catch (err) {
           console.error(err);
@@ -41,7 +52,7 @@ export default function SearchScreen() {
 
     const timer = setTimeout(fetchResults, 500);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, type]);
 
   const handleSearch = (val) => {
     setQuery(val);
@@ -199,7 +210,7 @@ export default function SearchScreen() {
                 Popular Searches
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.2, justifyContent: 'center' }}>
-                {popularSearches.map((s, i) => (
+                {dynamicPopularSearches.map((s, i) => (
                   <Chip 
                     key={i} 
                     label={s} 
