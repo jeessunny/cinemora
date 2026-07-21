@@ -422,7 +422,7 @@ export default function SeriesDetailsScreen() {
           {series.seasons.map((season, i) => (
             <Chip
               key={season.seasonNumber}
-              label={season.name}
+              label={`Season ${season.seasonNumber}`}
               onClick={() => setSelectedSeason(season.seasonNumber)}
               variant={selectedSeason === season.seasonNumber ? 'filled' : 'outlined'}
               color={selectedSeason === season.seasonNumber ? 'primary' : 'default'}
