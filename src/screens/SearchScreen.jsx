@@ -132,7 +132,7 @@ export default function SearchScreen() {
               ))}
             </Box>
           ) : results.length > 0 ? (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, pb: 10 }}>
               {results.map((movie, index) => (
                 <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
                   <PosterCard movie={movie} status={getStatus(movie.id)} animDelay={Math.min(index * 0.05, 0.3)} />

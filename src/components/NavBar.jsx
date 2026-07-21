@@ -63,7 +63,7 @@ export default function NavBar() {
             minWidth: 'auto',
             color: 'text.secondary',
             opacity: 0.8,
-            transition: animationsEnabled ? 'color 0.3s, opacity 0.3s, transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1), max-width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), min-width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), padding 0.5s ease' : 'none',
+            transition: animationsEnabled ? 'color 0.3s, opacity 0.3s, transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1), max-width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), min-width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), padding 0.5s ease, flex 0.5s cubic-bezier(0.34, 1.3, 0.64, 1)' : 'none',
             '&.Mui-selected': {
               color: 'primary.main',
               opacity: 1,
@@ -104,6 +104,7 @@ export default function NavBar() {
           disableRipple
           onClick={() => navigate('/search')}
           sx={{
+            flex: navSearchEnabled ? 1 : 0,
             maxWidth: navSearchEnabled ? 168 : 0,
             minWidth: navSearchEnabled ? 'auto' : 0,
             padding: navSearchEnabled ? undefined : 0,
@@ -126,6 +127,7 @@ export default function NavBar() {
           disableRipple
           onClick={() => navigate('/settings')}
           sx={{
+            flex: navSettingsEnabled ? 1 : 0,
             maxWidth: navSettingsEnabled ? 168 : 0,
             minWidth: navSettingsEnabled ? 'auto' : 0,
             padding: navSettingsEnabled ? undefined : 0,
