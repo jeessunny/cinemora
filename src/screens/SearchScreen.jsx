@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { SearchOff, History, TrendingUp } from '@mui/icons-material';
 import useStore from '../store';
-import { searchMovies, popularSearches } from '../data/mockData';
+import { popularSearches } from '../data/mockData';
+import { searchMovies } from '../services/tmdb';
 import SearchBar from '../components/SearchBar';
 import SegmentedButton from '../components/SegmentedButton';
 import PosterCard from '../components/PosterCard';
@@ -20,9 +21,25 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('movies');
   const [isTyping, setIsTyping] = useState(false);
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsTyping(false), 500);
+    const fetchResults = async () => {
+      if (query.trim()) {
+        try {
+          // You could conditionally search TMDB TV vs Movies here, but we are using movie search
+          const res = await searchMovies(query);
+          setResults(res);
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        setResults([]);
+      }
+      setIsTyping(false);
+    };
+
+    const timer = setTimeout(fetchResults, 500);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -36,19 +53,6 @@ export default function SearchScreen() {
       addRecentSearch(val.trim());
     }
   };
-
-  // Filter movies/shows solely based on query and type (genre chips removed)
-  const results = useMemo(() => {
-    let res = searchMovies(query);
-    if (type === 'tv') {
-      res = res.filter(m => 
-        m.title.toLowerCase().includes('series') || 
-        m.genres.includes('Documentary') ||
-        m.genres.includes('Animation')
-      );
-    }
-    return res;
-  }, [query, type]);
 
   const getStatus = (id) => {
     if (history.some(m => m.id === id)) return 'history';

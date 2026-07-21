@@ -1,5 +1,5 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { Box, Typography, IconButton, Avatar, Chip, Snackbar } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, IconButton, Avatar, Chip, Snackbar, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { 
   ChevronLeft, Favorite, FavoriteBorder, 
@@ -7,13 +7,16 @@ import {
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import useStore from '../store';
-import { mockMovies } from '../data/mockData';
+import { getMovieDetails } from '../services/tmdb';
 import ScrollRail from '../components/ScrollRail';
 
 export default function MovieDetailsScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
   const theme = useTheme();
+  
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState('');
   const [bounceId, setBounceId] = useState(null);
   
@@ -27,19 +30,30 @@ export default function MovieDetailsScreen() {
   const addToHistory = useStore(state => state.addToHistory);
   const removeFromHistory = useStore(state => state.removeFromHistory);
 
-  const movie = useMemo(() => mockMovies.find(m => m.id === parseInt(id)), [id]);
-  const moreLikeThis = useMemo(() => {
-    if (!movie) return [];
-    return mockMovies
-      .filter(m => m.id !== movie.id && m.genres.some(g => movie.genres.includes(g)))
-      .sort((a, b) => b.matchPercentage - a.matchPercentage)
-      .slice(0, 10);
-  }, [movie]);
-
-  // Scroll to top on route change
   useEffect(() => {
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const data = await getMovieDetails(id);
+        setMovie(data);
+      } catch (err) {
+        console.error('Error fetching movie details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDetails();
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [id]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', bgcolor: 'background.default' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (!movie) {
     return (
@@ -49,6 +63,7 @@ export default function MovieDetailsScreen() {
     );
   }
 
+  const moreLikeThis = movie.similar || [];
   const isWatchlist = watchlist.some(m => m.id === movie.id);
   const isFavorite = favorites.some(m => m.id === movie.id);
   const isHistory = history.some(m => m.id === movie.id);

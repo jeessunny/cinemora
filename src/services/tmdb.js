@@ -1,0 +1,108 @@
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const BASE_URL = 'https://api.themoviedb.org/3';
+
+const GENRE_MAP = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Sci-Fi",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western"
+};
+
+export const getGenresFromIds = (ids) => {
+  return ids.map(id => GENRE_MAP[id]).filter(Boolean);
+};
+
+export const mapMovie = (m) => ({
+  id: m.id,
+  title: m.title || m.name,
+  year: m.release_date ? parseInt(m.release_date.split('-')[0]) : 'N/A',
+  rating: Math.round(m.vote_average * 10) / 10,
+  runtime: m.runtime ? `${Math.floor(m.runtime / 60)}h ${m.runtime % 60}m` : 'N/A',
+  genres: m.genre_ids ? getGenresFromIds(m.genre_ids) : (m.genres ? m.genres.map(g => g.name) : []),
+  posterUrl: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster',
+  backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/w1280${m.backdrop_path}` : 'https://via.placeholder.com/1280x720?text=No+Backdrop',
+  synopsis: m.overview || 'No synopsis available.',
+  matchPercentage: Math.round(m.vote_average * 10),
+  cast: m.credits?.cast?.slice(0, 10).map(c => ({
+    name: c.name,
+    character: c.character,
+    photoUrl: c.profile_path ? `https://image.tmdb.org/t/p/w200${c.profile_path}` : 'https://via.placeholder.com/200x200?text=No+Photo'
+  })) || []
+});
+
+const fetchTMDB = async (endpoint) => {
+  const url = new URL(`${BASE_URL}${endpoint}`);
+  url.searchParams.append('api_key', TMDB_API_KEY);
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch from TMDB');
+  }
+  return response.json();
+};
+
+export const getTrending = async () => {
+  const data = await fetchTMDB('/trending/movie/week');
+  return data.results.map(mapMovie);
+};
+
+export const getNewReleases = async () => {
+  const data = await fetchTMDB('/movie/now_playing');
+  return data.results.map(mapMovie);
+};
+
+export const getPopular = async () => {
+  const data = await fetchTMDB('/movie/popular');
+  return data.results.map(mapMovie);
+};
+
+export const getRecommended = async () => {
+  // Using popular or top_rated as recommended
+  const data = await fetchTMDB('/movie/top_rated');
+  return data.results.map(mapMovie);
+};
+
+export const searchMovies = async (query) => {
+  if (!query) return [];
+  const url = new URL(`${BASE_URL}/search/movie`);
+  url.searchParams.append('api_key', TMDB_API_KEY);
+  url.searchParams.append('query', query);
+  const response = await fetch(url);
+  const data = await response.json();
+  return data.results.map(mapMovie);
+};
+
+export const getMovieDetails = async (id) => {
+  const url = new URL(`${BASE_URL}/movie/${id}`);
+  url.searchParams.append('api_key', TMDB_API_KEY);
+  url.searchParams.append('append_to_response', 'credits,similar');
+  const response = await fetch(url);
+  const data = await response.json();
+  return {
+    ...mapMovie(data),
+    similar: data.similar?.results?.map(mapMovie) || []
+  };
+};
+
+export const getMoviesByGenreId = async (genreId) => {
+  const url = new URL(`${BASE_URL}/discover/movie`);
+  url.searchParams.append('api_key', TMDB_API_KEY);
+  url.searchParams.append('with_genres', genreId);
+  const response = await fetch(url);
+  const data = await response.json();
+  return data.results.map(mapMovie);
+};
