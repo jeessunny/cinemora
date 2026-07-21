@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paper, InputBase, IconButton } from '@mui/material';
+import { Paper, InputBase, IconButton, Box } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
 
 export default function SearchBar({ value, onChange, onClear, onClick, onSubmit, placeholder = "Search movies, genres...", readOnly = false }) {
