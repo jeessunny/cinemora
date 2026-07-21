@@ -4,6 +4,7 @@ import { ThemeProvider, CssBaseline, Box } from '@mui/material';
 import { getTheme } from './theme';
 import useStore from './store';
 import NavBar from './components/NavBar';
+import { Analytics } from '@vercel/analytics/react';
 
 // Screens
 import LoginScreen from './screens/LoginScreen';
@@ -103,6 +104,7 @@ export default function App() {
           </Routes>
         </Layout>
       </BrowserRouter>
+      <Analytics />
     </ThemeProvider>
   );
 }
