@@ -1,18 +1,33 @@
 import React from 'react';
 import { Paper, InputBase, IconButton } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
+import useStore from '../store';
 
 export default function SearchBar({ value, onChange, onClear, onClick, placeholder = "Search movies, genres...", readOnly = false }) {
+  const glassmorphismEnabled = useStore(state => state.glassmorphismEnabled);
+  const themeMode = useStore(state => state.themeMode);
+
+  const glassStyle = glassmorphismEnabled ? {
+    bgcolor: themeMode === 'light' ? 'rgba(255,255,255,0.55)' : 'rgba(30,30,30,0.40)',
+    backdropFilter: 'blur(20px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    border: '1px solid rgba(255,255,255,0.18)',
+  } : {
+    bgcolor: 'surface.surfaceContainerHigh',
+  };
+
   return (
     <Paper
-      elevation={2}
+      elevation={glassmorphismEnabled ? 0 : 2}
       sx={{
         p: '2px 4px',
         display: 'flex',
         alignItems: 'center',
         width: '100%',
         borderRadius: 50,
-        bgcolor: 'surface.surfaceContainerHigh',
+        transition: 'all 250ms ease',
+        ...glassStyle,
       }}
       onClick={onClick}
     >

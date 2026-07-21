@@ -16,6 +16,7 @@ export default function MovieDetailsScreen() {
   const theme = useTheme();
   const [snackbar, setSnackbar] = useState('');
   const [bounceId, setBounceId] = useState(null);
+  const glassmorphismEnabled = useStore(state => state.glassmorphismEnabled);
   
   const watchlist = useStore(state => state.watchlist);
   const addToWatchlist = useStore(state => state.addToWatchlist);
@@ -187,7 +188,20 @@ export default function MovieDetailsScreen() {
             animationDelay: '0.25s',
           }}
         />
-        <Box sx={{ pt: 10, flex: 1, minWidth: 0 }}>
+        <Box sx={{ 
+          pt: 10, flex: 1, minWidth: 0,
+          ...(glassmorphismEnabled && {
+            bgcolor: 'rgba(30,30,30,0.40)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255,255,255,0.18)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            p: 2,
+            pt: 10,
+          }),
+          transition: 'all 250ms ease',
+        }}>
           {/* Centered Movie Title in a full width block */}
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mb: 1.5 }}>
             <Typography 

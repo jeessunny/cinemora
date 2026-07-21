@@ -6,7 +6,7 @@ import {
 import { 
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
-  Animation, ViewDay, Search, Settings
+  Animation, ViewDay, Search, Settings, AutoAwesome
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -130,6 +130,8 @@ export default function SettingsScreen() {
   const setNavSearchEnabled = useStore(state => state.setNavSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
   const setNavSettingsEnabled = useStore(state => state.setNavSettingsEnabled);
+  const glassmorphismEnabled = useStore(state => state.glassmorphismEnabled);
+  const setGlassmorphismEnabled = useStore(state => state.setGlassmorphismEnabled);
 
   const [confirmDialog, setConfirmDialog] = useState(null);
 
@@ -192,8 +194,17 @@ export default function SettingsScreen() {
       {/* ═══════ Profile Card ═══════ */}
       <Box sx={{ 
         pl: 2.5, pr: 3.5, mb: 1, py: 3,
-        bgcolor: 'surface.surfaceContainerLow',
+        bgcolor: glassmorphismEnabled
+          ? 'rgba(30,30,30,0.40)'
+          : 'surface.surfaceContainerLow',
         borderRadius: '16px',
+        ...(glassmorphismEnabled && {
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        }),
+        transition: 'all 250ms ease',
         display: 'flex', alignItems: 'center', gap: 2.5, boxSizing: 'border-box'
       }}>
         <Avatar 
@@ -265,6 +276,21 @@ export default function SettingsScreen() {
               />
             ))}
           </Box>
+        </ListItem>
+        <Divider />
+        <ListItem sx={{ py: 1.5, px: 2 }}>
+          <ListItemIcon sx={{ minWidth: 40 }}><AutoAwesome color="primary" /></ListItemIcon>
+          <ListItemText 
+            primary="Glassmorphism" 
+            secondary="Frosted glass on floating surfaces"
+            primaryTypographyProps={{ fontWeight: 600 }} 
+            secondaryTypographyProps={{ fontSize: '12px' }}
+          />
+          <Switch 
+            checked={!!glassmorphismEnabled} 
+            onChange={(e) => setGlassmorphismEnabled(e.target.checked)}
+            color="primary"
+          />
         </ListItem>
       </List>
 

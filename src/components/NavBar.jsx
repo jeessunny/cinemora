@@ -11,6 +11,8 @@ export default function NavBar() {
   const animationsEnabled = useStore(state => state.animationsEnabled);
   const navSearchEnabled = useStore(state => state.navSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
+  const glassmorphismEnabled = useStore(state => state.glassmorphismEnabled);
+  const themeMode = useStore(state => state.themeMode);
 
   const getTabValue = () => {
     const path = location.pathname;
@@ -30,14 +32,20 @@ export default function NavBar() {
     zIndex: 1000,
     borderRadius: floatingNavBar ? '32px' : 0,
     overflow: 'hidden',
-    bgcolor: 'surface.surfaceContainer',
+    bgcolor: glassmorphismEnabled
+      ? (themeMode === 'light' ? 'rgba(255,255,255,0.55)' : 'rgba(30,30,30,0.40)')
+      : 'surface.surfaceContainer',
     backgroundImage: 'none !important',
-    boxShadow: floatingNavBar ? '0 8px 30px rgba(0, 0, 0, 0.45)' : '0 -1px 8px rgba(0, 0, 0, 0.2)',
+    backdropFilter: glassmorphismEnabled ? 'blur(20px) saturate(180%)' : 'none',
+    WebkitBackdropFilter: glassmorphismEnabled ? 'blur(20px) saturate(180%)' : 'none',
+    boxShadow: glassmorphismEnabled
+      ? '0 8px 32px rgba(0,0,0,0.12)'
+      : (floatingNavBar ? '0 8px 30px rgba(0, 0, 0, 0.45)' : '0 -1px 8px rgba(0, 0, 0, 0.2)'),
     border: '1px solid',
     borderBottomWidth: floatingNavBar ? '1px' : 0,
     borderLeftWidth: floatingNavBar ? '1px' : 0,
     borderRightWidth: floatingNavBar ? '1px' : 0,
-    borderColor: 'surface.surfaceContainerHighest',
+    borderColor: glassmorphismEnabled ? 'rgba(255,255,255,0.18)' : 'surface.surfaceContainerHighest',
     paddingBottom: floatingNavBar ? 0 : 'env(safe-area-inset-bottom)',
     // Premium spring-like transition for morphing between floating and fixed states, and changing items
     transition: animationsEnabled ? 'all 0.5s cubic-bezier(0.34, 1.3, 0.64, 1)' : 'none',

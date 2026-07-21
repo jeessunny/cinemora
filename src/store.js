@@ -31,6 +31,7 @@ const useStore = create(
       navBarAnimationEnabled: true, // Toggle for just navbar water ripple
       navSearchEnabled: true, // Toggle for Search tab visibility in NavBar
       navSettingsEnabled: true, // Toggle for Settings tab visibility in NavBar
+      glassmorphismEnabled: true, // Toggle for glassmorphism on floating surfaces
 
       // === Customization Actions ===
       setAccentColor: (color) => set({ accentColor: color }),
@@ -39,6 +40,7 @@ const useStore = create(
       setNavBarAnimationEnabled: (val) => set({ navBarAnimationEnabled: val }),
       setNavSearchEnabled: (val) => set({ navSearchEnabled: val }),
       setNavSettingsEnabled: (val) => set({ navSettingsEnabled: val }),
+      setGlassmorphismEnabled: (val) => set({ glassmorphismEnabled: val }),
 
       toggleHomeSection: (id) => set((state) => ({
         homeSections: state.homeSections.map(s =>
