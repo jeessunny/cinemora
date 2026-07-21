@@ -43,7 +43,11 @@ export default function PosterCard({ movie, status, animDelay = 0 }) {
       }}
     >
       <CardActionArea 
-        onClick={() => navigate(`/movie/${movie.id}?type=${movie.type || 'movie'}`)}
+        onClick={() => {
+          const mediaType = movie.type || 'movie';
+          const path = mediaType === 'tv' ? `/series/${movie.id}` : `/movie/${movie.id}?type=movie`;
+          navigate(path);
+        }}
         sx={{ width: '100%', height: '100%', display: 'block', borderRadius: '12px', overflow: 'hidden' }}
       >
         {/* Full Card Background Image */}

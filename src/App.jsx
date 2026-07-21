@@ -13,6 +13,7 @@ import SearchScreen from './screens/SearchScreen';
 import SavedScreen from './screens/SavedScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import MovieDetailsScreen from './screens/MovieDetailsScreen';
+import SeriesDetailsScreen from './screens/SeriesDetailsScreen';
 
 const ProtectedRoute = ({ children }) => {
   const isOnboarded = useStore(state => state.isOnboarded);
@@ -39,7 +40,7 @@ const AnimatedPage = ({ children }) => {
 const Layout = ({ children }) => {
   const location = useLocation();
   // Support hiding navigation on Login (/) and MovieDetails routes
-  const hideNav = ['/'].includes(location.pathname) || location.pathname.includes('/movie/');
+  const hideNav = ['/'].includes(location.pathname) || location.pathname.includes('/movie/') || location.pathname.includes('/series/');
   
   return (
     <>
@@ -100,6 +101,7 @@ export default function App() {
             <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
             <Route path="/setting" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
             <Route path="/movie/:id" element={<ProtectedRoute><MovieDetailsScreen /></ProtectedRoute>} />
+            <Route path="/series/:id" element={<ProtectedRoute><SeriesDetailsScreen /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </Layout>

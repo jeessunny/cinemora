@@ -116,3 +116,62 @@ export const getMoviesByGenreId = async (genreId) => {
   const data = await response.json();
   return data.results.map(mapMovie);
 };
+
+export const getSeriesDetails = async (id) => {
+  const url = new URL(`${BASE_URL}/tv/${id}`);
+  url.searchParams.append('api_key', TMDB_API_KEY);
+  url.searchParams.append('append_to_response', 'credits,similar');
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Not found');
+  const data = await response.json();
+
+  const seasons = (data.seasons || [])
+    .filter(s => s.season_number > 0) // exclude "Specials" (season 0)
+    .map(s => ({
+      id: s.id,
+      seasonNumber: s.season_number,
+      name: s.name,
+      episodeCount: s.episode_count,
+      airDate: s.air_date,
+      posterUrl: s.poster_path
+        ? `https://image.tmdb.org/t/p/w300${s.poster_path}`
+        : null,
+      overview: s.overview || '',
+    }));
+
+  return {
+    ...mapMovie(data),
+    numberOfSeasons: data.number_of_seasons,
+    numberOfEpisodes: data.number_of_episodes,
+    status: data.status, // "Returning Series", "Ended", etc.
+    networks: (data.networks || []).map(n => n.name),
+    seasons,
+    similar: data.similar?.results?.map(mapMovie) || [],
+  };
+};
+
+export const getSeasonDetails = async (seriesId, seasonNumber) => {
+  const url = new URL(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}`);
+  url.searchParams.append('api_key', TMDB_API_KEY);
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Season not found');
+  const data = await response.json();
+
+  return {
+    seasonNumber: data.season_number,
+    name: data.name,
+    overview: data.overview,
+    episodes: (data.episodes || []).map(ep => ({
+      id: ep.id,
+      episodeNumber: ep.episode_number,
+      name: ep.name,
+      overview: ep.overview || '',
+      airDate: ep.air_date,
+      runtime: ep.runtime,
+      rating: ep.vote_average ? Math.round(ep.vote_average * 10) / 10 : null,
+      stillUrl: ep.still_path
+        ? `https://image.tmdb.org/t/p/w500${ep.still_path}`
+        : null,
+    })),
+  };
+};
