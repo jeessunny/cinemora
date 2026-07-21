@@ -107,10 +107,11 @@ export default function HomeScreen() {
   }, [firstGenre, secondGenre]);
 
   const getStatus = (id) => {
-    if (history.some(m => m.id === id)) return 'history';
-    if (favorites.some(m => m.id === id)) return 'favorite';
-    if (watchlist.some(m => m.id === id)) return 'watchlist';
-    return null;
+    const statuses = [];
+    if (history.some(m => m.id === id)) statuses.push('history');
+    if (favorites.some(m => m.id === id)) statuses.push('favorite');
+    if (watchlist.some(m => m.id === id)) statuses.push('watchlist');
+    return statuses.length > 0 ? statuses : null;
   };
 
   const sectionMap = {

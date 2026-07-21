@@ -6,14 +6,16 @@ import { useNavigate } from 'react-router-dom';
 export default function PosterCard({ movie, status, animDelay = 0 }) {
   const navigate = useNavigate();
 
-  const getStatusIcon = () => {
-    switch (status) {
+  const getStatusIcon = (s) => {
+    switch (s) {
       case 'favorite': return <Favorite color="error" fontSize="small" sx={{ fontSize: 16 }} />;
       case 'watchlist': return <Bookmark color="primary" fontSize="small" sx={{ fontSize: 16 }} />;
       case 'history': return <CheckCircle color="success" fontSize="small" sx={{ fontSize: 16 }} />;
       default: return null;
     }
   };
+
+  const statuses = Array.isArray(status) ? status : (status ? [status] : []);
 
   return (
     <Card 
@@ -109,12 +111,12 @@ export default function PosterCard({ movie, status, animDelay = 0 }) {
           </Typography>
         </Box>
 
-        {/* Status Badge */}
-        {status && (
-          <Box sx={{ 
+        {/* Status Badges */}
+        {statuses.map((stat, idx) => (
+          <Box key={stat} sx={{ 
             position: 'absolute', 
             top: 8, 
-            right: 8, 
+            right: 8 + (idx * 28), 
             bgcolor: 'rgba(0, 0, 0, 0.75)', 
             borderRadius: '50%',
             width: 26,
@@ -126,11 +128,11 @@ export default function PosterCard({ movie, status, animDelay = 0 }) {
             backdropFilter: 'blur(4px)',
             zIndex: 2,
             animation: 'scaleIn 0.3s ease-out both',
-            animationDelay: `${animDelay + 0.15}s`,
+            animationDelay: `${animDelay + 0.15 + (idx * 0.05)}s`,
           }}>
-            {getStatusIcon()}
+            {getStatusIcon(stat)}
           </Box>
-        )}
+        ))}
       </CardActionArea>
     </Card>
   );

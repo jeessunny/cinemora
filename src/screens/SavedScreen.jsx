@@ -74,11 +74,19 @@ export default function SavedScreen() {
       );
     }
 
+    const getStatus = (id) => {
+      const statuses = [];
+      if (history.some(m => m.id === id)) statuses.push('history');
+      if (favorites.some(m => m.id === id)) statuses.push('favorite');
+      if (watchlist.some(m => m.id === id)) statuses.push('watchlist');
+      return statuses.length > 0 ? statuses : null;
+    };
+
     return (
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
         {data.map((movie, index) => (
           <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
-            <PosterCard movie={movie} status={status} animDelay={Math.min(index * 0.05, 0.3)} />
+            <PosterCard movie={movie} status={getStatus(movie.id)} animDelay={Math.min(index * 0.05, 0.3)} />
           </Box>
         ))}
       </Box>

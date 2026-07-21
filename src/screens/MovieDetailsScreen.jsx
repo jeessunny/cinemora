@@ -125,10 +125,11 @@ export default function MovieDetailsScreen() {
   };
 
   const getStatus = (mId) => {
-    if (history.some(m => m.id === mId)) return 'history';
-    if (favorites.some(m => m.id === mId)) return 'favorite';
-    if (watchlist.some(m => m.id === mId)) return 'watchlist';
-    return null;
+    const statuses = [];
+    if (history.some(m => m.id === mId)) statuses.push('history');
+    if (favorites.some(m => m.id === mId)) statuses.push('favorite');
+    if (watchlist.some(m => m.id === mId)) statuses.push('watchlist');
+    return statuses.length > 0 ? statuses : null;
   };
 
   const scrimColor = theme.palette.mode === 'dark' ? '15, 13, 13' : '255, 255, 255';
@@ -347,6 +348,7 @@ export default function MovieDetailsScreen() {
           gap: 2, 
           overflowX: 'auto', 
           px: 2, 
+          pt: 1.5,
           pb: 1.5,
           '&::-webkit-scrollbar': { display: 'none' },
           scrollbarWidth: 'none',
@@ -369,8 +371,6 @@ export default function MovieDetailsScreen() {
                   height: 64, 
                   mx: 'auto', 
                   mb: 1.2,
-                  border: '2px solid',
-                  borderColor: 'surface.surfaceContainerHighest',
                   boxShadow: 'none',
                   transition: 'transform 0.25s ease, box-shadow 0.25s ease',
                   '&:hover': {
