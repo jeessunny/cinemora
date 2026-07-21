@@ -95,6 +95,7 @@ export default function SearchScreen() {
           value={query} 
           onChange={handleSearch} 
           onClear={() => setQuery('')}
+          onSubmit={handleSearchSubmit}
         />
       </Box>
 

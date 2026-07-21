@@ -2,7 +2,13 @@ import React from 'react';
 import { Paper, InputBase, IconButton } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
 
-export default function SearchBar({ value, onChange, onClear, onClick, placeholder = "Search movies, genres...", readOnly = false }) {
+export default function SearchBar({ value, onChange, onClear, onClick, onSubmit, placeholder = "Search movies, genres...", readOnly = false }) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && onSubmit) {
+      onSubmit(value);
+    }
+  };
+
   return (
     <Paper
       elevation={2}
@@ -16,7 +22,7 @@ export default function SearchBar({ value, onChange, onClear, onClick, placehold
       }}
       onClick={onClick}
     >
-      <IconButton sx={{ p: '10px' }} aria-label="search">
+      <IconButton sx={{ p: '10px' }} aria-label="search" onClick={() => onSubmit && onSubmit(value)}>
         <Search />
       </IconButton>
       <InputBase
@@ -24,6 +30,7 @@ export default function SearchBar({ value, onChange, onClear, onClick, placehold
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange && onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
         readOnly={readOnly}
       />
       {value && (

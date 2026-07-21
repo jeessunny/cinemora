@@ -27,7 +27,7 @@ export default function HeroCard({ movie }) {
           transform: 'scale(0.98)',
         }
       }}
-      onClick={() => navigate(`/movie/${movie.id}`)}
+      onClick={() => navigate(`/movie/${movie.id}?type=${movie.type || 'movie'}`)}
     >
       <Box
         sx={{

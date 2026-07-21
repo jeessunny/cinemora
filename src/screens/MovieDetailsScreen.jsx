@@ -5,7 +5,7 @@ import {
   ChevronLeft, Favorite, FavoriteBorder, 
   Bookmark, BookmarkBorder, Share, CheckCircle, CheckCircleOutline 
 } from '@mui/icons-material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 import { getMovieDetails } from '../services/tmdb';
 import ScrollRail from '../components/ScrollRail';
@@ -13,8 +13,11 @@ import ScrollRail from '../components/ScrollRail';
 export default function MovieDetailsScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   
+  const type = new URLSearchParams(location.search).get('type') || 'movie';
+
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState('');
@@ -34,7 +37,7 @@ export default function MovieDetailsScreen() {
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const data = await getMovieDetails(id);
+        const data = await getMovieDetails(id, type);
         setMovie(data);
       } catch (err) {
         console.error('Error fetching movie details:', err);
@@ -45,7 +48,7 @@ export default function MovieDetailsScreen() {
     
     fetchDetails();
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, [id]);
+  }, [id, type]);
 
   if (loading) {
     return (

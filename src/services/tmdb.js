@@ -29,6 +29,7 @@ export const getGenresFromIds = (ids) => {
 
 export const mapMovie = (m) => ({
   id: m.id,
+  type: m.media_type || (m.first_air_date ? 'tv' : 'movie'),
   title: m.title || m.name,
   year: m.release_date ? parseInt(m.release_date.split('-')[0]) : (m.first_air_date ? parseInt(m.first_air_date.split('-')[0]) : 'N/A'),
   rating: Math.round(m.vote_average * 10) / 10,
@@ -93,11 +94,13 @@ export const getPopularSearches = async (type = 'movies') => {
   return data.results.slice(0, 8).map(m => m.title || m.name);
 };
 
-export const getMovieDetails = async (id) => {
-  const url = new URL(`${BASE_URL}/movie/${id}`);
+export const getMovieDetails = async (id, type = 'movie') => {
+  const endpoint = type === 'tv' ? `/tv/${id}` : `/movie/${id}`;
+  const url = new URL(`${BASE_URL}${endpoint}`);
   url.searchParams.append('api_key', TMDB_API_KEY);
   url.searchParams.append('append_to_response', 'credits,similar');
   const response = await fetch(url);
+  if (!response.ok) throw new Error('Not found');
   const data = await response.json();
   return {
     ...mapMovie(data),

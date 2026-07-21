@@ -43,7 +43,7 @@ export default function PosterCard({ movie, status, animDelay = 0 }) {
       }}
     >
       <CardActionArea 
-        onClick={() => navigate(`/movie/${movie.id}`)}
+        onClick={() => navigate(`/movie/${movie.id}?type=${movie.type || 'movie'}`)}
         sx={{ width: '100%', height: '100%', display: 'block', borderRadius: '12px', overflow: 'hidden' }}
       >
         {/* Full Card Background Image */}
