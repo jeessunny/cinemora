@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Paper, BottomNavigation, BottomNavigationAction, Box } from '@mui/material';
+import React from 'react';
+import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { HomeRounded, SearchRounded, BookmarkRounded, SettingsRounded } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
@@ -7,14 +7,10 @@ import useStore from '../store';
 export default function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [ripples, setRipples] = useState([]);
   const floatingNavBar = useStore(state => state.floatingNavBar);
   const animationsEnabled = useStore(state => state.animationsEnabled);
-  const navBarAnimationEnabled = useStore(state => state.navBarAnimationEnabled);
   const navSearchEnabled = useStore(state => state.navSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
-
-  const showRipple = animationsEnabled && navBarAnimationEnabled;
 
   const getTabValue = () => {
     const path = location.pathname;
@@ -23,31 +19,6 @@ export default function NavBar() {
     if (path.includes('/saved')) return 'saved';
     if (path.includes('/settings') || path.includes('/setting')) return 'settings';
     return 'none';
-  };
-
-  const handleRipple = (e) => {
-    if (!showRipple) return;
-    // Only trigger ripple for primary pointers (mouse left click or touch)
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    const buttonRect = e.currentTarget.getBoundingClientRect();
-    const navRect = e.currentTarget.parentElement.getBoundingClientRect();
-    
-    // Calculate center coordinates of the button relative to the entire navigation bar container
-    const x = buttonRect.left - navRect.left + buttonRect.width / 2;
-    const y = buttonRect.top - navRect.top + buttonRect.height / 2;
-
-    const newRipple = {
-      id: Date.now() + Math.random(),
-      x,
-      y
-    };
-
-    setRipples(prev => [...prev, newRipple]);
-
-    // Clean up ripple element after animation finishes (1.6s)
-    setTimeout(() => {
-      setRipples(prev => prev.filter(r => r.id !== newRipple.id));
-    }, 1600);
   };
 
   // Dynamic animated style for the nav bar
@@ -81,26 +52,6 @@ export default function NavBar() {
       elevation={0}
       sx={navStyle} 
     >
-      {/* Custom Water Ripples container */}
-      {showRipple && (
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 1 }}>
-          {ripples.map(ripple => (
-            <Box
-              key={ripple.id}
-              className="water-ripple-custom"
-              sx={{
-                position: 'absolute',
-                left: ripple.x,
-                top: ripple.y,
-                transform: 'translate(-50%, -50%)',
-                borderRadius: '50%',
-                pointerEvents: 'none',
-              }}
-            />
-          ))}
-        </Box>
-      )}
-
       <BottomNavigation
         value={getTabValue()}
         showLabels
@@ -144,7 +95,6 @@ export default function NavBar() {
           value="home"
           icon={<HomeRounded />} 
           disableRipple
-          onPointerDown={handleRipple}
           onClick={() => navigate('/home')}
         />
         <BottomNavigationAction 
@@ -152,7 +102,6 @@ export default function NavBar() {
           value="search"
           icon={<SearchRounded />} 
           disableRipple
-          onPointerDown={handleRipple}
           onClick={() => navigate('/search')}
           sx={{
             maxWidth: navSearchEnabled ? 168 : 0,
@@ -168,7 +117,6 @@ export default function NavBar() {
           value="saved"
           icon={<BookmarkRounded />} 
           disableRipple
-          onPointerDown={handleRipple}
           onClick={() => navigate('/saved')}
         />
         <BottomNavigationAction 
@@ -176,7 +124,6 @@ export default function NavBar() {
           value="settings"
           icon={<SettingsRounded />} 
           disableRipple
-          onPointerDown={handleRipple}
           onClick={() => navigate('/settings')}
           sx={{
             maxWidth: navSettingsEnabled ? 168 : 0,

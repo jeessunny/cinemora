@@ -6,7 +6,7 @@ import {
 import { 
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
-  Animation, ViewDay, MotionPhotosOff, Search, Settings
+  Animation, ViewDay, Search, Settings
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -126,8 +126,6 @@ export default function SettingsScreen() {
   const resetHomeSections = useStore(state => state.resetHomeSections);
   const animationsEnabled = useStore(state => state.animationsEnabled);
   const setAnimationsEnabled = useStore(state => state.setAnimationsEnabled);
-  const navBarAnimationEnabled = useStore(state => state.navBarAnimationEnabled);
-  const setNavBarAnimationEnabled = useStore(state => state.setNavBarAnimationEnabled);
   const navSearchEnabled = useStore(state => state.navSearchEnabled);
   const setNavSearchEnabled = useStore(state => state.setNavSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
@@ -318,24 +316,6 @@ export default function SettingsScreen() {
           <Switch 
             checked={!!animationsEnabled} 
             onChange={(e) => setAnimationsEnabled(e.target.checked)}
-            color="primary"
-          />
-        </ListItem>
-
-        <Divider />
-
-        <ListItem sx={{ py: 1.5, px: 2, opacity: animationsEnabled ? 1 : 0.4 }}>
-          <ListItemIcon sx={{ minWidth: 40 }}><MotionPhotosOff color="primary" /></ListItemIcon>
-          <ListItemText 
-            primary="Navigation Bar Animation" 
-            secondary="Water ripple effect on tap"
-            primaryTypographyProps={{ fontWeight: 600 }} 
-            secondaryTypographyProps={{ fontSize: '12px' }}
-          />
-          <Switch 
-            checked={navBarAnimationEnabled}
-            disabled={!animationsEnabled}
-            onChange={(e) => setNavBarAnimationEnabled(e.target.checked)}
             color="primary"
           />
         </ListItem>

@@ -243,39 +243,8 @@ body, body * {
   }
 }
 
-/* Custom premium water droplet collision ripple */
-@keyframes waterRippleCustom {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.05);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-}
-
 :root {
   --accent-color: #E50914;
-}
-
-.water-ripple-custom {
-  width: 400px;
-  height: 400px;
-  /* Multi-ring radial gradient using dynamic accent color */
-  background: radial-gradient(
-    circle,
-    transparent 35%,
-    color-mix(in srgb, var(--accent-color) 25%, transparent) 42%,
-    transparent 50%,
-    color-mix(in srgb, var(--accent-color) 55%, transparent) 60%,
-    transparent 72%
-  );
-  border-radius: 50%;
-  pointer-events: none;
-  /* Hardware acceleration for mobile */
-  will-change: transform, opacity;
-  animation: waterRippleCustom 1.6s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
 }
 
 /* ═══════════════════════════════════════════
