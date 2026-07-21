@@ -5,20 +5,21 @@ import useStore from '../store';
 import SegmentedButton from '../components/SegmentedButton';
 import PosterCard from '../components/PosterCard';
 import EmptyState from '../components/EmptyState';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function SavedScreen() {
   const navigate = useNavigate();
   const watchlist = useStore(state => state.watchlist);
   const favorites = useStore(state => state.favorites);
   const history = useStore(state => state.history);
-  const [tab, setTab] = useState('watchlist');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab') || 'watchlist';
   const [category, setCategory] = useState('all'); // 'all' | 'movie' | 'tv'
   const [historySearch, setHistorySearch] = useState('');
 
   // Reset category when switching tabs
   const handleTabChange = (newTab) => {
-    setTab(newTab);
+    setSearchParams({ tab: newTab }, { replace: true });
     setCategory('all');
     setHistorySearch('');
   };
@@ -216,7 +217,7 @@ export default function SavedScreen() {
     }
 
     return (
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, pb: 10 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, pb: 14 }}>
         {filteredData.map((movie, index) => (
           <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
             <PosterCard movie={movie} status={getStatus(movie.id)} animDelay={Math.min(index * 0.05, 0.3)} />
