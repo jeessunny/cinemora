@@ -1,11 +1,9 @@
 import React from 'react';
 import { Card, Box, Typography, Button, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import useStore from '../store';
 
 export default function HeroCard({ movie }) {
   const navigate = useNavigate();
-  const glassmorphismEnabled = useStore(state => state.glassmorphismEnabled);
 
   if (!movie) return null;
 
@@ -51,28 +49,13 @@ export default function HeroCard({ movie }) {
           left: 0,
           right: 0,
           bottom: 0,
-          background: glassmorphismEnabled
-            ? 'linear-gradient(to top, rgba(15, 13, 13, 0.5) 0%, rgba(15, 13, 13, 0) 60%)'
-            : 'linear-gradient(to top, rgba(15, 13, 13, 0.9) 0%, rgba(15, 13, 13, 0) 100%)',
+          background: 'linear-gradient(to top, rgba(15, 13, 13, 0.9) 0%, rgba(15, 13, 13, 0) 100%)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
           p: 3,
         }}
       >
-        {/* Glassmorphism info panel */}
-        <Box sx={{
-          ...(glassmorphismEnabled && {
-            bgcolor: 'rgba(30,30,30,0.40)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.18)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            p: 2,
-          }),
-          transition: 'all 250ms ease',
-        }}>
         <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
           {movie.genres.slice(0, 2).map((g, i) => (
             <Chip 
@@ -132,7 +115,6 @@ export default function HeroCard({ movie }) {
         >
           View Details
         </Button>
-        </Box>
       </Box>
     </Card>
   );
