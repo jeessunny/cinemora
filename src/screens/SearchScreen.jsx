@@ -36,22 +36,23 @@ export default function SearchScreen() {
   }, [type]);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchResults = async () => {
       if (query.trim()) {
         try {
           const res = await searchMovies(query, type);
-          setResults(res);
+          if (!cancelled) setResults(res);
         } catch (err) {
-          console.error(err);
+          if (!cancelled) console.error(err);
         }
       } else {
         setResults([]);
       }
-      setIsTyping(false);
+      if (!cancelled) setIsTyping(false);
     };
 
-    const timer = setTimeout(fetchResults, 500);
-    return () => clearTimeout(timer);
+    const timer = setTimeout(fetchResults, 300);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [query, type]);
 
   const handleSearch = (val) => {
