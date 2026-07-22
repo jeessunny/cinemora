@@ -86,6 +86,8 @@ const useStore = create(
         const filtered = state.history.filter((m) => m.id !== movie.id);
         return {
           history: [{ ...movie, watchedDate: new Date().toISOString() }, ...filtered],
+          // Auto-remove from watchlist when marked as watched
+          watchlist: state.watchlist.filter((m) => m.id !== movie.id),
         };
       }),
       removeFromHistory: (id) => set((state) => ({
