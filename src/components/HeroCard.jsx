@@ -33,15 +33,17 @@ export default function HeroCard({ movie }) {
       }}
     >
       <Box
+        component="img"
+        src={movie.backdropUrl}
+        alt={movie.title}
+        loading="lazy"
         sx={{
           position: 'absolute',
           top: 0,
           left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `url(${movie.backdropUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
           transition: 'transform 0.6s ease',
         }}
       />

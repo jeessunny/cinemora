@@ -496,6 +496,7 @@ export default function SeriesDetailsScreen() {
                           component="img"
                           src={ep.stillUrl}
                           alt={ep.name}
+                          loading="lazy"
                           sx={{
                             width: '100%',
                             height: '100%',

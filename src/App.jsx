@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, Box } from '@mui/material';
+import { ThemeProvider, CssBaseline, Box, CircularProgress } from '@mui/material';
 import { getTheme } from './theme';
 import useStore from './store';
 import NavBar from './components/NavBar';
 import { Analytics } from '@vercel/analytics/react';
 
-// Screens
-import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreen';
-import SearchScreen from './screens/SearchScreen';
-import SavedScreen from './screens/SavedScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import MovieDetailsScreen from './screens/MovieDetailsScreen';
-import SeriesDetailsScreen from './screens/SeriesDetailsScreen';
+// Lazy-loaded screens — each is a separate JS chunk loaded on demand
+const LoginScreen = lazy(() => import('./screens/LoginScreen'));
+const HomeScreen = lazy(() => import('./screens/HomeScreen'));
+const SearchScreen = lazy(() => import('./screens/SearchScreen'));
+const SavedScreen = lazy(() => import('./screens/SavedScreen'));
+const SettingsScreen = lazy(() => import('./screens/SettingsScreen'));
+const MovieDetailsScreen = lazy(() => import('./screens/MovieDetailsScreen'));
+const SeriesDetailsScreen = lazy(() => import('./screens/SeriesDetailsScreen'));
+
+// Fallback spinner while a lazy chunk loads
+const LazyFallback = () => (
+  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+    <CircularProgress size={32} />
+  </Box>
+);
 
 const ProtectedRoute = ({ children }) => {
   const isOnboarded = useStore(state => state.isOnboarded);
@@ -93,17 +100,19 @@ export default function App() {
       <CssBaseline />
       <BrowserRouter>
         <Layout>
-          <Routes>
-            <Route path="/" element={<LoginScreen />} />
-            <Route path="/home" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
-            <Route path="/search" element={<ProtectedRoute><SearchScreen /></ProtectedRoute>} />
-            <Route path="/saved" element={<ProtectedRoute><SavedScreen /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
-            <Route path="/setting" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
-            <Route path="/movie/:id" element={<ProtectedRoute><MovieDetailsScreen /></ProtectedRoute>} />
-            <Route path="/series/:id" element={<ProtectedRoute><SeriesDetailsScreen /></ProtectedRoute>} />
-            <Route path="*" element={<Navigate to="/home" replace />} />
-          </Routes>
+          <Suspense fallback={<LazyFallback />}>
+            <Routes>
+              <Route path="/" element={<LoginScreen />} />
+              <Route path="/home" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
+              <Route path="/search" element={<ProtectedRoute><SearchScreen /></ProtectedRoute>} />
+              <Route path="/saved" element={<ProtectedRoute><SavedScreen /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
+              <Route path="/setting" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
+              <Route path="/movie/:id" element={<ProtectedRoute><MovieDetailsScreen /></ProtectedRoute>} />
+              <Route path="/series/:id" element={<ProtectedRoute><SeriesDetailsScreen /></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to="/home" replace />} />
+            </Routes>
+          </Suspense>
         </Layout>
       </BrowserRouter>
       <Analytics />

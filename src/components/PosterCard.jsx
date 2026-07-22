@@ -55,6 +55,7 @@ export default function PosterCard({ movie, status, animDelay = 0 }) {
           component="img"
           image={movie.posterUrl}
           alt={movie.title}
+          loading="lazy"
           sx={{ 
             width: '100%', 
             height: '100%', 
