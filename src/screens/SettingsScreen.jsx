@@ -373,7 +373,7 @@ export default function SettingsScreen() {
 
       <Typography variant="labelMedium" color="text.secondary" align="center" 
         sx={{ mt: 4, display: 'block', opacity: 0.6 }}>
-        Cinemora v2.0.0
+        Cinemora v2.1.0
       </Typography>
 
       <ConfirmDialog
