@@ -1,9 +1,9 @@
-const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-const BASE_URL = 'https://api.themoviedb.org/3';
+// ═══════════════════════════════════════════
+// TMDB Service — All calls go through /api/tmdb proxy
+// Benefits: hidden API key, Vercel CDN edge caching for all users
+// ═══════════════════════════════════════════
 
-// ═══════════════════════════════════════════
-// IN-MEMORY CACHE — avoids re-fetching the same data
-// ═══════════════════════════════════════════
+// Client-side in-memory cache (per-user, per-session)
 const cache = new Map();
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
@@ -18,8 +18,7 @@ const setCache = (key, data) => {
   cache.set(key, { data, ts: Date.now() });
 };
 
-// Deduplicate in-flight requests — if the same URL is already being fetched,
-// return the existing promise instead of firing a second network call
+// Deduplicate in-flight requests
 const inFlight = new Map();
 
 const GENRE_MAP = {
@@ -56,144 +55,101 @@ export const mapMovie = (m) => ({
   rating: Math.round(m.vote_average * 10) / 10,
   runtime: m.runtime ? `${Math.floor(m.runtime / 60)}h ${m.runtime % 60}m` : 'N/A',
   genres: m.genre_ids ? getGenresFromIds(m.genre_ids) : (m.genres ? m.genres.map(g => g.name) : []),
-  // Use smaller image sizes for lists — w342 is plenty for poster cards
   posterUrl: m.poster_path ? `https://image.tmdb.org/t/p/w342${m.poster_path}` : 'https://via.placeholder.com/342x513?text=No+Poster',
-  // Use w780 for backdrops — more than enough for mobile screens
   backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}` : 'https://via.placeholder.com/780x439?text=No+Backdrop',
   synopsis: m.overview || 'No synopsis available.',
   matchPercentage: Math.round(m.vote_average * 10),
   cast: m.credits?.cast?.slice(0, 10).map(c => ({
     name: c.name,
     character: c.character,
-    // w185 is fine for small circular avatars
     photoUrl: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : 'https://via.placeholder.com/185x185?text=No+Photo'
   })) || []
 });
 
-const fetchTMDB = async (endpoint) => {
-  const urlStr = `${BASE_URL}${endpoint}`;
+// Core fetch function — routes through /api/tmdb proxy with caching + dedup
+const fetchTMDB = async (path, extraParams = {}) => {
+  const cacheKey = `${path}?${JSON.stringify(extraParams)}`;
 
-  // Check cache first
-  const cached = getCached(urlStr);
+  // Check client cache
+  const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  // Deduplicate in-flight requests
-  if (inFlight.has(urlStr)) return inFlight.get(urlStr);
+  // Deduplicate in-flight
+  if (inFlight.has(cacheKey)) return inFlight.get(cacheKey);
 
   const request = (async () => {
-    const url = new URL(urlStr);
-    url.searchParams.append('api_key', TMDB_API_KEY);
-    const response = await fetch(url);
+    const url = new URL('/api/tmdb', window.location.origin);
+    url.searchParams.append('path', path);
+    if (Object.keys(extraParams).length > 0) {
+      url.searchParams.append('query', JSON.stringify(extraParams));
+    }
+
+    const response = await fetch(url.toString());
     if (!response.ok) {
-      throw new Error('Failed to fetch from TMDB');
+      throw new Error(`TMDB fetch failed: ${response.status}`);
     }
     const data = await response.json();
-    setCache(urlStr, data);
+    setCache(cacheKey, data);
     return data;
   })();
 
-  inFlight.set(urlStr, request);
+  inFlight.set(cacheKey, request);
   try {
     return await request;
   } finally {
-    inFlight.delete(urlStr);
+    inFlight.delete(cacheKey);
   }
 };
 
 export const getTrending = async () => {
-  const data = await fetchTMDB('/trending/movie/week');
+  const data = await fetchTMDB('trending/movie/week');
   return data.results.map(mapMovie);
 };
 
 export const getNewReleases = async () => {
-  const data = await fetchTMDB('/movie/now_playing');
+  const data = await fetchTMDB('movie/now_playing');
   return data.results.map(mapMovie);
 };
 
 export const getPopular = async () => {
-  const data = await fetchTMDB('/movie/popular');
+  const data = await fetchTMDB('movie/popular');
   return data.results.map(mapMovie);
 };
 
 export const getRecommended = async () => {
-  const data = await fetchTMDB('/movie/top_rated');
+  const data = await fetchTMDB('movie/top_rated');
   return data.results.map(mapMovie);
 };
 
 export const searchMovies = async (query, type = 'movies') => {
   if (!query) return [];
-  const endpoint = type === 'tv' ? '/search/tv' : '/search/movie';
-  const cacheKey = `${BASE_URL}${endpoint}?query=${encodeURIComponent(query)}`;
-
-  // Check cache for search results too
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const url = new URL(`${BASE_URL}${endpoint}`);
-  url.searchParams.append('api_key', TMDB_API_KEY);
-  url.searchParams.append('query', query);
-  const response = await fetch(url);
-  const data = await response.json();
-  const results = data.results.map(mapMovie);
-  setCache(cacheKey, results);
-  return results;
+  const endpoint = type === 'tv' ? 'search/tv' : 'search/movie';
+  const data = await fetchTMDB(endpoint, { query });
+  return data.results.map(mapMovie);
 };
 
 export const getPopularSearches = async (type = 'movies') => {
-  const endpoint = type === 'tv' ? '/trending/tv/week' : '/trending/movie/week';
+  const endpoint = type === 'tv' ? 'trending/tv/week' : 'trending/movie/week';
   const data = await fetchTMDB(endpoint);
   return data.results.slice(0, 8).map(m => m.title || m.name);
 };
 
 export const getMovieDetails = async (id, type = 'movie') => {
-  const endpoint = type === 'tv' ? `/tv/${id}` : `/movie/${id}`;
-  const cacheKey = `${BASE_URL}${endpoint}?details=1`;
-
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const url = new URL(`${BASE_URL}${endpoint}`);
-  url.searchParams.append('api_key', TMDB_API_KEY);
-  url.searchParams.append('append_to_response', 'credits,similar');
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Not found');
-  const data = await response.json();
-  const result = {
+  const endpoint = type === 'tv' ? `tv/${id}` : `movie/${id}`;
+  const data = await fetchTMDB(endpoint, { append_to_response: 'credits,similar' });
+  return {
     ...mapMovie(data),
     similar: data.similar?.results?.map(mapMovie) || []
   };
-  setCache(cacheKey, result);
-  return result;
 };
 
 export const getMoviesByGenreId = async (genreId) => {
-  const cacheKey = `${BASE_URL}/discover/movie?genre=${genreId}`;
-
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const url = new URL(`${BASE_URL}/discover/movie`);
-  url.searchParams.append('api_key', TMDB_API_KEY);
-  url.searchParams.append('with_genres', genreId);
-  const response = await fetch(url);
-  const data = await response.json();
-  const results = data.results.map(mapMovie);
-  setCache(cacheKey, results);
-  return results;
+  const data = await fetchTMDB('discover/movie', { with_genres: genreId });
+  return data.results.map(mapMovie);
 };
 
 export const getSeriesDetails = async (id) => {
-  const cacheKey = `${BASE_URL}/tv/${id}?details=1`;
-
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const url = new URL(`${BASE_URL}/tv/${id}`);
-  url.searchParams.append('api_key', TMDB_API_KEY);
-  url.searchParams.append('append_to_response', 'credits,similar');
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Not found');
-  const data = await response.json();
+  const data = await fetchTMDB(`tv/${id}`, { append_to_response: 'credits,similar' });
 
   const seasons = (data.seasons || [])
     .filter(s => s.season_number > 0)
@@ -209,7 +165,7 @@ export const getSeriesDetails = async (id) => {
       overview: s.overview || '',
     }));
 
-  const result = {
+  return {
     ...mapMovie(data),
     numberOfSeasons: data.number_of_seasons,
     numberOfEpisodes: data.number_of_episodes,
@@ -218,23 +174,12 @@ export const getSeriesDetails = async (id) => {
     seasons,
     similar: data.similar?.results?.map(mapMovie) || [],
   };
-  setCache(cacheKey, result);
-  return result;
 };
 
 export const getSeasonDetails = async (seriesId, seasonNumber) => {
-  const cacheKey = `${BASE_URL}/tv/${seriesId}/season/${seasonNumber}`;
+  const data = await fetchTMDB(`tv/${seriesId}/season/${seasonNumber}`);
 
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const url = new URL(`${BASE_URL}/tv/${seriesId}/season/${seasonNumber}`);
-  url.searchParams.append('api_key', TMDB_API_KEY);
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Season not found');
-  const data = await response.json();
-
-  const result = {
+  return {
     seasonNumber: data.season_number,
     name: data.name,
     overview: data.overview,
@@ -251,6 +196,4 @@ export const getSeasonDetails = async (seriesId, seasonNumber) => {
         : null,
     })),
   };
-  setCache(cacheKey, result);
-  return result;
 };
