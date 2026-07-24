@@ -121,9 +121,14 @@ export default function LoginScreen() {
 
   const handleSubmit = () => {
     if (isFormValid) {
-      // Name and avatar are handled by App.jsx fetching the profile
+      setUserName(nameInput);
+      setAvatar(avatarPreview);
       setOnboarded(true);
-      navigate('/home');
+      if (isEditing) {
+        navigate('/settings', { replace: true });
+      } else {
+        navigate('/home');
+      }
     }
   };
 
@@ -227,9 +232,6 @@ export default function LoginScreen() {
               width: 110, 
               height: 110, 
               bgcolor: 'surface.surfaceContainerHighest',
-              border: '3px solid',
-              borderColor: avatarPreview ? 'primary.main' : 'surface.surfaceContainerHighest',
-              transition: 'border-color 0.3s ease',
             }}
           />
           <IconButton 
