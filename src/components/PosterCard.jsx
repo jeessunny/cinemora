@@ -2,9 +2,11 @@ import React from 'react';
 import { Card, CardActionArea, CardMedia, Typography, Box } from '@mui/material';
 import { Favorite, Bookmark, CheckCircle } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import useStore from '../store';
 
-export default function PosterCard({ movie, status, animDelay = 0 }) {
+export default function PosterCard({ movie, status, animDelay = 0, source = null }) {
   const navigate = useNavigate();
+  const trackMovieView = useStore(state => state.trackMovieView);
 
   const getStatusIcon = (s) => {
     switch (s) {
@@ -44,6 +46,7 @@ export default function PosterCard({ movie, status, animDelay = 0 }) {
     >
       <CardActionArea 
         onClick={() => {
+          if (source) trackMovieView(movie, source);
           const mediaType = movie.type || 'movie';
           const path = mediaType === 'tv' ? `/series/${movie.id}` : `/movie/${movie.id}?type=movie`;
           navigate(path);

@@ -132,7 +132,14 @@ const useStore = create(
         const { session } = useStore.getState();
         if (session?.user) {
           await supabase.from('user_movies').upsert({ user_id: session.user.id, movie_id: movie.id, status: 'watchlist', movie_data: movie, movie_type: movie.media_type || 'movie' });
-          await supabase.from('user_activity').insert({ user_id: session.user.id, movie_id: movie.id, genres: movie.genre_ids || [], action_type: 'added_watchlist', weight: 2 });
+          await supabase.from('user_activity').insert({ 
+            user_id: session.user.id, 
+            movie_id: movie.id, 
+            genres: movie.genre_ids || [], 
+            action_type: 'added_watchlist', 
+            weight: 2,
+            original_language: movie.original_language || 'en'
+          });
         }
       },
       removeFromWatchlist: async (id) => {
@@ -148,7 +155,14 @@ const useStore = create(
         const { session } = useStore.getState();
         if (session?.user) {
           await supabase.from('user_movies').upsert({ user_id: session.user.id, movie_id: movie.id, status: 'favorite', movie_data: movie, movie_type: movie.media_type || 'movie' });
-          await supabase.from('user_activity').insert({ user_id: session.user.id, movie_id: movie.id, genres: movie.genre_ids || [], action_type: 'added_favorite', weight: 4 });
+          await supabase.from('user_activity').insert({ 
+            user_id: session.user.id, 
+            movie_id: movie.id, 
+            genres: movie.genre_ids || [], 
+            action_type: 'added_favorite', 
+            weight: 4,
+            original_language: movie.original_language || 'en'
+          });
         }
       },
       removeFromFavorites: async (id) => {
@@ -170,13 +184,34 @@ const useStore = create(
           const watchedDate = new Date().toISOString();
           await supabase.from('user_movies').upsert({ user_id: session.user.id, movie_id: movie.id, status: 'history', movie_data: movie, movie_type: movie.media_type || 'movie', watched_date: watchedDate });
           await supabase.from('user_movies').delete().match({ user_id: session.user.id, movie_id: movie.id, status: 'watchlist' });
-          await supabase.from('user_activity').insert({ user_id: session.user.id, movie_id: movie.id, genres: movie.genre_ids || [], action_type: 'marked_history', weight: 5 });
+          await supabase.from('user_activity').insert({ 
+            user_id: session.user.id, 
+            movie_id: movie.id, 
+            genres: movie.genre_ids || [], 
+            action_type: 'marked_history', 
+            weight: 5,
+            original_language: movie.original_language || 'en'
+          });
         }
       },
       removeFromHistory: async (id) => {
         set((state) => ({ history: state.history.filter((m) => m.id !== id) }));
         const { session } = useStore.getState();
         if (session?.user) await supabase.from('user_movies').delete().match({ user_id: session.user.id, movie_id: id, status: 'history' });
+      },
+      
+      trackMovieView: async (movie, source) => {
+        const { session } = useStore.getState();
+        if (session?.user) {
+          await supabase.from('user_activity').insert({
+            user_id: session.user.id,
+            movie_id: movie.id,
+            genres: movie.genre_ids || [],
+            action_type: `viewed_from_${source}`,
+            weight: source === 'search' ? 2 : 1, // Search clicks mean higher intent
+            original_language: movie.original_language || 'en'
+          });
+        }
       },
       
       setThemeMode: (mode) => {

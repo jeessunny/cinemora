@@ -31,31 +31,35 @@ const GENRE_ID_TO_NAME = {
  * 3. Returns the top genres for the user based on behavior.
  * 4. Falls back to their explicitly selected onboarding genres if no activity exists.
  */
-export const getTopGenres = async () => {
+export const getRecommendationData = async () => {
   const { session, selectedGenres } = useStore.getState();
   
   if (!session?.user) {
-    return selectedGenres; // Fallback to onboarding selection if logged out
+    return { topGenres: selectedGenres, topLanguage: 'en' };
   }
 
   const { data: activity, error } = await supabase
     .from('user_activity')
-    .select('genres, weight')
+    .select('genres, weight, original_language')
     .eq('user_id', session.user.id);
 
   if (error || !activity || activity.length === 0) {
-    return selectedGenres;
+    return { topGenres: selectedGenres, topLanguage: 'en' };
   }
 
   // Calculate scores
   const genreScores = {};
+  const languageScores = {};
   
   activity.forEach(row => {
     if (row.genres && Array.isArray(row.genres)) {
       row.genres.forEach(genreId => {
-        const genreName = GENRE_ID_TO_NAME[genreId] || String(genreId); // Sometimes they are strings
+        const genreName = GENRE_ID_TO_NAME[genreId] || String(genreId);
         genreScores[genreName] = (genreScores[genreName] || 0) + row.weight;
       });
+    }
+    if (row.original_language) {
+      languageScores[row.original_language] = (languageScores[row.original_language] || 0) + row.weight;
     }
   });
 
@@ -64,6 +68,12 @@ export const getTopGenres = async () => {
     .sort(([, a], [, b]) => b - a)
     .map(([genre]) => genre);
 
-  // Return the top 3, or fallback to selectedGenres if empty
-  return sortedGenres.length > 0 ? sortedGenres.slice(0, 3) : selectedGenres;
+  const sortedLanguages = Object.entries(languageScores)
+    .sort(([, a], [, b]) => b - a)
+    .map(([lang]) => lang);
+
+  const topGenres = sortedGenres.length > 0 ? sortedGenres.slice(0, 3) : selectedGenres;
+  const topLanguage = sortedLanguages.length > 0 ? sortedLanguages[0] : 'en';
+
+  return { topGenres, topLanguage };
 };

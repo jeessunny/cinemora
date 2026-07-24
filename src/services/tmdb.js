@@ -55,6 +55,8 @@ export const mapMovie = (m) => ({
   rating: Math.round(m.vote_average * 10) / 10,
   runtime: m.runtime ? `${Math.floor(m.runtime / 60)}h ${m.runtime % 60}m` : 'N/A',
   genres: m.genre_ids ? getGenresFromIds(m.genre_ids) : (m.genres ? m.genres.map(g => g.name) : []),
+  genre_ids: m.genre_ids || (m.genres ? m.genres.map(g => g.id) : []),
+  original_language: m.original_language || 'en',
   posterUrl: m.poster_path ? `https://image.tmdb.org/t/p/w342${m.poster_path}` : 'https://via.placeholder.com/342x513?text=No+Poster',
   backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}` : 'https://via.placeholder.com/780x439?text=No+Backdrop',
   synopsis: m.overview || 'No synopsis available.',
@@ -116,9 +118,19 @@ export const getPopular = async () => {
   return data.results.map(mapMovie);
 };
 
-export const getRecommended = async () => {
-  const data = await fetchTMDB('movie/top_rated');
-  return data.results.map(mapMovie);
+export const getRecommended = async (genreIds = [], lang = 'en') => {
+  const params = {};
+  if (lang && lang !== 'en') params.with_original_language = lang;
+  if (genreIds && genreIds.length > 0) params.with_genres = genreIds.join(',');
+  
+  // If no params, default to top_rated
+  if (Object.keys(params).length === 0) {
+    const data = await fetchTMDB('movie/top_rated');
+    return data.results.map(mapMovie);
+  } else {
+    const data = await fetchTMDB('discover/movie', params);
+    return data.results.map(mapMovie);
+  }
 };
 
 export const searchMovies = async (query, type = 'movies') => {
@@ -143,8 +155,10 @@ export const getMovieDetails = async (id, type = 'movie') => {
   };
 };
 
-export const getMoviesByGenreId = async (genreId) => {
-  const data = await fetchTMDB('discover/movie', { with_genres: genreId });
+export const getMoviesByGenreId = async (genreId, lang = 'en') => {
+  const params = { with_genres: genreId };
+  if (lang && lang !== 'en') params.with_original_language = lang;
+  const data = await fetchTMDB('discover/movie', params);
   return data.results.map(mapMovie);
 };
 

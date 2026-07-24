@@ -12,7 +12,7 @@ import {
 import HeroCard from '../components/HeroCard';
 import ScrollRail from '../components/ScrollRail';
 import SearchBar from '../components/SearchBar';
-import { getTopGenres } from '../services/recommendationEngine';
+import { getRecommendationData } from '../services/recommendationEngine';
 
 // Need to map genre name to TMDB genre ID
 const GENRE_NAME_TO_ID = {
@@ -71,11 +71,15 @@ export default function HomeScreen() {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        const topGenres = await getTopGenres();
+        const { topGenres, topLanguage } = await getRecommendationData();
         setAlgoGenres(topGenres);
         
         const g1 = topGenres[0] || selectedGenres[0] || 'Action';
         const g2 = topGenres[1] || selectedGenres[1];
+
+        // For recommendations, pass their top genres so they actually get personalized discover results
+        const g1Id = GENRE_NAME_TO_ID[g1] || 28;
+        const g2Id = g2 ? GENRE_NAME_TO_ID[g2] : null;
 
         const [
           recData,
@@ -85,12 +89,12 @@ export default function HomeScreen() {
           g1Data,
           g2Data
         ] = await Promise.all([
-          getRecommended(),
+          getRecommended([g1Id, g2Id].filter(Boolean), topLanguage),
           getTrending(),
           getNewReleases(),
           getPopular(),
-          getMoviesByGenreId(GENRE_NAME_TO_ID[g1] || 28),
-          g2 ? getMoviesByGenreId(GENRE_NAME_TO_ID[g2]) : Promise.resolve([])
+          getMoviesByGenreId(g1Id, topLanguage),
+          g2Id ? getMoviesByGenreId(g2Id, topLanguage) : Promise.resolve([])
         ]);
 
         const historyIds = new Set(useStore.getState().history.map(m => m.id));
