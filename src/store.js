@@ -35,19 +35,19 @@ const useStore = create(
       navSettingsEnabled: true, // Toggle for Settings tab visibility in NavBar
 
       // === Customization Actions ===
-      hydrateSettings: (profile) => set({
-        userName: profile.user_name || '',
-        avatar: profile.avatar_url || null,
-        themeMode: profile.theme_mode || 'system',
-        accentColor: profile.accent_color || '#E50914',
-        animationsEnabled: profile.animations_enabled !== null ? profile.animations_enabled : true,
-        navSettingsEnabled: profile.nav_settings_enabled !== null ? profile.nav_settings_enabled : true,
-        selectedGenres: profile.selected_genres || [],
-        floatingNavBar: profile.floating_nav_bar !== null ? profile.floating_nav_bar : true,
-        navSearchEnabled: profile.nav_search_enabled !== null ? profile.nav_search_enabled : true,
-        navBarAnimationEnabled: profile.nav_bar_animation_enabled !== null ? profile.nav_bar_animation_enabled : true,
-        homeSections: profile.home_sections || DEFAULT_SECTIONS,
-      }),
+      hydrateSettings: (profile) => set((state) => ({
+        userName: profile.user_name || state.userName,
+        avatar: profile.avatar_url || state.avatar,
+        themeMode: profile.theme_mode || state.themeMode,
+        accentColor: profile.accent_color || state.accentColor,
+        animationsEnabled: profile.animations_enabled !== null ? profile.animations_enabled : state.animationsEnabled,
+        navSettingsEnabled: profile.nav_settings_enabled !== null ? profile.nav_settings_enabled : state.navSettingsEnabled,
+        selectedGenres: (profile.selected_genres && profile.selected_genres.length > 0) ? profile.selected_genres : state.selectedGenres,
+        floatingNavBar: profile.floating_nav_bar !== null ? profile.floating_nav_bar : state.floatingNavBar,
+        navSearchEnabled: profile.nav_search_enabled !== null ? profile.nav_search_enabled : state.navSearchEnabled,
+        navBarAnimationEnabled: profile.nav_bar_animation_enabled !== null ? profile.nav_bar_animation_enabled : state.navBarAnimationEnabled,
+        homeSections: profile.home_sections || state.homeSections,
+      })),
       setAccentColor: (color) => {
         set({ accentColor: color });
         const { session } = useStore.getState();

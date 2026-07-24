@@ -69,7 +69,20 @@ export default function App() {
     // Fetch profile
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (profile) {
-      hydrateSettings(profile);
+      const state = useStore.getState();
+      // If the profile has no selected genres, it means it's a first-time login
+      if (!profile.selected_genres || profile.selected_genres.length === 0) {
+        await supabase.from('profiles').update({
+          user_name: state.userName || profile.user_name,
+          avatar_url: state.avatar || profile.avatar_url,
+          selected_genres: state.selectedGenres
+        }).eq('id', userId);
+        
+        const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+        if (updatedProfile) hydrateSettings(updatedProfile);
+      } else {
+        hydrateSettings(profile);
+      }
     }
     // Fetch saved movies
     const { data: movies } = await supabase.from('user_movies').select('*').eq('user_id', userId);

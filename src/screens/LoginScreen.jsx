@@ -101,6 +101,10 @@ export default function LoginScreen() {
 
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);
+    // Save local selections before redirecting so they persist and can be sent to Supabase in App.jsx
+    setUserName(nameInput);
+    setAvatar(avatarPreview);
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -113,7 +117,7 @@ export default function LoginScreen() {
     }
   };
 
-  const isFormValid = session ? (selectedGenres.length > 0) : false;
+  const isFormValid = selectedGenres.length > 0 && nameInput.trim().length > 0;
 
   const handleSubmit = () => {
     if (isFormValid) {
@@ -214,105 +218,70 @@ export default function LoginScreen() {
         </Typography>
       </Box>
 
-      {(!session && !isEditing) ? (
-        <Box sx={{ width: '100%', mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Button
-            variant="contained"
-            fullWidth
-            size="large"
-            disabled={isLoggingIn}
-            onClick={handleGoogleLogin}
+      {/* Avatar Picker Container */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ position: 'relative' }}>
+          <Avatar 
+            src={avatarPreview || ''} 
             sx={{ 
-              py: 1.8, 
-              borderRadius: '8px', 
-              fontSize: '16px',
-              fontWeight: 700,
-              textTransform: 'none',
+              width: 110, 
+              height: 110, 
               bgcolor: 'surface.surfaceContainerHighest',
-              color: 'text.primary',
-              border: '1px solid',
-              borderColor: 'surface.surfaceContainerHighest',
-              '&:hover': {
-                bgcolor: 'surface.surfaceContainer',
-              }
+              border: '3px solid',
+              borderColor: avatarPreview ? 'primary.main' : 'surface.surfaceContainerHighest',
+              transition: 'border-color 0.3s ease',
             }}
+          />
+          <IconButton 
+            sx={{ 
+              position: 'absolute', 
+              bottom: -4, 
+              right: -4,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              border: '3px solid',
+              borderColor: 'background.default',
+              '&:hover': { bgcolor: 'primary.dark' },
+              width: 36,
+              height: 36,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: 0
+            }}
+            onClick={handleAvatarChange}
           >
-            {isLoggingIn ? 'Connecting...' : 'Continue with Google'}
-          </Button>
-          <Typography variant="bodyMedium" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
-            We'll sync your Watchlist, History, and Favorites to the cloud.
-          </Typography>
+            <Refresh 
+              sx={{ 
+                fontSize: 20, 
+                color: 'primary.contrastText',
+                transition: isSpinning ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+                transform: isSpinning ? 'rotate(360deg)' : 'rotate(0deg)'
+              }} 
+            />
+          </IconButton>
         </Box>
-      ) : (
-        <>
-          {isEditing && (
-            <>
-              {/* Avatar Picker Container (Only in Edit mode) */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-                <Box sx={{ position: 'relative' }}>
-                  <Avatar 
-                    src={avatarPreview || ''} 
-                    sx={{ 
-                      width: 110, 
-                      height: 110, 
-                      bgcolor: 'surface.surfaceContainerHighest',
-                      border: '3px solid',
-                      borderColor: avatarPreview ? 'primary.main' : 'surface.surfaceContainerHighest',
-                      transition: 'border-color 0.3s ease',
-                    }}
-                  />
-                  <IconButton 
-                    sx={{ 
-                      position: 'absolute', 
-                      bottom: -4, 
-                      right: -4,
-                      bgcolor: 'primary.main',
-                      color: 'primary.contrastText',
-                      border: '3px solid',
-                      borderColor: 'background.default',
-                      '&:hover': { bgcolor: 'primary.dark' },
-                      width: 36,
-                      height: 36,
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      p: 0
-                    }}
-                    onClick={handleAvatarChange}
-                  >
-                    <Refresh 
-                      sx={{ 
-                        fontSize: 20, 
-                        color: 'primary.contrastText',
-                        transition: isSpinning ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-                        transform: isSpinning ? 'rotate(360deg)' : 'rotate(0deg)'
-                      }} 
-                    />
-                  </IconButton>
-                </Box>
-                <Typography variant="labelMedium" color="text.secondary" sx={{ mt: 1.5, fontWeight: 600 }}>
-                  Tap the shuffle icon to change your avatar
-                </Typography>
-              </Box>
+        <Typography variant="labelMedium" color="text.secondary" sx={{ mt: 1.5, fontWeight: 600 }}>
+          Tap the shuffle icon to change your avatar
+        </Typography>
+      </Box>
 
-              {/* Text Field with full container width */}
-              <Box sx={{ width: '100%', mb: 4 }}>
-                <TextField
-                  fullWidth
-                  label="What should we call you?"
-                  variant="outlined"
-                  value={nameInput}
-                  onChange={(e) => setNameInput(e.target.value)}
-                  sx={{ 
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                    }
-                  }}
-                />
-              </Box>
-            </>
-          )}
+      {/* Text Field with full container width */}
+      <Box sx={{ width: '100%', mb: 4 }}>
+        <TextField
+          fullWidth
+          label="What should we call you?"
+          variant="outlined"
+          value={nameInput}
+          onChange={(e) => setNameInput(e.target.value)}
+          sx={{ 
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+            }
+          }}
+        />
+      </Box>
 
       {/* Genre selection row */}
       <Box sx={{ width: '100%' }}>
@@ -338,29 +307,54 @@ export default function LoginScreen() {
         </Box>
       </Box>
 
-      <Button
-        variant="contained"
-        fullWidth
-        size="large"
-        disabled={!isFormValid}
-        onClick={handleSubmit}
-        sx={{ 
-          mt: 5, 
-          py: 1.8, 
-          borderRadius: '8px', 
-          fontSize: '16px',
-          fontWeight: 700,
-          textTransform: 'none',
-          bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
-          color: isFormValid ? 'primary.contrastText' : 'action.disabled',
-          '&:hover': {
-            bgcolor: 'primary.dark'
-          }
-        }}
-      >
-        {isEditing ? 'Save Changes' : 'Complete Setup'}
-      </Button>
-      </>
+      {(!session && !isEditing) ? (
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          disabled={!isFormValid || isLoggingIn}
+          onClick={handleGoogleLogin}
+          sx={{ 
+            mt: 5, 
+            py: 1.8, 
+            borderRadius: '8px', 
+            fontSize: '16px',
+            fontWeight: 700,
+            textTransform: 'none',
+            bgcolor: isFormValid ? 'surface.surfaceContainerHighest' : 'action.disabledBackground',
+            color: isFormValid ? 'text.primary' : 'action.disabled',
+            border: '1px solid',
+            borderColor: isFormValid ? 'surface.surfaceContainerHighest' : 'transparent',
+            '&:hover': {
+              bgcolor: 'surface.surfaceContainer',
+            }
+          }}
+        >
+          {isLoggingIn ? 'Connecting...' : 'Sign in with Google to Continue'}
+        </Button>
+      ) : (
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          disabled={!isFormValid}
+          onClick={handleSubmit}
+          sx={{ 
+            mt: 5, 
+            py: 1.8, 
+            borderRadius: '8px', 
+            fontSize: '16px',
+            fontWeight: 700,
+            textTransform: 'none',
+            bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
+            color: isFormValid ? 'primary.contrastText' : 'action.disabled',
+            '&:hover': {
+              bgcolor: 'primary.dark'
+            }
+          }}
+        >
+          {isEditing ? 'Save Changes' : 'Complete Setup'}
+        </Button>
       )}
 
       {/* Discard changes dialog matches Yes/No format */}
