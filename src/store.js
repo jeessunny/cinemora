@@ -43,40 +43,65 @@ const useStore = create(
         animationsEnabled: profile.animations_enabled !== null ? profile.animations_enabled : true,
         navSettingsEnabled: profile.nav_settings_enabled !== null ? profile.nav_settings_enabled : true,
         selectedGenres: profile.selected_genres || [],
+        floatingNavBar: profile.floating_nav_bar !== null ? profile.floating_nav_bar : true,
+        navSearchEnabled: profile.nav_search_enabled !== null ? profile.nav_search_enabled : true,
+        navBarAnimationEnabled: profile.nav_bar_animation_enabled !== null ? profile.nav_bar_animation_enabled : true,
+        homeSections: profile.home_sections || DEFAULT_SECTIONS,
       }),
       setAccentColor: (color) => {
         set({ accentColor: color });
         const { session } = useStore.getState();
         if (session?.user) supabase.from('profiles').update({ accent_color: color }).eq('id', session.user.id);
       },
-      setFloatingNavBar: (val) => set({ floatingNavBar: val }),
+      setFloatingNavBar: (val) => {
+        set({ floatingNavBar: val });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ floating_nav_bar: val }).eq('id', session.user.id);
+      },
       setAnimationsEnabled: (val) => {
         set({ animationsEnabled: val });
         const { session } = useStore.getState();
         if (session?.user) supabase.from('profiles').update({ animations_enabled: val }).eq('id', session.user.id);
       },
-      setNavBarAnimationEnabled: (val) => set({ navBarAnimationEnabled: val }),
-      setNavSearchEnabled: (val) => set({ navSearchEnabled: val }),
+      setNavBarAnimationEnabled: (val) => {
+        set({ navBarAnimationEnabled: val });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ nav_bar_animation_enabled: val }).eq('id', session.user.id);
+      },
+      setNavSearchEnabled: (val) => {
+        set({ navSearchEnabled: val });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ nav_search_enabled: val }).eq('id', session.user.id);
+      },
       setNavSettingsEnabled: (val) => {
         set({ navSettingsEnabled: val });
         const { session } = useStore.getState();
         if (session?.user) supabase.from('profiles').update({ nav_settings_enabled: val }).eq('id', session.user.id);
       },
 
-      toggleHomeSection: (id) => set((state) => ({
-        homeSections: state.homeSections.map(s =>
+      toggleHomeSection: (id) => set((state) => {
+        const newSections = state.homeSections.map(s =>
           s.id === id ? { ...s, enabled: !s.enabled } : s
-        )
-      })),
+        );
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ home_sections: newSections }).eq('id', session.user.id);
+        return { homeSections: newSections };
+      }),
 
       reorderHomeSections: (fromIndex, toIndex) => set((state) => {
         const sections = [...state.homeSections];
         const [moved] = sections.splice(fromIndex, 1);
         sections.splice(toIndex, 0, moved);
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ home_sections: sections }).eq('id', session.user.id);
         return { homeSections: sections };
       }),
 
-      resetHomeSections: () => set({ homeSections: DEFAULT_SECTIONS }),
+      resetHomeSections: () => {
+        set({ homeSections: DEFAULT_SECTIONS });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ home_sections: DEFAULT_SECTIONS }).eq('id', session.user.id);
+      },
 
       // === Existing Actions ===
       setSession: (session) => set({ session }),
