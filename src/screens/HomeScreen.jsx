@@ -93,16 +93,20 @@ export default function HomeScreen() {
           g2 ? getMoviesByGenreId(GENRE_NAME_TO_ID[g2]) : Promise.resolve([])
         ]);
 
-        setRecommended(recData);
-        setTrending(trendData);
-        setNewReleases(newRelData);
-        setPopular(popData);
-        setGenre1Movies(g1Data);
-        setGenre2Movies(g2Data);
+        const historyIds = new Set(useStore.getState().history.map(m => m.id));
+        const filterHistory = (movies) => movies.filter(m => !historyIds.has(m.id));
 
-        if (recData.length > 0) {
-          const randomIndex = Math.floor(Math.random() * recData.length);
-          setHeroMovie(recData[randomIndex]);
+        setRecommended(filterHistory(recData));
+        setTrending(filterHistory(trendData));
+        setNewReleases(filterHistory(newRelData));
+        setPopular(filterHistory(popData));
+        setGenre1Movies(filterHistory(g1Data));
+        setGenre2Movies(filterHistory(g2Data));
+        
+        // Pick a hero movie from trending that hasn't been watched
+        const validTrending = filterHistory(trendData);
+        if (validTrending.length > 0) {
+          setHeroMovie(validTrending[Math.floor(Math.random() * validTrending.length)]);
         }
       } catch (err) {
         console.error('Error fetching TMDB data:', err);
