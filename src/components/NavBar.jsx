@@ -9,6 +9,7 @@ export default function NavBar() {
   const location = useLocation();
   const floatingNavBar = useStore(state => state.floatingNavBar);
   const animationsEnabled = useStore(state => state.animationsEnabled);
+  const navBarAnimationEnabled = useStore(state => state.navBarAnimationEnabled);
   const navSearchEnabled = useStore(state => state.navSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
 
@@ -94,14 +95,14 @@ export default function NavBar() {
           label="Home" 
           value="home"
           icon={<HomeRounded />} 
-          disableRipple
+          disableRipple={!navBarAnimationEnabled}
           onClick={() => navigate('/home')}
         />
         <BottomNavigationAction 
           label="Search" 
           value="search"
           icon={<SearchRounded />} 
-          disableRipple
+          disableRipple={!navBarAnimationEnabled}
           onClick={() => navigate('/search')}
           sx={{
             flex: navSearchEnabled ? 1 : 0,
@@ -117,14 +118,14 @@ export default function NavBar() {
           label="Saved" 
           value="saved"
           icon={<BookmarkRounded />} 
-          disableRipple
+          disableRipple={!navBarAnimationEnabled}
           onClick={() => navigate('/saved')}
         />
         <BottomNavigationAction 
           label="Settings" 
           value="settings"
           icon={<SettingsRounded />} 
-          disableRipple
+          disableRipple={!navBarAnimationEnabled}
           onClick={() => navigate('/settings')}
           sx={{
             flex: navSettingsEnabled ? 1 : 0,
