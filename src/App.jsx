@@ -75,7 +75,14 @@ export default function App() {
         await supabase.from('profiles').update({
           user_name: state.userName || profile.user_name,
           avatar_url: state.avatar || profile.avatar_url,
-          selected_genres: state.selectedGenres
+          selected_genres: state.selectedGenres,
+          theme_mode: state.themeMode,
+          accent_color: state.accentColor,
+          animations_enabled: state.animationsEnabled,
+          nav_settings_enabled: state.navSettingsEnabled,
+          floating_nav_bar: state.floatingNavBar,
+          nav_search_enabled: state.navSearchEnabled,
+          home_sections: state.homeSections
         }).eq('id', userId);
         
         const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', userId).single();
