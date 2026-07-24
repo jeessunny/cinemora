@@ -4,6 +4,7 @@ import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 import { genres } from '../data/mockData';
+import { supabase } from '../services/supabaseClient';
 import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
 
@@ -17,6 +18,7 @@ export default function LoginScreen() {
   const selectedGenres = useStore(state => state.selectedGenres);
   const setOnboarded = useStore(state => state.setOnboarded);
   const isOnboarded = useStore(state => state.isOnboarded);
+  const session = useStore(state => state.session);
   const storeAvatar = useStore(state => state.avatar);
   const storeUserName = useStore(state => state.userName);
   
@@ -25,6 +27,7 @@ export default function LoginScreen() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [initialGenres, setInitialGenres] = useState([]);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Check router navigation state to determine if user arrived via settings profile edit click
   const isEditing = location.state?.fromSettings === true;
@@ -96,12 +99,25 @@ export default function LoginScreen() {
     }, 600);
   };
 
-  const isFormValid = nameInput.trim() !== '' && avatarPreview !== null && selectedGenres.length > 0;
+  const handleGoogleLogin = async () => {
+    setIsLoggingIn(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) {
+      console.error(error);
+      setIsLoggingIn(false);
+    }
+  };
+
+  const isFormValid = session ? (selectedGenres.length > 0) : false;
 
   const handleSubmit = () => {
     if (isFormValid) {
-      setUserName(nameInput.trim());
-      setAvatar(avatarPreview);
+      // Name and avatar are handled by App.jsx fetching the profile
       setOnboarded(true);
       navigate('/home');
     }
@@ -198,70 +214,105 @@ export default function LoginScreen() {
         </Typography>
       </Box>
 
-      {/* Avatar Picker Container */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-        <Box sx={{ position: 'relative' }}>
-          <Avatar 
-            src={avatarPreview || ''} 
+      {(!session && !isEditing) ? (
+        <Box sx={{ width: '100%', mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Button
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={isLoggingIn}
+            onClick={handleGoogleLogin}
             sx={{ 
-              width: 110, 
-              height: 110, 
+              py: 1.8, 
+              borderRadius: '8px', 
+              fontSize: '16px',
+              fontWeight: 700,
+              textTransform: 'none',
               bgcolor: 'surface.surfaceContainerHighest',
-              border: '3px solid',
-              borderColor: avatarPreview ? 'primary.main' : 'surface.surfaceContainerHighest',
-              transition: 'border-color 0.3s ease',
+              color: 'text.primary',
+              border: '1px solid',
+              borderColor: 'surface.surfaceContainerHighest',
+              '&:hover': {
+                bgcolor: 'surface.surfaceContainer',
+              }
             }}
-          />
-          <IconButton 
-            sx={{ 
-              position: 'absolute', 
-              bottom: -4, 
-              right: -4,
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
-              border: '3px solid',
-              borderColor: 'background.default',
-              '&:hover': { bgcolor: 'primary.dark' },
-              width: 36,
-              height: 36,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: 0
-            }}
-            onClick={handleAvatarChange}
           >
-            <Refresh 
-              sx={{ 
-                fontSize: 20, 
-                color: 'primary.contrastText',
-                transition: isSpinning ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-                transform: isSpinning ? 'rotate(360deg)' : 'rotate(0deg)'
-              }} 
-            />
-          </IconButton>
+            {isLoggingIn ? 'Connecting...' : 'Continue with Google'}
+          </Button>
+          <Typography variant="bodyMedium" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
+            We'll sync your Watchlist, History, and Favorites to the cloud.
+          </Typography>
         </Box>
-        <Typography variant="labelMedium" color="text.secondary" sx={{ mt: 1.5, fontWeight: 600 }}>
-          Tap the shuffle icon to change your avatar
-        </Typography>
-      </Box>
+      ) : (
+        <>
+          {isEditing && (
+            <>
+              {/* Avatar Picker Container (Only in Edit mode) */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+                <Box sx={{ position: 'relative' }}>
+                  <Avatar 
+                    src={avatarPreview || ''} 
+                    sx={{ 
+                      width: 110, 
+                      height: 110, 
+                      bgcolor: 'surface.surfaceContainerHighest',
+                      border: '3px solid',
+                      borderColor: avatarPreview ? 'primary.main' : 'surface.surfaceContainerHighest',
+                      transition: 'border-color 0.3s ease',
+                    }}
+                  />
+                  <IconButton 
+                    sx={{ 
+                      position: 'absolute', 
+                      bottom: -4, 
+                      right: -4,
+                      bgcolor: 'primary.main',
+                      color: 'primary.contrastText',
+                      border: '3px solid',
+                      borderColor: 'background.default',
+                      '&:hover': { bgcolor: 'primary.dark' },
+                      width: 36,
+                      height: 36,
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      p: 0
+                    }}
+                    onClick={handleAvatarChange}
+                  >
+                    <Refresh 
+                      sx={{ 
+                        fontSize: 20, 
+                        color: 'primary.contrastText',
+                        transition: isSpinning ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+                        transform: isSpinning ? 'rotate(360deg)' : 'rotate(0deg)'
+                      }} 
+                    />
+                  </IconButton>
+                </Box>
+                <Typography variant="labelMedium" color="text.secondary" sx={{ mt: 1.5, fontWeight: 600 }}>
+                  Tap the shuffle icon to change your avatar
+                </Typography>
+              </Box>
 
-      {/* Text Field with full container width */}
-      <Box sx={{ width: '100%', mb: 4 }}>
-        <TextField
-          fullWidth
-          label="What should we call you?"
-          variant="outlined"
-          value={nameInput}
-          onChange={(e) => setNameInput(e.target.value)}
-          sx={{ 
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            }
-          }}
-        />
-      </Box>
+              {/* Text Field with full container width */}
+              <Box sx={{ width: '100%', mb: 4 }}>
+                <TextField
+                  fullWidth
+                  label="What should we call you?"
+                  variant="outlined"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    }
+                  }}
+                />
+              </Box>
+            </>
+          )}
 
       {/* Genre selection row */}
       <Box sx={{ width: '100%' }}>
@@ -307,8 +358,10 @@ export default function LoginScreen() {
           }
         }}
       >
-        {isEditing ? 'Save Changes' : 'Get Started'}
+        {isEditing ? 'Save Changes' : 'Complete Setup'}
       </Button>
+      </>
+      )}
 
       {/* Discard changes dialog matches Yes/No format */}
       <ConfirmDialog

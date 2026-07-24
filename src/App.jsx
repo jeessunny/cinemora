@@ -5,6 +5,7 @@ import { getTheme } from './theme';
 import useStore from './store';
 import NavBar from './components/NavBar';
 import { Analytics } from '@vercel/analytics/react';
+import { supabase } from './services/supabaseClient';
 
 // Lazy-loaded screens — each is a separate JS chunk loaded on demand
 const LoginScreen = lazy(() => import('./screens/LoginScreen'));
@@ -60,6 +61,41 @@ const Layout = ({ children }) => {
 export default function App() {
   const themeMode = useStore(state => state.themeMode);
   const accentColor = useStore(state => state.accentColor);
+  const setSession = useStore(state => state.setSession);
+  const setUserName = useStore(state => state.setUserName);
+  const setAvatar = useStore(state => state.setAvatar);
+  const setHydratedMovies = useStore(state => state.setHydratedMovies);
+  
+  const fetchUserData = async (userId) => {
+    // Fetch profile
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (profile) {
+      if (profile.user_name) setUserName(profile.user_name);
+      if (profile.avatar_url) setAvatar(profile.avatar_url);
+    }
+    // Fetch saved movies
+    const { data: movies } = await supabase.from('user_movies').select('*').eq('user_id', userId);
+    if (movies) {
+      setHydratedMovies(movies);
+    }
+  };
+
+  // Auth listener
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) fetchUserData(session.user.id);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session?.user) fetchUserData(session.user.id);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   
   // State to hold active resolved theme mode
   const [resolvedMode, setResolvedMode] = useState('dark');

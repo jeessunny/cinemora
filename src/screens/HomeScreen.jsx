@@ -12,6 +12,7 @@ import {
 import HeroCard from '../components/HeroCard';
 import ScrollRail from '../components/ScrollRail';
 import SearchBar from '../components/SearchBar';
+import { getTopGenres } from '../services/recommendationEngine';
 
 // Need to map genre name to TMDB genre ID
 const GENRE_NAME_TO_ID = {
@@ -62,13 +63,20 @@ export default function HomeScreen() {
     return 'Good evening';
   };
 
-  const firstGenre = selectedGenres[0] || 'Action';
-  const secondGenre = selectedGenres[1];
+  const [algoGenres, setAlgoGenres] = useState([]);
+  const firstGenre = algoGenres[0] || selectedGenres[0] || 'Action';
+  const secondGenre = algoGenres[1] || selectedGenres[1];
 
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
+        const topGenres = await getTopGenres();
+        setAlgoGenres(topGenres);
+        
+        const g1 = topGenres[0] || selectedGenres[0] || 'Action';
+        const g2 = topGenres[1] || selectedGenres[1];
+
         const [
           recData,
           trendData,
@@ -81,8 +89,8 @@ export default function HomeScreen() {
           getTrending(),
           getNewReleases(),
           getPopular(),
-          getMoviesByGenreId(GENRE_NAME_TO_ID[firstGenre] || 28),
-          secondGenre ? getMoviesByGenreId(GENRE_NAME_TO_ID[secondGenre]) : Promise.resolve([])
+          getMoviesByGenreId(GENRE_NAME_TO_ID[g1] || 28),
+          g2 ? getMoviesByGenreId(GENRE_NAME_TO_ID[g2]) : Promise.resolve([])
         ]);
 
         setRecommended(recData);

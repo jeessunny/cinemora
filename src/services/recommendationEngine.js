@@ -1,0 +1,69 @@
+import { supabase } from './supabaseClient';
+import useStore from '../store';
+
+// Maps genre IDs to names (TMDB mapping)
+const GENRE_ID_TO_NAME = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Sci-Fi",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western"
+};
+
+/**
+ * Custom Recommendation Algorithm
+ * 1. Fetches all user activity (views, favorites, history).
+ * 2. Tallies the weights per genre.
+ * 3. Returns the top genres for the user based on behavior.
+ * 4. Falls back to their explicitly selected onboarding genres if no activity exists.
+ */
+export const getTopGenres = async () => {
+  const { session, selectedGenres } = useStore.getState();
+  
+  if (!session?.user) {
+    return selectedGenres; // Fallback to onboarding selection if logged out
+  }
+
+  const { data: activity, error } = await supabase
+    .from('user_activity')
+    .select('genres, weight')
+    .eq('user_id', session.user.id);
+
+  if (error || !activity || activity.length === 0) {
+    return selectedGenres;
+  }
+
+  // Calculate scores
+  const genreScores = {};
+  
+  activity.forEach(row => {
+    if (row.genres && Array.isArray(row.genres)) {
+      row.genres.forEach(genreId => {
+        const genreName = GENRE_ID_TO_NAME[genreId] || String(genreId); // Sometimes they are strings
+        genreScores[genreName] = (genreScores[genreName] || 0) + row.weight;
+      });
+    }
+  });
+
+  // Sort by highest score
+  const sortedGenres = Object.entries(genreScores)
+    .sort(([, a], [, b]) => b - a)
+    .map(([genre]) => genre);
+
+  // Return the top 3, or fallback to selectedGenres if empty
+  return sortedGenres.length > 0 ? sortedGenres.slice(0, 3) : selectedGenres;
+};
