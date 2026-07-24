@@ -6,9 +6,10 @@ import {
 import { 
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
-  Animation, ViewDay, Search, Settings
+  Animation, ViewDay, Search, Settings, Logout, DeleteForever
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../services/supabaseClient';
 import {
   DndContext,
   closestCenter,
@@ -145,6 +146,25 @@ export default function SettingsScreen() {
     navigate('/');
   };
 
+  const handleLogOut = async () => {
+    await supabase.auth.signOut();
+    useStore.getState().setSession(null);
+    useStore.getState().setOnboarded(false);
+    navigate('/');
+  };
+
+  const handleDeleteAccount = async () => {
+    // Delete profile data (cascades or cleans up most data)
+    const { session } = useStore.getState();
+    if (session?.user) {
+      await supabase.from('profiles').delete().eq('id', session.user.id);
+      await supabase.auth.signOut();
+    }
+    useStore.getState().setSession(null);
+    useStore.getState().setOnboarded(false);
+    navigate('/');
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -198,7 +218,7 @@ export default function SettingsScreen() {
       }}>
         <Avatar 
           src={avatar || ''} 
-          sx={{ width: 72, height: 72, border: '2px solid', borderColor: 'primary.main', flexShrink: 0 }} 
+          sx={{ width: 72, height: 72, flexShrink: 0 }} 
         />
         <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0, flex: 1 }}>
           <Typography variant="titleMedium" fontWeight={800} color="text.primary"
@@ -206,14 +226,16 @@ export default function SettingsScreen() {
             {userName || 'Movie Lover'}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
-            <Typography variant="bodySmall" color="text.secondary" sx={{ fontWeight: 500 }}>
-              {selectedGenres.length} genre{selectedGenres.length !== 1 ? 's' : ''} selected
-            </Typography>
-            <Typography variant="bodySmall" color="text.secondary" sx={{ opacity: 0.5 }}>•</Typography>
             <Typography variant="bodySmall" color="primary.main"
               onClick={() => navigate('/', { state: { fromSettings: true } })}
               sx={{ cursor: 'pointer', fontWeight: 700, '&:hover': { textDecoration: 'underline' } }}>
               Edit Profile
+            </Typography>
+            <Typography variant="bodySmall" color="text.secondary" sx={{ opacity: 0.5 }}>•</Typography>
+            <Typography variant="bodySmall" color="error.main"
+              onClick={handleLogOut}
+              sx={{ cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 0.5, '&:hover': { textDecoration: 'underline' } }}>
+              <Logout sx={{ fontSize: 14 }} /> Log Out
             </Typography>
           </Box>
         </Box>
@@ -369,6 +391,13 @@ export default function SettingsScreen() {
           <ListItemIcon sx={{ minWidth: 40 }}><RestartAlt color="error" /></ListItemIcon>
           <ListItemText primary="Reset Recommendations" primaryTypographyProps={{ color: 'error', fontWeight: 600 }} />
         </ListItemButton>
+        
+        <Divider />
+        
+        <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('delete')}>
+          <ListItemIcon sx={{ minWidth: 40 }}><DeleteForever color="error" /></ListItemIcon>
+          <ListItemText primary="Delete Account" primaryTypographyProps={{ color: 'error', fontWeight: 600 }} />
+        </ListItemButton>
       </List>
 
       <Typography variant="labelMedium" color="text.secondary" align="center" 
@@ -391,6 +420,15 @@ export default function SettingsScreen() {
         onConfirm={handleResetRecommendations}
         onCancel={() => setConfirmDialog(null)}
         confirmText="Reset"
+      />
+
+      <ConfirmDialog
+        open={confirmDialog === 'delete'}
+        title="Delete Account?"
+        content="This will permanently delete all your data, including watch history, favorites, and profile. This action cannot be undone."
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setConfirmDialog(null)}
+        confirmText="Delete"
       />
     </Box>
   );
