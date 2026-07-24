@@ -35,12 +35,33 @@ const useStore = create(
       navSettingsEnabled: true, // Toggle for Settings tab visibility in NavBar
 
       // === Customization Actions ===
-      setAccentColor: (color) => set({ accentColor: color }),
+      hydrateSettings: (profile) => set({
+        userName: profile.user_name || '',
+        avatar: profile.avatar_url || null,
+        themeMode: profile.theme_mode || 'system',
+        accentColor: profile.accent_color || '#E50914',
+        animationsEnabled: profile.animations_enabled !== null ? profile.animations_enabled : true,
+        navSettingsEnabled: profile.nav_settings_enabled !== null ? profile.nav_settings_enabled : true,
+        selectedGenres: profile.selected_genres || [],
+      }),
+      setAccentColor: (color) => {
+        set({ accentColor: color });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ accent_color: color }).eq('id', session.user.id);
+      },
       setFloatingNavBar: (val) => set({ floatingNavBar: val }),
-      setAnimationsEnabled: (val) => set({ animationsEnabled: val }),
+      setAnimationsEnabled: (val) => {
+        set({ animationsEnabled: val });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ animations_enabled: val }).eq('id', session.user.id);
+      },
       setNavBarAnimationEnabled: (val) => set({ navBarAnimationEnabled: val }),
       setNavSearchEnabled: (val) => set({ navSearchEnabled: val }),
-      setNavSettingsEnabled: (val) => set({ navSettingsEnabled: val }),
+      setNavSettingsEnabled: (val) => {
+        set({ navSettingsEnabled: val });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ nav_settings_enabled: val }).eq('id', session.user.id);
+      },
 
       toggleHomeSection: (id) => set((state) => ({
         homeSections: state.homeSections.map(s =>
@@ -64,13 +85,27 @@ const useStore = create(
         favorites: movies.filter(m => m.status === 'favorite').map(m => m.movie_data),
         history: movies.filter(m => m.status === 'history').map(m => m.movie_data)
       }),
-      setAvatar: (url) => set({ avatar: url }),
-      setUserName: (name) => set({ userName: name }),
-      toggleGenre: (genre) => set((state) => ({
-        selectedGenres: state.selectedGenres.includes(genre)
+      setAvatar: (url) => {
+        set({ avatar: url });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ avatar_url: url }).eq('id', session.user.id);
+      },
+      setUserName: (name) => {
+        set({ userName: name });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ user_name: name }).eq('id', session.user.id);
+      },
+      toggleGenre: (genre) => set((state) => {
+        const newGenres = state.selectedGenres.includes(genre)
           ? state.selectedGenres.filter((g) => g !== genre)
-          : [...state.selectedGenres, genre],
-      })),
+          : [...state.selectedGenres, genre];
+        
+        const { session } = useStore.getState();
+        if (session?.user) {
+          supabase.from('profiles').update({ selected_genres: newGenres }).eq('id', session.user.id);
+        }
+        return { selectedGenres: newGenres };
+      }),
       
       addToWatchlist: async (movie) => {
         set((state) => ({
@@ -126,7 +161,11 @@ const useStore = create(
         if (session?.user) await supabase.from('user_movies').delete().match({ user_id: session.user.id, movie_id: id, status: 'history' });
       },
       
-      setThemeMode: (mode) => set({ themeMode: mode }), // Solid theme setting (light, dark, system)
+      setThemeMode: (mode) => {
+        set({ themeMode: mode });
+        const { session } = useStore.getState();
+        if (session?.user) supabase.from('profiles').update({ theme_mode: mode }).eq('id', session.user.id);
+      },
       setOnboarded: (status) => set({ isOnboarded: status }),
       
       addRecentSearch: (query) => set((state) => ({
