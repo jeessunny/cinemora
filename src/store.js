@@ -30,7 +30,6 @@ const useStore = create(
       floatingNavBar: true, // true = floating pill, false = fixed bottom
       homeSections: DEFAULT_SECTIONS,
       animationsEnabled: true, // Master toggle for all animations
-      navBarAnimationEnabled: true, // Toggle for just navbar water ripple
       navSearchEnabled: true, // Toggle for Search tab visibility in NavBar
       navSettingsEnabled: true, // Toggle for Settings tab visibility in NavBar
 
@@ -45,7 +44,6 @@ const useStore = create(
         selectedGenres: (profile.selected_genres && profile.selected_genres.length > 0) ? profile.selected_genres : state.selectedGenres,
         floatingNavBar: profile.floating_nav_bar !== null ? profile.floating_nav_bar : state.floatingNavBar,
         navSearchEnabled: profile.nav_search_enabled !== null ? profile.nav_search_enabled : state.navSearchEnabled,
-        navBarAnimationEnabled: profile.nav_bar_animation_enabled !== null ? profile.nav_bar_animation_enabled : state.navBarAnimationEnabled,
         homeSections: profile.home_sections || state.homeSections,
       })),
       setAccentColor: (color) => {
@@ -62,11 +60,6 @@ const useStore = create(
         set({ animationsEnabled: val });
         const { session } = useStore.getState();
         if (session?.user) supabase.from('profiles').update({ animations_enabled: val }).eq('id', session.user.id);
-      },
-      setNavBarAnimationEnabled: (val) => {
-        set({ navBarAnimationEnabled: val });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ nav_bar_animation_enabled: val }).eq('id', session.user.id);
       },
       setNavSearchEnabled: (val) => {
         set({ navSearchEnabled: val });
