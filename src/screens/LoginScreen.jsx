@@ -224,13 +224,13 @@ export default function LoginScreen() {
       </Box>
 
       {/* Avatar Picker Container */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
         <Box sx={{ position: 'relative' }}>
           <Avatar 
             src={avatarPreview || ''} 
             sx={{ 
-              width: 110, 
-              height: 110, 
+              width: 90, 
+              height: 90, 
               bgcolor: 'surface.surfaceContainerHighest',
             }}
           />
@@ -264,13 +264,13 @@ export default function LoginScreen() {
             />
           </IconButton>
         </Box>
-        <Typography variant="labelMedium" color="text.secondary" sx={{ mt: 1.5, fontWeight: 600 }}>
+        <Typography variant="labelMedium" color="text.secondary" sx={{ mt: 1, fontWeight: 600 }}>
           Tap the shuffle icon to change your avatar
         </Typography>
       </Box>
 
       {/* Text Field with full container width */}
-      <Box sx={{ width: '100%', mb: 4 }}>
+      <Box sx={{ width: '100%', mb: 2.5 }}>
         <TextField
           fullWidth
           label="What should we call you?"
@@ -310,7 +310,7 @@ export default function LoginScreen() {
       </Box>
 
       {(!session && !isEditing) ? (
-        <Box sx={{ mt: 5, width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ mt: 'auto', pt: 2, width: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Button
             variant="contained"
             fullWidth
@@ -318,7 +318,7 @@ export default function LoginScreen() {
             disabled={!isFormValid || isLoggingIn}
             onClick={handleGoogleLogin}
             sx={{ 
-              py: 1.8, 
+              py: 1.6, 
               borderRadius: '8px', 
               fontSize: '16px',
               fontWeight: 700,
@@ -336,15 +336,21 @@ export default function LoginScreen() {
           </Button>
 
           <Button
-            variant="text"
+            variant="contained"
             fullWidth
             onClick={handleGoogleLogin}
             disabled={isLoggingIn}
             sx={{ 
-              color: 'primary.main', 
+              py: 1.6, 
+              borderRadius: '8px', 
+              fontSize: '16px',
               fontWeight: 700,
               textTransform: 'none',
-              fontSize: '15px'
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              }
             }}
           >
             Log in to existing account
@@ -358,8 +364,8 @@ export default function LoginScreen() {
           disabled={!isFormValid}
           onClick={handleSubmit}
           sx={{ 
-            mt: 5, 
-            py: 1.8, 
+            mt: 'auto', 
+            py: 1.6, 
             borderRadius: '8px', 
             fontSize: '16px',
             fontWeight: 700,
