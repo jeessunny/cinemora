@@ -218,8 +218,6 @@ export default function HomeScreen() {
             cursor: 'pointer', 
             width: 48, 
             height: 48,
-            border: '2px solid',
-            borderColor: 'primary.main',
             boxShadow: 'none',
             flexShrink: 0,
             transition: 'transform 0.2s',

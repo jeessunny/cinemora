@@ -308,30 +308,46 @@ export default function LoginScreen() {
       </Box>
 
       {(!session && !isEditing) ? (
-        <Button
-          variant="contained"
-          fullWidth
-          size="large"
-          disabled={!isFormValid || isLoggingIn}
-          onClick={handleGoogleLogin}
-          sx={{ 
-            mt: 5, 
-            py: 1.8, 
-            borderRadius: '8px', 
-            fontSize: '16px',
-            fontWeight: 700,
-            textTransform: 'none',
-            bgcolor: isFormValid ? 'surface.surfaceContainerHighest' : 'action.disabledBackground',
-            color: isFormValid ? 'text.primary' : 'action.disabled',
-            border: '1px solid',
-            borderColor: isFormValid ? 'surface.surfaceContainerHighest' : 'transparent',
-            '&:hover': {
-              bgcolor: 'surface.surfaceContainer',
-            }
-          }}
-        >
-          {isLoggingIn ? 'Connecting...' : 'Sign in with Google to Continue'}
-        </Button>
+        <Box sx={{ mt: 5, width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={!isFormValid || isLoggingIn}
+            onClick={handleGoogleLogin}
+            sx={{ 
+              py: 1.8, 
+              borderRadius: '8px', 
+              fontSize: '16px',
+              fontWeight: 700,
+              textTransform: 'none',
+              bgcolor: isFormValid ? 'surface.surfaceContainerHighest' : 'action.disabledBackground',
+              color: isFormValid ? 'text.primary' : 'action.disabled',
+              border: '1px solid',
+              borderColor: isFormValid ? 'surface.surfaceContainerHighest' : 'transparent',
+              '&:hover': {
+                bgcolor: 'surface.surfaceContainer',
+              }
+            }}
+          >
+            {isLoggingIn ? 'Connecting...' : 'Create Account with Google'}
+          </Button>
+
+          <Button
+            variant="text"
+            fullWidth
+            onClick={handleGoogleLogin}
+            disabled={isLoggingIn}
+            sx={{ 
+              color: 'primary.main', 
+              fontWeight: 700,
+              textTransform: 'none',
+              fontSize: '15px'
+            }}
+          >
+            Log in to existing account
+          </Button>
+        </Box>
       ) : (
         <Button
           variant="contained"
