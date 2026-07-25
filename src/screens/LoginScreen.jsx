@@ -4,31 +4,13 @@ import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 import { supabase } from '../services/supabaseClient';
+import { getSupportedLanguages } from '../services/tmdb';
 import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 const genres = [
   'Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller',
   'Romance', 'Animation', 'Documentary', 'Fantasy', 'Mystery', 'Adventure'
-];
-
-const languages = [
-  { label: 'English', value: 'en' }, { label: 'Spanish', value: 'es' },
-  { label: 'Hindi', value: 'hi' }, { label: 'Korean', value: 'ko' },
-  { label: 'Japanese', value: 'ja' }, { label: 'French', value: 'fr' },
-  { label: 'German', value: 'de' }, { label: 'Italian', value: 'it' },
-  { label: 'Arabic', value: 'ar' }, { label: 'Portuguese', value: 'pt' },
-  { label: 'Russian', value: 'ru' }, { label: 'Chinese', value: 'zh' },
-  { label: 'Bengali', value: 'bn' }, { label: 'Urdu', value: 'ur' },
-  { label: 'Indonesian', value: 'id' }, { label: 'Telugu', value: 'te' },
-  { label: 'Marathi', value: 'mr' }, { label: 'Tamil', value: 'ta' },
-  { label: 'Turkish', value: 'tr' }, { label: 'Vietnamese', value: 'vi' },
-  { label: 'Polish', value: 'pl' }, { label: 'Dutch', value: 'nl' },
-  { label: 'Thai', value: 'th' }, { label: 'Swedish', value: 'sv' },
-  { label: 'Greek', value: 'el' }, { label: 'Czech', value: 'cs' },
-  { label: 'Danish', value: 'da' }, { label: 'Finnish', value: 'fi' },
-  { label: 'Hungarian', value: 'hu' }, { label: 'Norwegian', value: 'no' },
-  { label: 'Romanian', value: 'ro' }
 ];
 
 export default function LoginScreen() {
@@ -53,6 +35,18 @@ export default function LoginScreen() {
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [initialGenres, setInitialGenres] = useState([]);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [tmdbLanguages, setTmdbLanguages] = useState([]);
+
+  // Fetch languages on mount
+  useEffect(() => {
+    const fetchLangs = async () => {
+      const langs = await getSupportedLanguages();
+      if (langs && langs.length > 0) {
+        setTmdbLanguages(langs);
+      }
+    };
+    fetchLangs();
+  }, []);
 
   // Check router navigation state to determine if user arrived via settings profile edit click
   const isEditing = location.state?.fromSettings === true;
@@ -352,9 +346,9 @@ export default function LoginScreen() {
           multiple
           limitTags={3}
           id="language-tags"
-          options={languages}
-          getOptionLabel={(option) => option.label}
-          value={languages.filter(l => selectedLanguages.includes(l.value))}
+          options={tmdbLanguages}
+          getOptionLabel={(option) => option.label || ''}
+          value={tmdbLanguages.filter(l => selectedLanguages.includes(l.value))}
           onChange={(event, newValue) => {
             if (newValue.length <= 3) {
               setSelectedLanguages(newValue.map(n => n.value));
