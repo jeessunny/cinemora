@@ -50,34 +50,6 @@ export default defineConfig(({ mode }) => {
         clientsClaim: true,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/picsum\.photos\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'picsum-image-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/api\.dicebear\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'avatar-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {
@@ -92,20 +64,6 @@ export default defineConfig(({ mode }) => {
               expiration: {
                 maxEntries: 30,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/image\.tmdb\.org\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'tmdb-image-cache',
-              expiration: {
-                maxEntries: 300,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
               cacheableResponse: {
                 statuses: [0, 200],
