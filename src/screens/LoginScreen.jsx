@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Avatar, Button, IconButton } from '@mui/mat
 import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
-import { genres } from '../data/mockData';
+import { genres, languages } from '../data/mockData';
 import { supabase } from '../services/supabaseClient';
 import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -16,6 +16,8 @@ export default function LoginScreen() {
   const setAvatar = useStore(state => state.setAvatar);
   const toggleGenre = useStore(state => state.toggleGenre);
   const selectedGenres = useStore(state => state.selectedGenres);
+  const toggleLanguage = useStore(state => state.toggleLanguage);
+  const selectedLanguages = useStore(state => state.selectedLanguages);
   const setOnboarded = useStore(state => state.setOnboarded);
   const isOnboarded = useStore(state => state.isOnboarded);
   const session = useStore(state => state.session);
@@ -286,12 +288,12 @@ export default function LoginScreen() {
       </Box>
 
       {/* Genre selection row */}
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%', mb: 2.5 }}>
         <Typography 
           variant="titleMedium" 
           fontWeight={800} 
           sx={{ 
-            mb: 2, 
+            mb: 1.5, 
             textAlign: 'center', 
             width: '100%', 
             display: 'block' 
@@ -299,13 +301,64 @@ export default function LoginScreen() {
         >
           Select your favorite genres
         </Typography>
-        <Box sx={{ mb: 'auto' }}>
+        <Box>
           <GenreChips 
             genres={genres}
             selected={selectedGenres}
             onChange={toggleGenre}
             wrap
           />
+        </Box>
+      </Box>
+
+      {/* Language selection row */}
+      <Box sx={{ width: '100%', mb: 'auto' }}>
+        <Typography 
+          variant="titleMedium" 
+          fontWeight={800} 
+          sx={{ 
+            mb: 1.5, 
+            textAlign: 'center', 
+            width: '100%', 
+            display: 'block' 
+          }}
+        >
+          Favorite languages <Typography component="span" variant="labelMedium" color="text.secondary">(Max 3)</Typography>
+        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 1.2, 
+          flexWrap: 'wrap',
+          pb: 1.5,
+        }}>
+          {languages.map((lang) => {
+            const isSelected = selectedLanguages.includes(lang.value);
+            return (
+              <Button
+                key={lang.value}
+                onClick={() => toggleLanguage(lang.value)}
+                sx={{
+                  borderRadius: '6px',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  minWidth: 0,
+                  px: 2,
+                  py: 1,
+                  textTransform: 'none',
+                  bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainer',
+                  color: isSelected ? 'primary.contrastText' : 'text.primary',
+                  border: '1px solid',
+                  borderColor: isSelected ? 'primary.main' : 'divider',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainerHigh',
+                  }
+                }}
+              >
+                {lang.label}
+              </Button>
+            );
+          })}
         </Box>
       </Box>
 

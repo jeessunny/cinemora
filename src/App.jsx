@@ -76,6 +76,7 @@ export default function App() {
           user_name: state.userName || profile.user_name,
           avatar_url: state.avatar || profile.avatar_url,
           selected_genres: state.selectedGenres,
+          selected_languages: state.selectedLanguages,
           theme_mode: state.themeMode,
           accent_color: state.accentColor,
           animations_enabled: state.animationsEnabled,
@@ -86,9 +87,15 @@ export default function App() {
         }).eq('id', userId);
         
         const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-        if (updatedProfile) hydrateSettings(updatedProfile);
+        if (updatedProfile) {
+          hydrateSettings(updatedProfile);
+          if (updatedProfile.selected_genres && updatedProfile.selected_genres.length > 0) {
+            state.setOnboarded(true);
+          }
+        }
       } else {
         hydrateSettings(profile);
+        state.setOnboarded(true);
       }
     }
     // Fetch saved movies

@@ -32,10 +32,12 @@ const GENRE_ID_TO_NAME = {
  * 4. Falls back to their explicitly selected onboarding genres if no activity exists.
  */
 export const getRecommendationData = async () => {
-  const { session, selectedGenres } = useStore.getState();
+  const { session, selectedGenres, selectedLanguages } = useStore.getState();
+  
+  const fallbackLanguage = selectedLanguages?.length > 0 ? selectedLanguages[0] : 'en';
   
   if (!session?.user) {
-    return { topGenres: selectedGenres, topLanguage: 'en' };
+    return { topGenres: selectedGenres, topLanguage: fallbackLanguage };
   }
 
   const { data: activity, error } = await supabase
@@ -44,7 +46,7 @@ export const getRecommendationData = async () => {
     .eq('user_id', session.user.id);
 
   if (error || !activity || activity.length === 0) {
-    return { topGenres: selectedGenres, topLanguage: 'en' };
+    return { topGenres: selectedGenres, topLanguage: fallbackLanguage };
   }
 
   // Calculate scores

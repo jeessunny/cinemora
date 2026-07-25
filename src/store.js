@@ -18,6 +18,7 @@ const useStore = create(
       avatar: null,
       userName: '',
       selectedGenres: [],
+      selectedLanguages: [],
       watchlist: [],
       favorites: [],
       history: [],
@@ -42,6 +43,7 @@ const useStore = create(
         animationsEnabled: profile.animations_enabled !== null ? profile.animations_enabled : state.animationsEnabled,
         navSettingsEnabled: profile.nav_settings_enabled !== null ? profile.nav_settings_enabled : state.navSettingsEnabled,
         selectedGenres: (profile.selected_genres && profile.selected_genres.length > 0) ? profile.selected_genres : state.selectedGenres,
+        selectedLanguages: (profile.selected_languages && profile.selected_languages.length > 0) ? profile.selected_languages : state.selectedLanguages,
         floatingNavBar: profile.floating_nav_bar !== null ? profile.floating_nav_bar : state.floatingNavBar,
         navSearchEnabled: profile.nav_search_enabled !== null ? profile.nav_search_enabled : state.navSearchEnabled,
         homeSections: profile.home_sections || state.homeSections,
@@ -123,6 +125,28 @@ const useStore = create(
           supabase.from('profiles').update({ selected_genres: newGenres }).eq('id', session.user.id);
         }
         return { selectedGenres: newGenres };
+      }),
+      toggleLanguage: (language) => set((state) => {
+        // Max 3 languages rule logic handled in the UI, but we can also limit it here
+        const isSelected = state.selectedLanguages.includes(language);
+        let newLanguages;
+        if (isSelected) {
+          newLanguages = state.selectedLanguages.filter((l) => l !== language);
+        } else {
+          // If already 3 selected, don't add more (safeguard)
+          if (state.selectedLanguages.length >= 3) {
+            newLanguages = [...state.selectedLanguages];
+          } else {
+            newLanguages = [...state.selectedLanguages, language];
+          }
+        }
+        
+        const { session } = useStore.getState();
+        if (session?.user) {
+          // Note: The user MUST run ALTER TABLE profiles ADD COLUMN selected_languages text[];
+          supabase.from('profiles').update({ selected_languages: newLanguages }).eq('id', session.user.id);
+        }
+        return { selectedLanguages: newLanguages };
       }),
       
       addToWatchlist: async (movie) => {
