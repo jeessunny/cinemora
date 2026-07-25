@@ -19,10 +19,10 @@ export default function LoginScreen() {
   
   const setUserName = useStore(state => state.setUserName);
   const setAvatar = useStore(state => state.setAvatar);
-  const toggleGenre = useStore(state => state.toggleGenre);
-  const selectedGenres = useStore(state => state.selectedGenres);
+  const setStoreGenres = useStore(state => state.setGenres || (genres => useStore.setState({ selectedGenres: genres })));
   const setSelectedLanguages = useStore(state => state.setSelectedLanguages);
-  const selectedLanguages = useStore(state => state.selectedLanguages);
+  const storeGenres = useStore(state => state.selectedGenres);
+  const storeLanguages = useStore(state => state.selectedLanguages);
   const setOnboarded = useStore(state => state.setOnboarded);
   const isOnboarded = useStore(state => state.isOnboarded);
   const session = useStore(state => state.session);
@@ -31,28 +31,27 @@ export default function LoginScreen() {
   
   const [nameInput, setNameInput] = useState(storeUserName || '');
   const [avatarPreview, setAvatarPreview] = useState(storeAvatar);
+  const [genresInput, setGenresInput] = useState(storeGenres || []);
+  const [languagesInput, setLanguagesInput] = useState(storeLanguages || []);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
-  const [initialGenres, setInitialGenres] = useState([]);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [tmdbLanguages, setTmdbLanguages] = useState(allLanguages);
 
   // Check router navigation state to determine if user arrived via settings profile edit click
   const isEditing = location.state?.fromSettings === true;
 
-  // Store initial genre list snapshot on mount
-  useEffect(() => {
-    setInitialGenres([...selectedGenres]);
-  }, []);
-
-  const hasGenreChanges = 
-    selectedGenres.length !== initialGenres.length || 
-    selectedGenres.some(g => !initialGenres.includes(g));
+  const toggleLocalGenre = (genre) => {
+    setGenresInput(prev => 
+      prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]
+    );
+  };
 
   const hasChanges = 
     nameInput !== (storeUserName || '') || 
     avatarPreview !== storeAvatar || 
-    hasGenreChanges;
+    JSON.stringify(genresInput) !== JSON.stringify(storeGenres) ||
+    JSON.stringify(languagesInput) !== JSON.stringify(storeLanguages);
 
   // Use a ref to track changes without re-triggering useEffect and pushing multiple history states
   const hasChangesRef = React.useRef(hasChanges);
@@ -81,7 +80,7 @@ export default function LoginScreen() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [isEditing, navigate]); // Removed hasChanges from dependency array to prevent multiple pushState calls
+  }, [isEditing, navigate]);
 
   // Only redirect if onboarded AND not explicitly editing their profile (bypassed via fromSettings state)
   if (isOnboarded && !isEditing) {
@@ -96,7 +95,7 @@ export default function LoginScreen() {
     }
   }, [avatarPreview]);
 
-  const handleAvatarChange = () => {
+  const handleAvatarClick = () => {
     setIsSpinning(true);
     const seed = Math.floor(Math.random() * 10000);
     const mockAvatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
@@ -112,6 +111,7 @@ export default function LoginScreen() {
     // Save local selections before redirecting so they persist and can be sent to Supabase in App.jsx
     setUserName(nameInput);
     setAvatar(avatarPreview);
+    useStore.setState({ selectedGenres: genresInput, selectedLanguages: languagesInput });
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -125,12 +125,17 @@ export default function LoginScreen() {
     }
   };
 
-  const isFormValid = selectedGenres.length > 0 && nameInput.trim().length > 0;
+  const isFormValid = genresInput.length > 0 && nameInput.trim().length > 0;
 
   const handleSubmit = () => {
     if (isFormValid) {
       setUserName(nameInput);
       setAvatar(avatarPreview);
+      
+      // Update global store AND trigger Supabase sync
+      setStoreGenres(genresInput);
+      setSelectedLanguages(languagesInput);
+      
       setOnboarded(true);
       if (isEditing) {
         navigate('/settings', { replace: true });
@@ -310,8 +315,8 @@ export default function LoginScreen() {
         <Box>
           <GenreChips 
             genres={genres}
-            selected={selectedGenres}
-            onChange={toggleGenre}
+            selected={genresInput}
+            onChange={toggleLocalGenre}
             wrap
           />
         </Box>
@@ -337,17 +342,17 @@ export default function LoginScreen() {
           id="language-tags"
           options={tmdbLanguages}
           getOptionLabel={(option) => option.label || ''}
-          value={tmdbLanguages.filter(l => selectedLanguages.includes(l.value))}
+          value={tmdbLanguages.filter(l => languagesInput.includes(l.value))}
           onChange={(event, newValue) => {
             if (newValue.length <= 3) {
-              setSelectedLanguages(newValue.map(n => n.value));
+              setLanguagesInput(newValue.map(n => n.value));
             }
           }}
           renderInput={(params) => (
             <TextField
               {...params}
               variant="outlined"
-              placeholder={selectedLanguages.length < 3 ? "Search languages..." : "Max 3 reached"}
+              placeholder={languagesInput.length < 3 ? "Search languages..." : "Max 3 reached"}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '8px',
