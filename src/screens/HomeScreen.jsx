@@ -41,11 +41,11 @@ export default function HomeScreen() {
   const navigate = useNavigate();
   const userName = useStore(state => state.userName);
   const avatar = useStore(state => state.avatar);
-  const selectedGenres = useStore(state => state.selectedGenres);
-  const watchlist = useStore(state => state.watchlist);
-  const favorites = useStore(state => state.favorites);
-  const history = useStore(state => state.history);
-  const homeSections = useStore(state => state.homeSections);
+  const selectedGenres = useStore(state => state.selectedGenres) || [];
+  const watchlist = useStore(state => state.watchlist) || [];
+  const favorites = useStore(state => state.favorites) || [];
+  const history = useStore(state => state.history) || [];
+  const homeSections = useStore(state => state.homeSections) || [];
 
   const [loading, setLoading] = useState(true);
   const [recommended, setRecommended] = useState([]);

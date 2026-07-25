@@ -109,7 +109,7 @@ export default function SettingsScreen() {
   const navigate = useNavigate();
   const userName = useStore(state => state.userName);
   const avatar = useStore(state => state.avatar);
-  const selectedGenres = useStore(state => state.selectedGenres);
+  const selectedGenres = useStore(state => state.selectedGenres) || [];
   const themeMode = useStore(state => state.themeMode);
   const setThemeMode = useStore(state => state.setThemeMode);
   const clearHistory = useStore(state => state.clearHistory);
@@ -121,7 +121,7 @@ export default function SettingsScreen() {
   const setAccentColor = useStore(state => state.setAccentColor);
   const floatingNavBar = useStore(state => state.floatingNavBar);
   const setFloatingNavBar = useStore(state => state.setFloatingNavBar);
-  const homeSections = useStore(state => state.homeSections);
+  const homeSections = useStore(state => state.homeSections) || [];
   const toggleHomeSection = useStore(state => state.toggleHomeSection);
   const reorderHomeSections = useStore(state => state.reorderHomeSections);
   const resetHomeSections = useStore(state => state.resetHomeSections);
