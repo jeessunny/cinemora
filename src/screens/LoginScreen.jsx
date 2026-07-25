@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Avatar, Button, IconButton } from '@mui/material';
+import { Box, Typography, TextField, Avatar, Button, IconButton, Autocomplete, Chip } from '@mui/material';
 import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
@@ -13,14 +13,22 @@ const genres = [
 ];
 
 const languages = [
-  { label: 'English', value: 'en' },
-  { label: 'Hindi', value: 'hi' },
-  { label: 'Korean', value: 'ko' },
-  { label: 'Spanish', value: 'es' },
-  { label: 'Japanese', value: 'ja' },
-  { label: 'French', value: 'fr' },
-  { label: 'German', value: 'de' },
-  { label: 'Italian', value: 'it' }
+  { label: 'English', value: 'en' }, { label: 'Spanish', value: 'es' },
+  { label: 'Hindi', value: 'hi' }, { label: 'Korean', value: 'ko' },
+  { label: 'Japanese', value: 'ja' }, { label: 'French', value: 'fr' },
+  { label: 'German', value: 'de' }, { label: 'Italian', value: 'it' },
+  { label: 'Arabic', value: 'ar' }, { label: 'Portuguese', value: 'pt' },
+  { label: 'Russian', value: 'ru' }, { label: 'Chinese', value: 'zh' },
+  { label: 'Bengali', value: 'bn' }, { label: 'Urdu', value: 'ur' },
+  { label: 'Indonesian', value: 'id' }, { label: 'Telugu', value: 'te' },
+  { label: 'Marathi', value: 'mr' }, { label: 'Tamil', value: 'ta' },
+  { label: 'Turkish', value: 'tr' }, { label: 'Vietnamese', value: 'vi' },
+  { label: 'Polish', value: 'pl' }, { label: 'Dutch', value: 'nl' },
+  { label: 'Thai', value: 'th' }, { label: 'Swedish', value: 'sv' },
+  { label: 'Greek', value: 'el' }, { label: 'Czech', value: 'cs' },
+  { label: 'Danish', value: 'da' }, { label: 'Finnish', value: 'fi' },
+  { label: 'Hungarian', value: 'hu' }, { label: 'Norwegian', value: 'no' },
+  { label: 'Romanian', value: 'ro' }
 ];
 
 export default function LoginScreen() {
@@ -31,7 +39,7 @@ export default function LoginScreen() {
   const setAvatar = useStore(state => state.setAvatar);
   const toggleGenre = useStore(state => state.toggleGenre);
   const selectedGenres = useStore(state => state.selectedGenres);
-  const toggleLanguage = useStore(state => state.toggleLanguage);
+  const setSelectedLanguages = useStore(state => state.setSelectedLanguages);
   const selectedLanguages = useStore(state => state.selectedLanguages);
   const setOnboarded = useStore(state => state.setOnboarded);
   const isOnboarded = useStore(state => state.isOnboarded);
@@ -340,41 +348,58 @@ export default function LoginScreen() {
         >
           Favorite languages <Typography component="span" variant="labelMedium" color="text.secondary">(Max 3)</Typography>
         </Typography>
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 1.2, 
-          flexWrap: 'wrap',
-          pb: 1.5,
-        }}>
-          {languages.map((lang) => {
-            const isSelected = selectedLanguages.includes(lang.value);
-            return (
-              <Button
-                key={lang.value}
-                onClick={() => toggleLanguage(lang.value)}
-                sx={{
-                  borderRadius: '6px',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  minWidth: 0,
-                  px: 2,
-                  py: 1,
-                  textTransform: 'none',
-                  bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainer',
-                  color: isSelected ? 'primary.contrastText' : 'text.primary',
-                  border: '1px solid',
-                  borderColor: isSelected ? 'primary.main' : 'divider',
-                  boxShadow: 'none',
-                  '&:hover': {
-                    bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainerHigh',
-                  }
-                }}
-              >
-                {lang.label}
-              </Button>
-            );
-          })}
-        </Box>
+        <Autocomplete
+          multiple
+          limitTags={3}
+          id="language-tags"
+          options={languages}
+          getOptionLabel={(option) => option.label}
+          value={languages.filter(l => selectedLanguages.includes(l.value))}
+          onChange={(event, newValue) => {
+            if (newValue.length <= 3) {
+              setSelectedLanguages(newValue.map(n => n.value));
+            }
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              placeholder={selectedLanguages.length < 3 ? "Search languages..." : "Max 3 reached"}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  bgcolor: 'surface.surfaceContainer',
+                  '& fieldset': { borderColor: 'divider' },
+                  '&:hover fieldset': { borderColor: 'primary.main' },
+                  '&.Mui-focused fieldset': { borderColor: 'primary.main' }
+                }
+              }}
+            />
+          )}
+          renderTags={(value, getTagProps) =>
+            value.map((option, index) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              return (
+                <Chip
+                  key={key}
+                  label={option.label}
+                  {...tagProps}
+                  sx={{
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    fontWeight: 600,
+                    borderRadius: '6px',
+                    '& .MuiChip-deleteIcon': {
+                      color: 'primary.contrastText',
+                      opacity: 0.7,
+                      '&:hover': { opacity: 1 }
+                    }
+                  }}
+                />
+              );
+            })
+          }
+        />
       </Box>
 
       {(!session && !isEditing) ? (

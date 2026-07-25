@@ -126,24 +126,11 @@ const useStore = create(
         }
         return { selectedGenres: newGenres };
       }),
-      toggleLanguage: (language) => set((state) => {
-        // Max 3 languages rule logic handled in the UI, but we can also limit it here
-        const isSelected = state.selectedLanguages.includes(language);
-        let newLanguages;
-        if (isSelected) {
-          newLanguages = state.selectedLanguages.filter((l) => l !== language);
-        } else {
-          // If already 3 selected, don't add more (safeguard)
-          if (state.selectedLanguages.length >= 3) {
-            newLanguages = [...state.selectedLanguages];
-          } else {
-            newLanguages = [...state.selectedLanguages, language];
-          }
-        }
-        
+      setSelectedLanguages: (languages) => set((state) => {
+        // Enforce max 3 logic here as a safeguard
+        const newLanguages = languages.slice(0, 3);
         const { session } = useStore.getState();
         if (session?.user) {
-          // Note: The user MUST run ALTER TABLE profiles ADD COLUMN selected_languages text[];
           supabase.from('profiles').update({ selected_languages: newLanguages }).eq('id', session.user.id);
         }
         return { selectedLanguages: newLanguages };
