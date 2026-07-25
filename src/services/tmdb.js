@@ -57,14 +57,14 @@ export const mapMovie = (m) => ({
   genres: m.genre_ids ? getGenresFromIds(m.genre_ids) : (m.genres ? m.genres.map(g => g.name) : []),
   genre_ids: m.genre_ids || (m.genres ? m.genres.map(g => g.id) : []),
   original_language: m.original_language || 'en',
-  posterUrl: m.poster_path ? `https://image.tmdb.org/t/p/w342${m.poster_path}` : 'https://via.placeholder.com/342x513?text=No+Poster',
-  backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}` : 'https://via.placeholder.com/780x439?text=No+Backdrop',
+  posterUrl: m.poster_path ? `https://image.tmdb.org/t/p/w342${m.poster_path}` : 'https://placehold.co/342x513?text=No+Poster',
+  backdropUrl: m.backdrop_path ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}` : 'https://placehold.co/780x439?text=No+Backdrop',
   synopsis: m.overview || 'No synopsis available.',
   matchPercentage: Math.round(m.vote_average * 10),
   cast: m.credits?.cast?.slice(0, 10).map(c => ({
     name: c.name,
     character: c.character,
-    photoUrl: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : 'https://via.placeholder.com/185x185?text=No+Photo'
+    photoUrl: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : 'https://placehold.co/185x185?text=No+Photo'
   })) || []
 });
 
