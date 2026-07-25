@@ -4,9 +4,9 @@ import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 import { supabase } from '../services/supabaseClient';
-import { getSupportedLanguages } from '../services/tmdb';
 import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { allLanguages } from '../data/languages';
 
 const genres = [
   'Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller',
@@ -35,18 +35,7 @@ export default function LoginScreen() {
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [initialGenres, setInitialGenres] = useState([]);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [tmdbLanguages, setTmdbLanguages] = useState([]);
-
-  // Fetch languages on mount
-  useEffect(() => {
-    const fetchLangs = async () => {
-      const langs = await getSupportedLanguages();
-      if (langs && langs.length > 0) {
-        setTmdbLanguages(langs);
-      }
-    };
-    fetchLangs();
-  }, []);
+  const [tmdbLanguages, setTmdbLanguages] = useState(allLanguages);
 
   // Check router navigation state to determine if user arrived via settings profile edit click
   const isEditing = location.state?.fromSettings === true;
