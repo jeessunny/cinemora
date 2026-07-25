@@ -3,10 +3,25 @@ import { Box, Typography, TextField, Avatar, Button, IconButton } from '@mui/mat
 import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
-import { genres, languages } from '../data/mockData';
 import { supabase } from '../services/supabaseClient';
 import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
+
+const genres = [
+  'Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller',
+  'Romance', 'Animation', 'Documentary', 'Fantasy', 'Mystery', 'Adventure'
+];
+
+const languages = [
+  { label: 'English', value: 'en' },
+  { label: 'Hindi', value: 'hi' },
+  { label: 'Korean', value: 'ko' },
+  { label: 'Spanish', value: 'es' },
+  { label: 'Japanese', value: 'ja' },
+  { label: 'French', value: 'fr' },
+  { label: 'German', value: 'de' },
+  { label: 'Italian', value: 'it' }
+];
 
 export default function LoginScreen() {
   const navigate = useNavigate();
