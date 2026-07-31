@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Avatar, Button, IconButton, Autocomplete, Chip, createFilterOptions } from '@mui/material';
+import { Box, Typography, TextField, Avatar, Button, IconButton, Chip, Dialog, ListItemButton, ListItemText } from '@mui/material';
 import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
@@ -8,11 +8,7 @@ import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { allLanguages } from '../data/languages';
 
-// Custom filter: match anywhere in label (not just start), case-insensitive
-const languageFilter = createFilterOptions({
-  matchFrom: 'any',
-  stringify: (option) => option.label,
-});
+// Custom language filter removed since we now use a Dialog
 
 const genres = [
   'Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller',
@@ -43,6 +39,8 @@ export default function LoginScreen() {
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [tmdbLanguages, setTmdbLanguages] = useState(allLanguages);
+  const [langDialogOpen, setLangDialogOpen] = useState(false);
+  const [langSearchQuery, setLangSearchQuery] = useState('');
 
   // Check router navigation state to determine if user arrived via settings profile edit click
   const isEditing = location.state?.fromSettings === true;
@@ -342,62 +340,104 @@ export default function LoginScreen() {
         >
           Favorite languages <Typography component="span" variant="labelMedium" color="text.secondary">(Max 3)</Typography>
         </Typography>
-        <Autocomplete
-          multiple
-          limitTags={3}
-          id="language-tags"
-          options={tmdbLanguages}
-          getOptionLabel={(option) => option.label || ''}
-          filterOptions={languageFilter}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-          value={tmdbLanguages.filter(l => languagesInput.includes(l.value))}
-          onChange={(event, newValue) => {
-            if (newValue.length <= 3) {
-              setLanguagesInput(newValue.map(n => n.value));
-            }
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
+
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+          {languagesInput.map((langValue) => {
+            const label = tmdbLanguages.find(l => l.value === langValue)?.label || langValue;
+            return (
+              <Chip
+                key={langValue}
+                label={label}
+                onDelete={() => setLanguagesInput(languagesInput.filter(l => l !== langValue))}
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  fontWeight: 600,
+                  borderRadius: '6px',
+                  '& .MuiChip-deleteIcon': {
+                    color: 'primary.contrastText',
+                    opacity: 0.7,
+                    '&:hover': { opacity: 1 }
+                  }
+                }}
+              />
+            );
+          })}
+          {languagesInput.length < 3 && (
+            <Chip
+              label="+ Add Language"
+              onClick={() => setLangDialogOpen(true)}
               variant="outlined"
-              placeholder={languagesInput.length < 3 ? "Search languages..." : "Max 3 reached"}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '8px',
-                  bgcolor: 'surface.surfaceContainer',
-                  '& fieldset': { borderColor: 'divider' },
-                  '&:hover fieldset': { borderColor: 'primary.main' },
-                  '&.Mui-focused fieldset': { borderColor: 'primary.main' }
-                }
+                fontWeight: 600,
+                borderRadius: '6px',
+                borderColor: 'primary.main',
+                color: 'primary.main',
               }}
             />
           )}
-          renderTags={(value, getTagProps) =>
-            value.map((option, index) => {
-              const { key, ...tagProps } = getTagProps({ index });
-              return (
-                <Chip
-                  key={key}
-                  label={option.label}
-                  {...tagProps}
-                  sx={{
-                    bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
-                    fontWeight: 600,
-                    borderRadius: '6px',
-                    '& .MuiChip-deleteIcon': {
-                      color: 'primary.contrastText',
-                      opacity: 0.7,
-                      '&:hover': { opacity: 1 }
-                    }
-                  }}
-                />
-              );
-            })
-          }
-        />
+        </Box>
       </Box>
 
+      {/* Language Search Dialog */}
+      <Dialog 
+        open={langDialogOpen} 
+        onClose={() => setLangDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            bgcolor: 'surface.surfaceContainer',
+            borderRadius: '16px',
+            maxHeight: '80vh',
+            p: 2
+          }
+        }}
+      >
+        <Typography variant="titleLarge" fontWeight={800} sx={{ mb: 2 }}>
+          Search Language
+        </Typography>
+        <TextField
+          autoFocus
+          fullWidth
+          placeholder="Type a language (e.g., Malayalam)..."
+          variant="outlined"
+          value={langSearchQuery}
+          onChange={(e) => setLangSearchQuery(e.target.value)}
+          sx={{
+            mb: 2,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '12px',
+              bgcolor: 'surface.surfaceContainerHighest',
+            }
+          }}
+        />
+        <Box sx={{ overflowY: 'auto', flex: 1, maxHeight: '400px' }}>
+          {tmdbLanguages
+            .filter(l => l.label.toLowerCase().includes(langSearchQuery.toLowerCase()))
+            .slice(0, 20)
+            .map(lang => (
+              <ListItemButton
+                key={lang.value}
+                onClick={() => {
+                  if (!languagesInput.includes(lang.value)) {
+                    setLanguagesInput([...languagesInput, lang.value]);
+                  }
+                  setLangDialogOpen(false);
+                  setLangSearchQuery('');
+                }}
+                sx={{ borderRadius: '8px', mb: 0.5 }}
+              >
+                <ListItemText primary={lang.label} />
+              </ListItemButton>
+            ))}
+          {langSearchQuery && tmdbLanguages.filter(l => l.label.toLowerCase().includes(langSearchQuery.toLowerCase())).length === 0 && (
+            <Typography sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+              No languages found.
+            </Typography>
+          )}
+        </Box>
+      </Dialog>
       {(!session && !isEditing) ? (
         <Box sx={{ mt: 'auto', pt: 2, width: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Button

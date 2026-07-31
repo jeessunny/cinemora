@@ -75,7 +75,10 @@ export const getRecommendationData = async () => {
     .map(([lang]) => lang);
 
   const topGenres = sortedGenres.length > 0 ? sortedGenres.slice(0, 3) : selectedGenres;
-  const topLanguage = sortedLanguages.length > 0 ? sortedLanguages[0] : 'en';
+  
+  // Mix top algorithm languages with explicit user selections
+  const topLanguageArr = Array.from(new Set([...sortedLanguages.slice(0, 3), ...(selectedLanguages || [])]));
+  const topLanguage = topLanguageArr.length > 0 ? topLanguageArr.join('|') : 'en';
 
   return { topGenres, topLanguage };
 };

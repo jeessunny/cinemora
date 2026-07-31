@@ -98,20 +98,41 @@ export default function HomeScreen() {
         ]);
 
         const historyIds = new Set(useStore.getState().history.map(m => m.id));
-        const filterHistory = (movies) => movies.filter(m => !historyIds.has(m.id));
-
-        setRecommended(filterHistory(recData));
-        setTrending(filterHistory(trendData));
-        setNewReleases(filterHistory(newRelData));
-        setPopular(filterHistory(popData));
-        setGenre1Movies(filterHistory(g1Data));
-        setGenre2Movies(filterHistory(g2Data));
+        const watchlistIds = new Set(useStore.getState().watchlist.map(m => m.id));
         
-        // Pick a hero movie from trending that hasn't been watched
-        const validTrending = filterHistory(trendData);
-        if (validTrending.length > 0) {
-          setHeroMovie(validTrending[Math.floor(Math.random() * validTrending.length)]);
+        // Track seen movies so they don't repeat across different rows
+        const seenIds = new Set();
+        
+        const filterMovies = (movies, isTrending = false) => {
+          return movies.filter(m => {
+            if (historyIds.has(m.id)) return false; // Never show watched movies
+            if (seenIds.has(m.id)) return false; // Prevent duplicates across rails
+            
+            // Watchlist items only appear randomly 10% of the time (1 in 10), unless it's trending hero
+            if (watchlistIds.has(m.id) && !isTrending && Math.random() > 0.10) {
+              return false;
+            }
+            
+            seenIds.add(m.id);
+            return true;
+          });
+        };
+
+        // For Hero Movie, we don't want to filter out watchlist or seen items yet
+        const rawTrending = trendData.filter(m => !historyIds.has(m.id));
+        if (rawTrending.length > 0) {
+          const hero = rawTrending[Math.floor(Math.random() * rawTrending.length)];
+          setHeroMovie(hero);
+          seenIds.add(hero.id); // Add hero to seen so it doesn't appear in rows below
         }
+
+        setRecommended(filterMovies(recData));
+        setTrending(filterMovies(trendData, true));
+        setNewReleases(filterMovies(newRelData));
+        setPopular(filterMovies(popData));
+        setGenre1Movies(filterMovies(g1Data));
+        setGenre2Movies(filterMovies(g2Data));
+        
       } catch (err) {
         console.error('Error fetching TMDB data:', err);
       } finally {
