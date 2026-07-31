@@ -110,8 +110,8 @@ export default function LoginScreen() {
     }, 600);
   };
 
-  const handleGoogleLogin = async () => {
-    setIsLoggingIn(true);
+  const handleGoogleLogin = async (type = 'create') => {
+    setIsLoggingIn(type);
     // Save local selections before redirecting so they persist and can be sent to Supabase in App.jsx
     setUserName(nameInput);
     setAvatar(avatarPreview);
@@ -444,8 +444,8 @@ export default function LoginScreen() {
             variant="contained"
             fullWidth
             size="large"
-            disabled={!isFormValid || isLoggingIn}
-            onClick={handleGoogleLogin}
+            disabled={!isFormValid || !!isLoggingIn}
+            onClick={() => handleGoogleLogin('create')}
             sx={{ 
               py: 1.6, 
               borderRadius: '8px', 
@@ -459,14 +459,14 @@ export default function LoginScreen() {
               }
             }}
           >
-            {isLoggingIn ? 'Connecting...' : 'Continue with Google'}
+            {isLoggingIn === 'create' ? 'Connecting...' : 'Continue with Google'}
           </Button>
 
           <Button
             variant="contained"
             fullWidth
-            onClick={handleGoogleLogin}
-            disabled={isLoggingIn}
+            onClick={() => handleGoogleLogin('signin')}
+            disabled={!!isLoggingIn}
             sx={{ 
               py: 1.6, 
               borderRadius: '8px', 
@@ -480,7 +480,7 @@ export default function LoginScreen() {
               }
             }}
           >
-            Sign in to existing account
+            {isLoggingIn === 'signin' ? 'Connecting...' : 'Sign in to existing account'}
           </Button>
         </Box>
       ) : (
