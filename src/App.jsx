@@ -5,6 +5,7 @@ import { getTheme } from './theme';
 import useStore from './store';
 import NavBar from './components/NavBar';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { supabase } from './services/supabaseClient';
 
 // Lazy-loaded screens — each is a separate JS chunk loaded on demand
@@ -213,6 +214,7 @@ export default function App() {
           </Layout>
         </BrowserRouter>
         <Analytics />
+        <SpeedInsights />
       </ThemeProvider>
     </ErrorBoundary>
   );
