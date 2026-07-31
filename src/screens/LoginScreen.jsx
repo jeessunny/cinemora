@@ -154,7 +154,7 @@ export default function LoginScreen() {
   };
 
   const handleConfirmDiscard = () => {
-    useStore.setState({ selectedGenres: initialGenres });
+    useStore.setState({ selectedGenres: storeGenres });
     setShowDiscardDialog(false);
     navigate('/settings', { replace: true });
   };
@@ -265,7 +265,7 @@ export default function LoginScreen() {
               justifyContent: 'center',
               p: 0
             }}
-            onClick={handleAvatarChange}
+            onClick={handleAvatarClick}
           >
             <Refresh 
               sx={{ 

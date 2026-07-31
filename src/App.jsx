@@ -23,6 +23,41 @@ const LazyFallback = () => (
   </Box>
 );
 
+// Error Boundary to catch crashes and show a helpful message instead of blank screen
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Cinemora crashed:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', p: 3, bgcolor: '#0F0D0D', color: '#fff' }}>
+          <Box sx={{ fontSize: '48px', mb: 2 }}>😵</Box>
+          <Box sx={{ fontSize: '20px', fontWeight: 700, mb: 1 }}>Something went wrong</Box>
+          <Box sx={{ fontSize: '14px', color: '#999', mb: 3, textAlign: 'center', maxWidth: 400 }}>
+            {this.state.error?.message || 'An unexpected error occurred'}
+          </Box>
+          <Box
+            component="button"
+            onClick={() => { this.setState({ hasError: false, error: null }); window.location.href = '/'; }}
+            sx={{ px: 3, py: 1.5, bgcolor: '#E50914', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+          >
+            Reload App
+          </Box>
+        </Box>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const ProtectedRoute = ({ children }) => {
   const isOnboarded = useStore(state => state.isOnboarded);
   if (!isOnboarded) return <Navigate to="/" replace />;
@@ -157,26 +192,28 @@ export default function App() {
   const theme = getTheme(resolvedMode, accentColor);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Layout>
-          <Suspense fallback={<LazyFallback />}>
-            <Routes>
-              <Route path="/" element={<LoginScreen />} />
-              <Route path="/home" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
-              <Route path="/search" element={<ProtectedRoute><SearchScreen /></ProtectedRoute>} />
-              <Route path="/saved" element={<ProtectedRoute><SavedScreen /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
-              <Route path="/setting" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
-              <Route path="/movie/:id" element={<ProtectedRoute><MovieDetailsScreen /></ProtectedRoute>} />
-              <Route path="/series/:id" element={<ProtectedRoute><SeriesDetailsScreen /></ProtectedRoute>} />
-              <Route path="*" element={<Navigate to="/home" replace />} />
-            </Routes>
-          </Suspense>
-        </Layout>
-      </BrowserRouter>
-      <Analytics />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <Layout>
+            <Suspense fallback={<LazyFallback />}>
+              <Routes>
+                <Route path="/" element={<LoginScreen />} />
+                <Route path="/home" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
+                <Route path="/search" element={<ProtectedRoute><SearchScreen /></ProtectedRoute>} />
+                <Route path="/saved" element={<ProtectedRoute><SavedScreen /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
+                <Route path="/setting" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
+                <Route path="/movie/:id" element={<ProtectedRoute><MovieDetailsScreen /></ProtectedRoute>} />
+                <Route path="/series/:id" element={<ProtectedRoute><SeriesDetailsScreen /></ProtectedRoute>} />
+                <Route path="*" element={<Navigate to="/home" replace />} />
+              </Routes>
+            </Suspense>
+          </Layout>
+        </BrowserRouter>
+        <Analytics />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
