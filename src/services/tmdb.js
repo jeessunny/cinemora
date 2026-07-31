@@ -138,13 +138,13 @@ export const getPopular = async (lang = 'en') => {
   return data.results.map(mapMovie);
 };
 
-export const getRecommended = async (genreIds = [], lang = 'en') => {
-  const params = {};
+export const getRecommended = async (genreIds = [], lang = 'en', page = 1) => {
+  const params = { page };
   if (lang && lang !== 'en') params.with_original_language = lang;
   if (genreIds && genreIds.length > 0) params.with_genres = genreIds.join(',');
   
-  // If no params, default to top_rated
-  if (Object.keys(params).length === 0) {
+  // If no params (other than page), default to top_rated
+  if (Object.keys(params).length === 1 && params.page === 1) {
     const data = await fetchTMDB('movie/top_rated');
     return data.results.map(mapMovie);
   } else {
@@ -175,8 +175,8 @@ export const getMovieDetails = async (id, type = 'movie') => {
   };
 };
 
-export const getMoviesByGenreId = async (genreId, lang = 'en') => {
-  const params = { with_genres: genreId };
+export const getMoviesByGenreId = async (genreId, lang = 'en', page = 1) => {
+  const params = { with_genres: genreId, page };
   if (lang && lang !== 'en') params.with_original_language = lang;
   const data = await fetchTMDB('discover/movie', params);
   return data.results.map(mapMovie);

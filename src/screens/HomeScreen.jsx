@@ -89,12 +89,12 @@ export default function HomeScreen() {
           g1Data,
           g2Data
         ] = await Promise.all([
-          getRecommended([g1Id, g2Id].filter(Boolean), topLanguage),
+          getRecommended([g1Id, g2Id].filter(Boolean), topLanguage, 3), // Page 3
           getTrending(topLanguage),
           getNewReleases(topLanguage),
           getPopular(topLanguage),
-          getMoviesByGenreId(g1Id, topLanguage),
-          g2Id ? getMoviesByGenreId(g2Id, topLanguage) : Promise.resolve([])
+          getMoviesByGenreId(g1Id, topLanguage, 1), // Page 1
+          g2Id ? getMoviesByGenreId(g2Id, topLanguage, 2) : Promise.resolve([]) // Page 2
         ]);
 
         const historyIds = new Set(useStore.getState().history.map(m => m.id));
