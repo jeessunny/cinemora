@@ -149,6 +149,7 @@ export default function SettingsScreen() {
   const handleLogOut = async () => {
     await supabase.auth.signOut();
     useStore.getState().clearAllData();
+    localStorage.removeItem('cinemora-storage');
     navigate('/');
   };
 

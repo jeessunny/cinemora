@@ -116,9 +116,12 @@ export default function App() {
     if (profile) {
       const state = useStore.getState();
       
-      // Intelligent avatar resolution: Supabase > Google OAuth > Local
+      // Intelligent avatar resolution
       const googleAvatar = userMetadata?.avatar_url || userMetadata?.picture;
-      const finalAvatar = profile.avatar_url || googleAvatar || state.avatar;
+      
+      // If the Supabase profile has a random Dicebear placeholder, let the Google OAuth picture override it!
+      const isDicebear = profile.avatar_url?.includes('dicebear.com');
+      const finalAvatar = (isDicebear && googleAvatar) ? googleAvatar : (profile.avatar_url || googleAvatar || state.avatar);
       
       const googleName = userMetadata?.full_name || userMetadata?.name;
       const finalName = profile.user_name || googleName || state.userName;

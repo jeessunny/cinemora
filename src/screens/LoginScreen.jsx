@@ -91,6 +91,18 @@ export default function LoginScreen() {
     return <Navigate to="/home" replace />;
   }
 
+  // Deep site cache clear on enter to guarantee fresh state
+  useEffect(() => {
+    if (!isEditing) {
+      useStore.getState().clearAllData();
+      localStorage.removeItem('cinemora-storage');
+      setNameInput('');
+      setAvatarPreview(null);
+      setGenresInput([]);
+      setLanguagesInput([]);
+    }
+  }, [isEditing]);
+
   useEffect(() => {
     if (!avatarPreview) {
       const seed = Math.floor(Math.random() * 10000);
