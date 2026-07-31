@@ -101,9 +101,9 @@ const useStore = create(
       // === Existing Actions ===
       setSession: (session) => set({ session }),
       setHydratedMovies: (movies) => set({
-        watchlist: movies.filter(m => m.status === 'watchlist').map(m => m.movie_data),
-        favorites: movies.filter(m => m.status === 'favorite').map(m => m.movie_data),
-        history: movies.filter(m => m.status === 'history').map(m => m.movie_data)
+        watchlist: movies.filter(m => m.status === 'watchlist').map(m => m.movie_data).filter(Boolean),
+        favorites: movies.filter(m => m.status === 'favorite').map(m => m.movie_data).filter(Boolean),
+        history: movies.filter(m => m.status === 'history').map(m => m.movie_data).filter(Boolean)
       }),
       setAvatar: (url) => {
         set({ avatar: url });

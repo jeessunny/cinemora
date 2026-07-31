@@ -73,8 +73,8 @@ export default function HomeScreen() {
       try {
         const { topGenres, topLanguages } = await getRecommendationData();
         
-        const g1 = topGenres[0] || selectedGenres[0] || 'Action';
-        const g2 = topGenres[1] || selectedGenres[1];
+        const g1 = topGenres?.[0] || selectedGenres?.[0] || 'Action';
+        const g2 = topGenres?.[1] || selectedGenres?.[1];
 
         if (isMounted) {
           setRail1Title(`Because You Like ${g1}`);
@@ -85,9 +85,9 @@ export default function HomeScreen() {
         const g2Id = g2 ? GENRE_NAME_TO_ID[g2] : null;
 
         // Distribute languages across rails to prevent mono-language saturation
-        const lang1 = topLanguages[0] || 'en';
-        const lang2 = topLanguages[1] || lang1;
-        const lang3 = topLanguages[2] || lang1;
+        const lang1 = topLanguages?.[0] || 'en';
+        const lang2 = topLanguages?.[1] || lang1;
+        const lang3 = topLanguages?.[2] || lang1;
 
         const [
           recData,
