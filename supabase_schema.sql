@@ -1,13 +1,22 @@
 -- =============================================================================
--- Cinemora Supabase Schema
+-- Cinemora Supabase Schema & Migrations
 -- Run this in the Supabase Dashboard -> SQL Editor -> New Query
 -- =============================================================================
+
+-- ==========================================
+-- RUN THESE MIGRATIONS IF YOU ALREADY CREATED THE DB:
+-- ==========================================
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS selected_languages TEXT[] DEFAULT '{}';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS floating_nav_bar BOOLEAN DEFAULT true;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS nav_search_enabled BOOLEAN DEFAULT true;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS home_sections JSONB;
+-- ==========================================
 
 -- Enable the uuid-ossp extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Create Profiles Table (Stores Settings & User Info)
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   user_name TEXT,
   avatar_url TEXT,
@@ -17,6 +26,10 @@ CREATE TABLE public.profiles (
   nav_settings_enabled BOOLEAN DEFAULT true,
   glassmorphism_enabled BOOLEAN DEFAULT true,
   selected_genres TEXT[] DEFAULT '{}',
+  selected_languages TEXT[] DEFAULT '{}',
+  floating_nav_bar BOOLEAN DEFAULT true,
+  nav_search_enabled BOOLEAN DEFAULT true,
+  home_sections JSONB,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
