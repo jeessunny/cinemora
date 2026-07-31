@@ -42,6 +42,7 @@ export default function HomeScreen() {
   const userName = useStore(state => state.userName);
   const avatar = useStore(state => state.avatar);
   const selectedGenres = useStore(state => state.selectedGenres) || [];
+  const selectedLanguages = useStore(state => state.selectedLanguages) || [];
   const watchlist = useStore(state => state.watchlist) || [];
   const favorites = useStore(state => state.favorites) || [];
   const history = useStore(state => state.history) || [];
@@ -55,6 +56,8 @@ export default function HomeScreen() {
   const [genre1Movies, setGenre1Movies] = useState([]);
   const [genre2Movies, setGenre2Movies] = useState([]);
   const [heroMovie, setHeroMovie] = useState(null);
+  const [rail1Title, setRail1Title] = useState('Because You Like Action');
+  const [rail2Title, setRail2Title] = useState('');
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -63,19 +66,20 @@ export default function HomeScreen() {
     return 'Good evening';
   };
 
-  const [algoGenres, setAlgoGenres] = useState([]);
-  const firstGenre = algoGenres[0] || selectedGenres[0] || 'Action';
-  const secondGenre = algoGenres[1] || selectedGenres[1];
-
   useEffect(() => {
+    let isMounted = true;
     const fetchAllData = async () => {
       setLoading(true);
       try {
         const { topGenres, topLanguages } = await getRecommendationData();
-        setAlgoGenres(topGenres);
         
         const g1 = topGenres[0] || selectedGenres[0] || 'Action';
         const g2 = topGenres[1] || selectedGenres[1];
+
+        if (isMounted) {
+          setRail1Title(`Because You Like ${g1}`);
+          if (g2) setRail2Title(`More ${g2}`);
+        }
 
         const g1Id = GENRE_NAME_TO_ID[g1] || 28;
         const g2Id = g2 ? GENRE_NAME_TO_ID[g2] : null;
@@ -101,51 +105,63 @@ export default function HomeScreen() {
           g2Id ? getMoviesByGenreId(g2Id, lang3, 2) : Promise.resolve([]) 
         ]);
 
+        if (!isMounted) return;
+
         const historyIds = new Set(useStore.getState().history.map(m => m.id));
-        const watchlistIds = new Set(useStore.getState().watchlist.map(m => m.id));
-        
-        // Track seen movies so they don't repeat across different rows
         const seenIds = new Set();
         
-        const filterMovies = (movies, isTrending = false) => {
+        const filterMovies = (movies) => {
           return movies.filter(m => {
-            if (historyIds.has(m.id)) return false; // Never show watched movies
-            if (seenIds.has(m.id)) return false; // Prevent duplicates across rails
+            if (historyIds.has(m.id)) return false;
             
-            // Watchlist items only appear randomly 10% of the time (1 in 10), unless it's trending hero
-            if (watchlistIds.has(m.id) && !isTrending && Math.random() > 0.10) {
-              return false;
-            }
-            
+            // Allow watchlist movies to appear in the feed roughly 10% of the time (1 in 10 chance)
+            // This satisfies the user's "5 in 50" request so watchlist items don't dominate
+            const inWatchlist = useStore.getState().watchlist.some(wm => wm.id === m.id);
+            if (inWatchlist && Math.random() > 0.10) return false;
+
+            if (seenIds.has(m.id)) return false;
             seenIds.add(m.id);
             return true;
           });
         };
 
-        // For Hero Movie, we don't want to filter out watchlist or seen items yet
-        const rawTrending = trendData.filter(m => !historyIds.has(m.id));
-        if (rawTrending.length > 0) {
-          const hero = rawTrending[Math.floor(Math.random() * rawTrending.length)];
-          setHeroMovie(hero);
-          seenIds.add(hero.id); // Add hero to seen so it doesn't appear in rows below
-        }
+        const filteredRec = filterMovies(recData);
+        const filteredTrend = filterMovies(trendData);
+        const filteredNewRel = filterMovies(newRelData);
+        const filteredPop = filterMovies(popData);
+        const filteredG1 = filterMovies(g1Data);
+        const filteredG2 = filterMovies(g2Data);
 
-        setRecommended(filterMovies(recData));
-        setTrending(filterMovies(trendData, true));
-        setNewReleases(filterMovies(newRelData));
-        setPopular(filterMovies(popData));
-        setGenre1Movies(filterMovies(g1Data));
-        setGenre2Movies(filterMovies(g2Data));
-        
+        setRecommended(filteredRec);
+        setTrending(filteredTrend);
+        setNewReleases(filteredNewRel);
+        setPopular(filteredPop);
+        setGenre1Movies(filteredG1);
+        setGenre2Movies(filteredG2);
+
+        const allFetchedMovies = [
+          ...filteredRec,
+          ...filteredTrend,
+          ...filteredNewRel,
+          ...filteredPop,
+          ...filteredG1,
+          ...filteredG2
+        ];
+
+        const uniqueMovies = Array.from(new Map(allFetchedMovies.map(m => [m.id, m])).values());
+        const newHero = uniqueMovies.length > 0 ? uniqueMovies[Math.floor(Math.random() * uniqueMovies.length)] : null;
+        setHeroMovie(newHero);
+
       } catch (err) {
         console.error('Error fetching TMDB data:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchAllData();
-  }, [firstGenre, secondGenre]);
+    return () => { isMounted = false; };
+  }, [selectedGenres, selectedLanguages]);
 
   const getStatus = (id) => {
     const statuses = [];
@@ -167,16 +183,16 @@ export default function HomeScreen() {
     genre1: () => (
       <ScrollRail 
         key="genre1"
-        title={`Because You Like ${firstGenre}`} 
+        title={rail1Title} 
         movies={genre1Movies} 
         getStatus={getStatus}
       />
     ),
     genre2: () => (
-      secondGenre && genre2Movies.length > 0 ? (
+      rail2Title && genre2Movies.length > 0 ? (
         <ScrollRail 
           key="genre2"
-          title={`More ${secondGenre}`} 
+          title={rail2Title} 
           movies={genre2Movies} 
           getStatus={getStatus}
         />
