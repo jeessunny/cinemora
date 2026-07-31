@@ -37,7 +37,7 @@ export const getRecommendationData = async () => {
   const fallbackLanguage = selectedLanguages?.length > 0 ? selectedLanguages[0] : 'en';
   
   if (!session?.user) {
-    return { topGenres: selectedGenres, topLanguage: fallbackLanguage };
+    return { topGenres: selectedGenres, topLanguages: selectedLanguages?.length > 0 ? selectedLanguages : ['en'] };
   }
 
   const { data: activity, error } = await supabase
@@ -46,7 +46,7 @@ export const getRecommendationData = async () => {
     .eq('user_id', session.user.id);
 
   if (error || !activity || activity.length === 0) {
-    return { topGenres: selectedGenres, topLanguage: fallbackLanguage };
+    return { topGenres: selectedGenres, topLanguages: selectedLanguages?.length > 0 ? selectedLanguages : ['en'] };
   }
 
   // Calculate scores
@@ -76,9 +76,8 @@ export const getRecommendationData = async () => {
 
   const topGenres = sortedGenres.length > 0 ? sortedGenres.slice(0, 3) : selectedGenres;
   
-  // Mix top algorithm languages with explicit user selections
-  const topLanguageArr = Array.from(new Set([...sortedLanguages.slice(0, 3), ...(selectedLanguages || [])]));
-  const topLanguage = topLanguageArr.length > 0 ? topLanguageArr.join('|') : 'en';
+  // TMDB with_original_language only accepts a single language string, NOT pipe-separated
+  const topLanguages = Array.from(new Set([...sortedLanguages.slice(0, 3), ...(selectedLanguages || [])]));
 
-  return { topGenres, topLanguage };
+  return { topGenres, topLanguages };
 };

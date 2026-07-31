@@ -71,15 +71,19 @@ export default function HomeScreen() {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        const { topGenres, topLanguage } = await getRecommendationData();
+        const { topGenres, topLanguages } = await getRecommendationData();
         setAlgoGenres(topGenres);
         
         const g1 = topGenres[0] || selectedGenres[0] || 'Action';
         const g2 = topGenres[1] || selectedGenres[1];
 
-        // For recommendations, pass their top genres so they actually get personalized discover results
         const g1Id = GENRE_NAME_TO_ID[g1] || 28;
         const g2Id = g2 ? GENRE_NAME_TO_ID[g2] : null;
+
+        // Distribute languages across rails to prevent mono-language saturation
+        const lang1 = topLanguages[0] || 'en';
+        const lang2 = topLanguages[1] || lang1;
+        const lang3 = topLanguages[2] || lang1;
 
         const [
           recData,
@@ -89,12 +93,12 @@ export default function HomeScreen() {
           g1Data,
           g2Data
         ] = await Promise.all([
-          getRecommended([g1Id, g2Id].filter(Boolean), topLanguage, 3), // Page 3
-          getTrending(topLanguage),
-          getNewReleases(topLanguage),
-          getPopular(topLanguage),
-          getMoviesByGenreId(g1Id, topLanguage, 1), // Page 1
-          g2Id ? getMoviesByGenreId(g2Id, topLanguage, 2) : Promise.resolve([]) // Page 2
+          getRecommended([g1Id, g2Id].filter(Boolean), lang1, 3), 
+          getTrending(lang2),
+          getNewReleases(lang3),
+          getPopular(lang1),
+          getMoviesByGenreId(g1Id, lang2, 1), 
+          g2Id ? getMoviesByGenreId(g2Id, lang3, 2) : Promise.resolve([]) 
         ]);
 
         const historyIds = new Set(useStore.getState().history.map(m => m.id));
