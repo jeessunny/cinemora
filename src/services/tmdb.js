@@ -103,18 +103,38 @@ const fetchTMDB = async (path, extraParams = {}) => {
   }
 };
 
-export const getTrending = async () => {
+export const getTrending = async (lang = 'en') => {
+  if (lang && lang !== 'en') {
+    const data = await fetchTMDB('discover/movie', { sort_by: 'popularity.desc', with_original_language: lang });
+    return data.results.map(mapMovie);
+  }
   const data = await fetchTMDB('trending/movie/week');
   return data.results.map(mapMovie);
 };
 
-export const getNewReleases = async () => {
+export const getNewReleases = async (lang = 'en') => {
+  if (lang && lang !== 'en') {
+    const today = new Date().toISOString().split('T')[0];
+    const past = new Date(Date.now() - 45*24*60*60*1000).toISOString().split('T')[0];
+    const data = await fetchTMDB('discover/movie', { 
+      sort_by: 'popularity.desc', 
+      with_original_language: lang,
+      'primary_release_date.lte': today,
+      'primary_release_date.gte': past
+    });
+    return data.results.map(mapMovie);
+  }
   const data = await fetchTMDB('movie/now_playing');
   return data.results.map(mapMovie);
 };
 
-export const getPopular = async () => {
-  const data = await fetchTMDB('movie/popular');
+export const getPopular = async (lang = 'en') => {
+  // Use page 2 to ensure it doesn't overlap perfectly with Trending, solving deduplication starvation
+  if (lang && lang !== 'en') {
+    const data = await fetchTMDB('discover/movie', { sort_by: 'popularity.desc', with_original_language: lang, page: 2 });
+    return data.results.map(mapMovie);
+  }
+  const data = await fetchTMDB('movie/popular', { page: 2 });
   return data.results.map(mapMovie);
 };
 

@@ -90,9 +90,9 @@ export default function HomeScreen() {
           g2Data
         ] = await Promise.all([
           getRecommended([g1Id, g2Id].filter(Boolean), topLanguage),
-          getTrending(),
-          getNewReleases(),
-          getPopular(),
+          getTrending(topLanguage),
+          getNewReleases(topLanguage),
+          getPopular(topLanguage),
           getMoviesByGenreId(g1Id, topLanguage),
           g2Id ? getMoviesByGenreId(g2Id, topLanguage) : Promise.resolve([])
         ]);
