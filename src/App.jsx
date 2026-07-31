@@ -101,16 +101,22 @@ export default function App() {
   const hydrateSettings = useStore(state => state.hydrateSettings);
   const setHydratedMovies = useStore(state => state.setHydratedMovies);
   
-  const fetchUserData = async (userId) => {
-    // Fetch profile
+  const fetchUserData = async (userId, userMetadata) => {
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (profile) {
       const state = useStore.getState();
-      // If the profile has no selected genres, it means it's a first-time login
+      
+      // Intelligent avatar resolution: Supabase > Google OAuth > Local
+      const googleAvatar = userMetadata?.avatar_url || userMetadata?.picture;
+      const finalAvatar = profile.avatar_url || googleAvatar || state.avatar;
+      
+      const googleName = userMetadata?.full_name || userMetadata?.name;
+      const finalName = profile.user_name || googleName || state.userName;
+
       if (!profile.selected_genres || profile.selected_genres.length === 0) {
         await supabase.from('profiles').update({
-          user_name: state.userName || profile.user_name,
-          avatar_url: state.avatar || profile.avatar_url,
+          user_name: finalName,
+          avatar_url: finalAvatar,
           selected_genres: state.selectedGenres,
           selected_languages: state.selectedLanguages,
           theme_mode: state.themeMode,
@@ -131,10 +137,12 @@ export default function App() {
         }
       } else {
         hydrateSettings(profile);
+        // Force update the Zustand store with the actual fetched avatar in case the user switched accounts
+        state.setAvatar(finalAvatar);
+        state.setUserName(finalName);
         state.setOnboarded(true);
       }
     }
-    // Fetch saved movies
     const { data: movies } = await supabase.from('user_movies').select('*').eq('user_id', userId);
     if (movies) {
       setHydratedMovies(movies);
@@ -145,14 +153,14 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session?.user) fetchUserData(session.user.id);
+      if (session?.user) fetchUserData(session.user.id, session.user.user_metadata);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session?.user) fetchUserData(session.user.id);
+      if (session?.user) fetchUserData(session.user.id, session.user.user_metadata);
     });
 
     return () => subscription.unsubscribe();

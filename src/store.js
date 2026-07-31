@@ -99,6 +99,25 @@ const useStore = create(
       },
 
       // === Existing Actions ===
+      clearAllData: () => set({
+        session: null,
+        avatar: null,
+        userName: '',
+        selectedGenres: [],
+        selectedLanguages: [],
+        watchlist: [],
+        favorites: [],
+        history: [],
+        isOnboarded: false,
+        recentSearches: [],
+        themeMode: 'system',
+        accentColor: '#E50914',
+        floatingNavBar: true,
+        homeSections: DEFAULT_SECTIONS,
+        animationsEnabled: true,
+        navSearchEnabled: true,
+        navSettingsEnabled: true
+      }),
       setSession: (session) => set({ session }),
       setHydratedMovies: (movies) => set({
         watchlist: movies.filter(m => m.status === 'watchlist').map(m => m.movie_data).filter(Boolean),

@@ -148,8 +148,7 @@ export default function SettingsScreen() {
 
   const handleLogOut = async () => {
     await supabase.auth.signOut();
-    useStore.getState().setSession(null);
-    useStore.getState().setOnboarded(false);
+    useStore.getState().clearAllData();
     navigate('/');
   };
 
