@@ -414,7 +414,7 @@ export default function LoginScreen() {
         />
         <Box sx={{ overflowY: 'auto', flex: 1, maxHeight: '400px' }}>
           {tmdbLanguages
-            .filter(l => l.label.toLowerCase().includes(langSearchQuery.toLowerCase()))
+            .filter(l => l.label.toLowerCase().includes(langSearchQuery.trim().toLowerCase()))
             .slice(0, 20)
             .map(lang => (
               <ListItemButton
@@ -431,7 +431,7 @@ export default function LoginScreen() {
                 <ListItemText primary={lang.label} />
               </ListItemButton>
             ))}
-          {langSearchQuery && tmdbLanguages.filter(l => l.label.toLowerCase().includes(langSearchQuery.toLowerCase())).length === 0 && (
+          {langSearchQuery.trim() && tmdbLanguages.filter(l => l.label.toLowerCase().includes(langSearchQuery.trim().toLowerCase())).length === 0 && (
             <Typography sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
               No languages found.
             </Typography>
