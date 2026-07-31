@@ -36,7 +36,7 @@ export default function HeroCard({ movie }) {
         component="img"
         src={movie.backdropUrl}
         alt={movie.title}
-        loading="lazy"
+        fetchPriority="high"
         sx={{
           position: 'absolute',
           top: 0,

@@ -150,12 +150,24 @@ export default function MovieDetailsScreen() {
         sx={{ 
           position: 'relative', 
           height: 360,
-          backgroundImage: `url(${movie.backdropUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          overflow: 'hidden',
           animation: 'backdropReveal 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
         }}
       >
+        <Box
+          component="img"
+          src={movie.backdropUrl}
+          alt={movie.title}
+          fetchPriority="high"
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
         {/* Back Button */}
         <Box sx={{ 
           position: 'absolute', top: 0, left: 0, right: 0, 
@@ -195,6 +207,7 @@ export default function MovieDetailsScreen() {
           component="img"
           src={movie.posterUrl}
           alt={movie.title}
+          fetchPriority="high"
           sx={{ 
             width: 120, 
             height: 180, 
