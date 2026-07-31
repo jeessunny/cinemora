@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Avatar, Button, IconButton, Autocomplete, Chip } from '@mui/material';
+import { Box, Typography, TextField, Avatar, Button, IconButton, Autocomplete, Chip, createFilterOptions } from '@mui/material';
 import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
@@ -7,6 +7,12 @@ import { supabase } from '../services/supabaseClient';
 import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { allLanguages } from '../data/languages';
+
+// Custom filter: match anywhere in label (not just start), case-insensitive
+const languageFilter = createFilterOptions({
+  matchFrom: 'any',
+  stringify: (option) => option.label,
+});
 
 const genres = [
   'Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Thriller',
@@ -116,7 +122,7 @@ export default function LoginScreen() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: `${window.location.origin}/home`
       }
     });
     if (error) {
@@ -342,6 +348,8 @@ export default function LoginScreen() {
           id="language-tags"
           options={tmdbLanguages}
           getOptionLabel={(option) => option.label || ''}
+          filterOptions={languageFilter}
+          isOptionEqualToValue={(option, value) => option.value === value.value}
           value={tmdbLanguages.filter(l => languagesInput.includes(l.value))}
           onChange={(event, newValue) => {
             if (newValue.length <= 3) {
@@ -404,16 +412,14 @@ export default function LoginScreen() {
               fontSize: '16px',
               fontWeight: 700,
               textTransform: 'none',
-              bgcolor: isFormValid ? 'surface.surfaceContainerHighest' : 'action.disabledBackground',
-              color: isFormValid ? 'text.primary' : 'action.disabled',
-              border: '1px solid',
-              borderColor: isFormValid ? 'surface.surfaceContainerHighest' : 'transparent',
+              bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
+              color: isFormValid ? 'primary.contrastText' : 'action.disabled',
               '&:hover': {
-                bgcolor: 'surface.surfaceContainer',
+                bgcolor: 'primary.dark',
               }
             }}
           >
-            {isLoggingIn ? 'Connecting...' : 'Create Account with Google'}
+            {isLoggingIn ? 'Connecting...' : 'Continue with Google'}
           </Button>
 
           <Button
@@ -434,7 +440,7 @@ export default function LoginScreen() {
               }
             }}
           >
-            Log in to existing account
+            Sign in to existing account
           </Button>
         </Box>
       ) : (
