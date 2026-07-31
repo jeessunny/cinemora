@@ -94,6 +94,16 @@ const Layout = ({ children }) => {
   );
 };
 
+// Sanitize corrupted cache from older versions instantly on boot
+const state = useStore.getState();
+if (state.watchlist?.some(m => !m) || state.history?.some(m => !m) || state.favorites?.some(m => !m)) {
+  useStore.setState({
+    watchlist: (state.watchlist || []).filter(Boolean),
+    history: (state.history || []).filter(Boolean),
+    favorites: (state.favorites || []).filter(Boolean),
+  });
+}
+
 export default function App() {
   const themeMode = useStore(state => state.themeMode);
   const accentColor = useStore(state => state.accentColor);

@@ -107,7 +107,7 @@ export default function HomeScreen() {
 
         if (!isMounted) return;
 
-        const historyIds = new Set(useStore.getState().history.map(m => m.id));
+        const historyIds = new Set(useStore.getState().history?.map(m => m?.id).filter(Boolean) || []);
         const seenIds = new Set();
         
         const filterMovies = (movies) => {
@@ -116,7 +116,7 @@ export default function HomeScreen() {
             
             // Allow watchlist movies to appear in the feed roughly 10% of the time (1 in 10 chance)
             // This satisfies the user's "5 in 50" request so watchlist items don't dominate
-            const inWatchlist = useStore.getState().watchlist.some(wm => wm.id === m.id);
+            const inWatchlist = useStore.getState().watchlist?.some(wm => wm?.id === m?.id);
             if (inWatchlist && Math.random() > 0.10) return false;
 
             if (seenIds.has(m.id)) return false;
@@ -165,9 +165,9 @@ export default function HomeScreen() {
 
   const getStatus = (id) => {
     const statuses = [];
-    if (history.some(m => m.id === id)) statuses.push('history');
-    if (favorites.some(m => m.id === id)) statuses.push('favorite');
-    if (watchlist.some(m => m.id === id)) statuses.push('watchlist');
+    if (history?.some(m => m?.id === id)) statuses.push('history');
+    if (favorites?.some(m => m?.id === id)) statuses.push('favorite');
+    if (watchlist?.some(m => m?.id === id)) statuses.push('watchlist');
     return statuses.length > 0 ? statuses : null;
   };
 
