@@ -21,7 +21,7 @@ export default function LoginScreen() {
   
   const setUserName = useStore(state => state.setUserName);
   const setAvatar = useStore(state => state.setAvatar);
-  const setStoreGenres = useStore(state => state.setGenres || (genres => useStore.setState({ selectedGenres: genres })));
+  const setStoreGenres = useStore(state => state.setGenres);
   const setSelectedLanguages = useStore(state => state.setSelectedLanguages);
   const storeGenres = useStore(state => state.selectedGenres);
   const storeLanguages = useStore(state => state.selectedLanguages);

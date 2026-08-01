@@ -145,6 +145,13 @@ const useStore = create(
         }
         return { selectedGenres: newGenres };
       }),
+      setGenres: (genres) => {
+        set({ selectedGenres: genres });
+        const { session } = useStore.getState();
+        if (session?.user) {
+          supabase.from('profiles').update({ selected_genres: genres }).eq('id', session.user.id);
+        }
+      },
       setSelectedLanguages: (languages) => set((state) => {
         // Enforce max 3 logic here as a safeguard
         const newLanguages = languages.slice(0, 3);
