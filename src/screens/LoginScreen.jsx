@@ -333,7 +333,7 @@ export default function LoginScreen() {
       </Box>
 
       {/* Language selection row */}
-      <Box sx={{ width: '100%', mb: 'auto' }}>
+      <Box sx={{ width: '100%', mb: 4 }}>
         <Typography 
           variant="titleMedium" 
           fontWeight={800} 
@@ -445,7 +445,7 @@ export default function LoginScreen() {
         </Box>
       </Dialog>
       {(!session && !isEditing) ? (
-        <Box sx={{ mt: 'auto', pt: 2, width: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        <Box sx={{ mt: 'auto', pt: 2, pb: 2, width: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Button
             variant="contained"
             fullWidth
@@ -472,28 +472,29 @@ export default function LoginScreen() {
           </Typography>
         </Box>
       ) : (
-        <Button
-          variant="contained"
-          fullWidth
-          size="large"
-          disabled={!isFormValid}
-          onClick={handleSubmit}
-          sx={{ 
-            mt: 'auto', 
-            py: 1.6, 
-            borderRadius: '8px', 
-            fontSize: '16px',
-            fontWeight: 700,
-            textTransform: 'none',
-            bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
-            color: isFormValid ? 'primary.contrastText' : 'action.disabled',
-            '&:hover': {
-              bgcolor: 'primary.dark'
-            }
-          }}
-        >
-          {isEditing ? 'Save Changes' : 'Complete Setup'}
-        </Button>
+        <Box sx={{ mt: 'auto', pt: 2, pb: 2, width: '100%' }}>
+          <Button
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={!isFormValid}
+            onClick={handleSubmit}
+            sx={{ 
+              py: 1.6, 
+              borderRadius: '8px', 
+              fontSize: '16px',
+              fontWeight: 700,
+              textTransform: 'none',
+              bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
+              color: isFormValid ? 'primary.contrastText' : 'action.disabled',
+              '&:hover': {
+                bgcolor: 'primary.dark'
+              }
+            }}
+          >
+            {isEditing ? 'Save Changes' : 'Complete Setup'}
+          </Button>
+        </Box>
       )}
 
       {/* Discard changes dialog matches Yes/No format */}
