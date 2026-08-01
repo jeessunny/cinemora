@@ -91,18 +91,6 @@ export default function LoginScreen() {
     return <Navigate to="/home" replace />;
   }
 
-  // Deep site cache clear on enter to guarantee fresh state
-  useEffect(() => {
-    if (!isEditing) {
-      useStore.getState().clearAllData();
-      localStorage.removeItem('cinemora-storage');
-      setNameInput('');
-      setAvatarPreview(null);
-      setGenresInput([]);
-      setLanguagesInput([]);
-    }
-  }, [isEditing]);
-
   useEffect(() => {
     if (!avatarPreview) {
       const seed = Math.floor(Math.random() * 10000);
@@ -124,10 +112,14 @@ export default function LoginScreen() {
 
   const handleGoogleLogin = async (type = 'create') => {
     setIsLoggingIn(type);
-    // Save local selections before redirecting so they persist and can be sent to Supabase in App.jsx
-    setUserName(nameInput);
-    setAvatar(avatarPreview);
-    useStore.setState({ selectedGenres: genresInput, selectedLanguages: languagesInput });
+
+    if (type === 'create') {
+      // Save local onboarding selections so they persist through the OAuth redirect
+      setUserName(nameInput);
+      setAvatar(avatarPreview);
+      useStore.setState({ selectedGenres: genresInput, selectedLanguages: languagesInput });
+    }
+    // For 'signin', we do NOT save local form data — the existing profile will be loaded from Supabase
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

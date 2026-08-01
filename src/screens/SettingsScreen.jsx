@@ -154,14 +154,14 @@ export default function SettingsScreen() {
   };
 
   const handleDeleteAccount = async () => {
-    // Delete profile data (cascades or cleans up most data)
     const { session } = useStore.getState();
     if (session?.user) {
+      await supabase.from('user_movies').delete().eq('user_id', session.user.id);
       await supabase.from('profiles').delete().eq('id', session.user.id);
       await supabase.auth.signOut();
     }
-    useStore.getState().setSession(null);
-    useStore.getState().setOnboarded(false);
+    useStore.getState().clearAllData();
+    localStorage.removeItem('cinemora-storage');
     navigate('/');
   };
 

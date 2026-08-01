@@ -112,53 +112,67 @@ export default function App() {
   const setHydratedMovies = useStore(state => state.setHydratedMovies);
   
   const fetchUserData = async (userId, userMetadata) => {
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (profile) {
+    try {
+      const { data: profile, error: profileError } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      
+      if (profileError || !profile) {
+        // No profile row exists yet — this is a brand new user
+        // Don't crash; just let the LoginScreen handle onboarding
+        console.log('No profile found for user, awaiting onboarding');
+        return;
+      }
+
       const state = useStore.getState();
       
       // Intelligent avatar resolution
       const googleAvatar = userMetadata?.avatar_url || userMetadata?.picture;
-      
-      // If the Supabase profile has a random Dicebear placeholder, let the Google OAuth picture override it!
       const isDicebear = profile.avatar_url?.includes('dicebear.com');
-      const finalAvatar = (isDicebear && googleAvatar) ? googleAvatar : (profile.avatar_url || googleAvatar || state.avatar);
+      const finalAvatar = (isDicebear && googleAvatar) ? googleAvatar : (profile.avatar_url || googleAvatar || null);
       
       const googleName = userMetadata?.full_name || userMetadata?.name;
-      const finalName = profile.user_name || googleName || state.userName;
+      const finalName = profile.user_name || googleName || '';
 
       if (!profile.selected_genres || profile.selected_genres.length === 0) {
-        await supabase.from('profiles').update({
-          user_name: finalName,
-          avatar_url: finalAvatar,
-          selected_genres: state.selectedGenres,
-          selected_languages: state.selectedLanguages,
-          theme_mode: state.themeMode,
-          accent_color: state.accentColor,
-          animations_enabled: state.animationsEnabled,
-          nav_settings_enabled: state.navSettingsEnabled,
-          floating_nav_bar: state.floatingNavBar,
-          nav_search_enabled: state.navSearchEnabled,
-          home_sections: state.homeSections
-        }).eq('id', userId);
-        
-        const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-        if (updatedProfile) {
-          hydrateSettings(updatedProfile);
-          if (updatedProfile.selected_genres && updatedProfile.selected_genres.length > 0) {
+        // Profile exists but has no genres — either first-time or needs onboarding
+        // Only push local state if the user actually filled out the form (has genres selected locally)
+        if (state.selectedGenres && state.selectedGenres.length > 0) {
+          await supabase.from('profiles').update({
+            user_name: state.userName || finalName,
+            avatar_url: state.avatar || finalAvatar,
+            selected_genres: state.selectedGenres,
+            selected_languages: state.selectedLanguages,
+            theme_mode: state.themeMode,
+            accent_color: state.accentColor,
+            animations_enabled: state.animationsEnabled,
+            nav_settings_enabled: state.navSettingsEnabled,
+            floating_nav_bar: state.floatingNavBar,
+            nav_search_enabled: state.navSearchEnabled,
+            home_sections: state.homeSections
+          }).eq('id', userId);
+          
+          const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+          if (updatedProfile) {
+            hydrateSettings(updatedProfile);
             state.setOnboarded(true);
           }
         }
+        // If no local genres either, user needs onboarding — don't set onboarded
       } else {
+        // Existing complete profile — load everything from database
         hydrateSettings(profile);
-        // Force update the Zustand store with the actual fetched avatar in case the user switched accounts
-        state.setAvatar(finalAvatar);
-        state.setUserName(finalName);
+        if (finalAvatar) state.setAvatar(finalAvatar);
+        if (finalName) state.setUserName(finalName);
         state.setOnboarded(true);
       }
-    }
-    const { data: movies } = await supabase.from('user_movies').select('*').eq('user_id', userId);
-    if (movies) {
-      setHydratedMovies(movies);
+
+      // Fetch saved movies
+      const { data: movies } = await supabase.from('user_movies').select('*').eq('user_id', userId);
+      if (movies && movies.length > 0) {
+        setHydratedMovies(movies);
+      }
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      // Don't crash the app — just let it fall through to login screen
     }
   };
 
