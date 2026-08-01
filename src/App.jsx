@@ -36,6 +36,18 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.error('Cinemora crashed:', error, errorInfo);
   }
+  handleReload = () => {
+    // Nuke ALL cached state so the crash doesn't repeat
+    try {
+      localStorage.removeItem('cinemora-storage');
+      useStore.getState().clearAllData();
+    } catch (e) {
+      // If even that fails, scorched earth
+      localStorage.clear();
+    }
+    this.setState({ hasError: false, error: null });
+    window.location.href = '/';
+  };
   render() {
     if (this.state.hasError) {
       return (
@@ -47,7 +59,7 @@ class ErrorBoundary extends React.Component {
           </Box>
           <Box
             component="button"
-            onClick={() => { this.setState({ hasError: false, error: null }); window.location.href = '/'; }}
+            onClick={this.handleReload}
             sx={{ px: 3, py: 1.5, bgcolor: '#E50914', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
           >
             Reload App
@@ -94,14 +106,26 @@ const Layout = ({ children }) => {
   );
 };
 
-// Sanitize corrupted cache from older versions instantly on boot
-const state = useStore.getState();
-if (state.watchlist?.some(m => !m) || state.history?.some(m => !m) || state.favorites?.some(m => !m)) {
-  useStore.setState({
-    watchlist: (state.watchlist || []).filter(Boolean),
-    history: (state.history || []).filter(Boolean),
-    favorites: (state.favorites || []).filter(Boolean),
-  });
+// Aggressively sanitize corrupted cache from older versions on boot
+try {
+  const s = useStore.getState();
+  const isBad = (arr) => !Array.isArray(arr) || arr.some(m => !m || typeof m !== 'object');
+  if (isBad(s.watchlist) || isBad(s.history) || isBad(s.favorites)) {
+    useStore.setState({
+      watchlist: Array.isArray(s.watchlist) ? s.watchlist.filter(m => m && typeof m === 'object') : [],
+      history: Array.isArray(s.history) ? s.history.filter(m => m && typeof m === 'object') : [],
+      favorites: Array.isArray(s.favorites) ? s.favorites.filter(m => m && typeof m === 'object') : [],
+    });
+  }
+  // Also fix corrupted homeSections
+  if (s.homeSections && !Array.isArray(s.homeSections)) {
+    useStore.setState({ homeSections: undefined });
+  }
+} catch (e) {
+  // If the store itself is corrupted beyond repair, nuke it
+  console.error('Store corruption detected, resetting:', e);
+  localStorage.removeItem('cinemora-storage');
+  window.location.reload();
 }
 
 export default function App() {
