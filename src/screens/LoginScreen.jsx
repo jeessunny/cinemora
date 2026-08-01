@@ -110,16 +110,17 @@ export default function LoginScreen() {
     }, 600);
   };
 
-  const handleGoogleLogin = async (type = 'create') => {
-    setIsLoggingIn(type);
+  const handleGoogleLogin = async () => {
+    setIsLoggingIn(true);
 
-    if (type === 'create') {
-      // Save local onboarding selections so they persist through the OAuth redirect
-      setUserName(nameInput);
-      setAvatar(avatarPreview);
+    // Save whatever the user has filled in so far — if they completed the form,
+    // App.jsx will push this to Supabase after redirect. If they haven't,
+    // App.jsx will detect the empty genres and keep them on the onboarding screen.
+    if (nameInput.trim()) setUserName(nameInput);
+    if (avatarPreview) setAvatar(avatarPreview);
+    if (genresInput.length > 0) {
       useStore.setState({ selectedGenres: genresInput, selectedLanguages: languagesInput });
     }
-    // For 'signin', we do NOT save local form data — the existing profile will be loaded from Supabase
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -448,29 +449,8 @@ export default function LoginScreen() {
             variant="contained"
             fullWidth
             size="large"
-            disabled={!isFormValid || !!isLoggingIn}
-            onClick={() => handleGoogleLogin('create')}
-            sx={{ 
-              py: 1.6, 
-              borderRadius: '8px', 
-              fontSize: '16px',
-              fontWeight: 700,
-              textTransform: 'none',
-              bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
-              color: isFormValid ? 'primary.contrastText' : 'action.disabled',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              }
-            }}
-          >
-            {isLoggingIn === 'create' ? 'Connecting...' : 'Continue with Google'}
-          </Button>
-
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => handleGoogleLogin('signin')}
             disabled={!!isLoggingIn}
+            onClick={handleGoogleLogin}
             sx={{ 
               py: 1.6, 
               borderRadius: '8px', 
@@ -484,8 +464,11 @@ export default function LoginScreen() {
               }
             }}
           >
-            {isLoggingIn === 'signin' ? 'Connecting...' : 'Sign in to existing account'}
+            {isLoggingIn ? 'Connecting...' : 'Continue with Google'}
           </Button>
+          <Typography variant="caption" sx={{ textAlign: 'center', color: 'text.secondary', mt: -0.5 }}>
+            Sign in or create a new account automatically
+          </Typography>
         </Box>
       ) : (
         <Button
