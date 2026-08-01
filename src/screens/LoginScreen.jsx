@@ -86,11 +86,7 @@ export default function LoginScreen() {
     };
   }, [isEditing, navigate]);
 
-  // Only redirect if onboarded AND not explicitly editing their profile (bypassed via fromSettings state)
-  if (isOnboarded && !isEditing) {
-    return <Navigate to="/home" replace />;
-  }
-
+  // Generate default avatar if none exists
   useEffect(() => {
     if (!avatarPreview) {
       const seed = Math.floor(Math.random() * 10000);
@@ -98,6 +94,11 @@ export default function LoginScreen() {
       setAvatarPreview(defaultAvatar);
     }
   }, [avatarPreview]);
+
+  // Only redirect if onboarded AND not explicitly editing their profile (bypassed via fromSettings state)
+  if (isOnboarded && !isEditing) {
+    return <Navigate to="/home" replace />;
+  }
 
   const handleAvatarClick = () => {
     setIsSpinning(true);
