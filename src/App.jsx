@@ -6,7 +6,6 @@ import useStore from './store';
 import NavBar from './components/NavBar';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import { supabase } from './services/supabaseClient';
 
 // Lazy-loaded screens — each is a separate JS chunk loaded on demand
 const LoginScreen = lazy(() => import('./screens/LoginScreen'));
@@ -131,92 +130,6 @@ try {
 export default function App() {
   const themeMode = useStore(state => state.themeMode);
   const accentColor = useStore(state => state.accentColor);
-  const setSession = useStore(state => state.setSession);
-  const hydrateSettings = useStore(state => state.hydrateSettings);
-  const setHydratedMovies = useStore(state => state.setHydratedMovies);
-  
-  const fetchUserData = async (userId, userMetadata) => {
-    try {
-      const { data: profile, error: profileError } = await supabase.from('profiles').select('*').eq('id', userId).single();
-      
-      if (profileError || !profile) {
-        // No profile row exists yet — this is a brand new user
-        // Don't crash; just let the LoginScreen handle onboarding
-        console.log('No profile found for user, awaiting onboarding');
-        return;
-      }
-
-      const state = useStore.getState();
-      
-      // Intelligent avatar resolution
-      const googleAvatar = userMetadata?.avatar_url || userMetadata?.picture;
-      const isDicebear = profile.avatar_url?.includes('dicebear.com');
-      const finalAvatar = (isDicebear && googleAvatar) ? googleAvatar : (profile.avatar_url || googleAvatar || null);
-      
-      const googleName = userMetadata?.full_name || userMetadata?.name;
-      const finalName = profile.user_name || googleName || '';
-
-      if (!profile.selected_genres || profile.selected_genres.length === 0) {
-        // Profile exists but has no genres — either first-time or needs onboarding
-        // Only push local state if the user actually filled out the form (has genres selected locally)
-        if (state.selectedGenres && state.selectedGenres.length > 0) {
-          await supabase.from('profiles').update({
-            user_name: state.userName || finalName,
-            avatar_url: state.avatar || finalAvatar,
-            selected_genres: state.selectedGenres,
-            selected_languages: state.selectedLanguages,
-            theme_mode: state.themeMode,
-            accent_color: state.accentColor,
-            animations_enabled: state.animationsEnabled,
-            nav_settings_enabled: state.navSettingsEnabled,
-            floating_nav_bar: state.floatingNavBar,
-            nav_search_enabled: state.navSearchEnabled,
-            home_sections: state.homeSections
-          }).eq('id', userId);
-          
-          const { data: updatedProfile } = await supabase.from('profiles').select('*').eq('id', userId).single();
-          if (updatedProfile) {
-            hydrateSettings(updatedProfile);
-            state.setOnboarded(true);
-          }
-        }
-        // If no local genres either, user needs onboarding — don't set onboarded
-      } else {
-        // Existing complete profile — load everything from database
-        hydrateSettings(profile);
-        if (finalAvatar) state.setAvatar(finalAvatar);
-        if (finalName) state.setUserName(finalName);
-        state.setOnboarded(true);
-      }
-
-      // Fetch saved movies
-      const { data: movies } = await supabase.from('user_movies').select('*').eq('user_id', userId);
-      if (movies && movies.length > 0) {
-        setHydratedMovies(movies);
-      }
-    } catch (err) {
-      console.error('Error fetching user data:', err);
-      // Don't crash the app — just let it fall through to login screen
-    }
-  };
-
-  // Auth listener
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) fetchUserData(session.user.id, session.user.user_metadata);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session?.user) fetchUserData(session.user.id, session.user.user_metadata);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-  
   // State to hold active resolved theme mode
   const [resolvedMode, setResolvedMode] = useState('dark');
 

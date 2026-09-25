@@ -9,7 +9,6 @@ import {
   Animation, ViewDay, Search, Settings, Logout, DeleteForever
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../services/supabaseClient';
 import {
   DndContext,
   closestCenter,
@@ -146,20 +145,13 @@ export default function SettingsScreen() {
     navigate('/');
   };
 
-  const handleLogOut = async () => {
-    await supabase.auth.signOut();
+  const handleLogOut = () => {
     useStore.getState().clearAllData();
     localStorage.removeItem('cinemora-storage');
     navigate('/');
   };
 
-  const handleDeleteAccount = async () => {
-    const { session } = useStore.getState();
-    if (session?.user) {
-      await supabase.from('user_movies').delete().eq('user_id', session.user.id);
-      await supabase.from('profiles').delete().eq('id', session.user.id);
-      await supabase.auth.signOut();
-    }
+  const handleDeleteAccount = () => {
     useStore.getState().clearAllData();
     localStorage.removeItem('cinemora-storage');
     navigate('/');

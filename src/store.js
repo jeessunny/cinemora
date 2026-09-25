@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from './services/supabaseClient';
 
 const DEFAULT_SECTIONS = [
   { id: 'recommended', label: 'Recommended For You', enabled: true },
@@ -48,55 +47,26 @@ const useStore = create(
         navSearchEnabled: profile.nav_search_enabled !== null ? profile.nav_search_enabled : state.navSearchEnabled,
         homeSections: profile.home_sections || state.homeSections,
       })),
-      setAccentColor: (color) => {
-        set({ accentColor: color });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ accent_color: color }).eq('id', session.user.id);
-      },
-      setFloatingNavBar: (val) => {
-        set({ floatingNavBar: val });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ floating_nav_bar: val }).eq('id', session.user.id);
-      },
-      setAnimationsEnabled: (val) => {
-        set({ animationsEnabled: val });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ animations_enabled: val }).eq('id', session.user.id);
-      },
-      setNavSearchEnabled: (val) => {
-        set({ navSearchEnabled: val });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ nav_search_enabled: val }).eq('id', session.user.id);
-      },
-      setNavSettingsEnabled: (val) => {
-        set({ navSettingsEnabled: val });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ nav_settings_enabled: val }).eq('id', session.user.id);
-      },
+      setAccentColor: (color) => set({ accentColor: color }),
+      setFloatingNavBar: (val) => set({ floatingNavBar: val }),
+      setAnimationsEnabled: (val) => set({ animationsEnabled: val }),
+      setNavSearchEnabled: (val) => set({ navSearchEnabled: val }),
+      setNavSettingsEnabled: (val) => set({ navSettingsEnabled: val }),
 
-      toggleHomeSection: (id) => set((state) => {
-        const newSections = state.homeSections.map(s =>
+      toggleHomeSection: (id) => set((state) => ({
+        homeSections: state.homeSections.map(s =>
           s.id === id ? { ...s, enabled: !s.enabled } : s
-        );
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ home_sections: newSections }).eq('id', session.user.id);
-        return { homeSections: newSections };
-      }),
+        )
+      })),
 
       reorderHomeSections: (fromIndex, toIndex) => set((state) => {
         const sections = [...state.homeSections];
         const [moved] = sections.splice(fromIndex, 1);
         sections.splice(toIndex, 0, moved);
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ home_sections: sections }).eq('id', session.user.id);
         return { homeSections: sections };
       }),
 
-      resetHomeSections: () => {
-        set({ homeSections: DEFAULT_SECTIONS });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ home_sections: DEFAULT_SECTIONS }).eq('id', session.user.id);
-      },
+      resetHomeSections: () => set({ homeSections: DEFAULT_SECTIONS }),
 
       // === Existing Actions ===
       clearAllData: () => set({
@@ -124,91 +94,36 @@ const useStore = create(
         favorites: movies.filter(m => m.status === 'favorite').map(m => m.movie_data).filter(Boolean),
         history: movies.filter(m => m.status === 'history').map(m => m.movie_data).filter(Boolean)
       }),
-      setAvatar: (url) => {
-        set({ avatar: url });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ avatar_url: url }).eq('id', session.user.id);
-      },
-      setUserName: (name) => {
-        set({ userName: name });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ user_name: name }).eq('id', session.user.id);
-      },
+      setAvatar: (url) => set({ avatar: url }),
+      setUserName: (name) => set({ userName: name }),
       toggleGenre: (genre) => set((state) => {
         const newGenres = state.selectedGenres.includes(genre)
           ? state.selectedGenres.filter((g) => g !== genre)
           : [...state.selectedGenres, genre];
-        
-        const { session } = useStore.getState();
-        if (session?.user) {
-          supabase.from('profiles').update({ selected_genres: newGenres }).eq('id', session.user.id);
-        }
         return { selectedGenres: newGenres };
       }),
-      setGenres: (genres) => {
-        set({ selectedGenres: genres });
-        const { session } = useStore.getState();
-        if (session?.user) {
-          supabase.from('profiles').update({ selected_genres: genres }).eq('id', session.user.id);
-        }
-      },
-      setSelectedLanguages: (languages) => set((state) => {
-        // Enforce max 3 logic here as a safeguard
-        const newLanguages = languages.slice(0, 3);
-        const { session } = useStore.getState();
-        if (session?.user) {
-          supabase.from('profiles').update({ selected_languages: newLanguages }).eq('id', session.user.id);
-        }
-        return { selectedLanguages: newLanguages };
-      }),
+      setGenres: (genres) => set({ selectedGenres: genres }),
+      setSelectedLanguages: (languages) => set({ selectedLanguages: languages.slice(0, 3) }),
       
-      addToWatchlist: async (movie) => {
+      addToWatchlist: (movie) => {
         set((state) => ({
           watchlist: state.watchlist.some(m => m.id === movie.id) ? state.watchlist : [...state.watchlist, movie]
         }));
-        const { session } = useStore.getState();
-        if (session?.user) {
-          await supabase.from('user_movies').upsert({ user_id: session.user.id, movie_id: movie.id, status: 'watchlist', movie_data: movie, movie_type: movie.media_type || 'movie' });
-          await supabase.from('user_activity').insert({ 
-            user_id: session.user.id, 
-            movie_id: movie.id, 
-            genres: movie.genre_ids || [], 
-            action_type: 'added_watchlist', 
-            weight: 2,
-            original_language: movie.original_language || 'en'
-          });
-        }
       },
-      removeFromWatchlist: async (id) => {
+      removeFromWatchlist: (id) => {
         set((state) => ({ watchlist: state.watchlist.filter((m) => m.id !== id) }));
-        const { session } = useStore.getState();
-        if (session?.user) await supabase.from('user_movies').delete().match({ user_id: session.user.id, movie_id: id, status: 'watchlist' });
       },
       
-      addToFavorites: async (movie) => {
+      addToFavorites: (movie) => {
         set((state) => ({
           favorites: state.favorites.some(m => m.id === movie.id) ? state.favorites : [...state.favorites, movie]
         }));
-        const { session } = useStore.getState();
-        if (session?.user) {
-          await supabase.from('user_movies').upsert({ user_id: session.user.id, movie_id: movie.id, status: 'favorite', movie_data: movie, movie_type: movie.media_type || 'movie' });
-          await supabase.from('user_activity').insert({ 
-            user_id: session.user.id, 
-            movie_id: movie.id, 
-            genres: movie.genre_ids || [], 
-            action_type: 'added_favorite', 
-            weight: 4,
-            original_language: movie.original_language || 'en'
-          });
-        }
       },
-      removeFromFavorites: async (id) => {
+      removeFromFavorites: (id) => {
         set((state) => ({ favorites: state.favorites.filter((m) => m.id !== id) }));
-        const { session } = useStore.getState();
-        if (session?.user) await supabase.from('user_movies').delete().match({ user_id: session.user.id, movie_id: id, status: 'favorite' });
       },
       
-      addToHistory: async (movie) => {
+      addToHistory: (movie) => {
         set((state) => {
           const filtered = state.history.filter((m) => m.id !== movie.id);
           return {
@@ -216,46 +131,16 @@ const useStore = create(
             watchlist: state.watchlist.filter((m) => m.id !== movie.id),
           };
         });
-        const { session } = useStore.getState();
-        if (session?.user) {
-          const watchedDate = new Date().toISOString();
-          await supabase.from('user_movies').upsert({ user_id: session.user.id, movie_id: movie.id, status: 'history', movie_data: movie, movie_type: movie.media_type || 'movie', watched_date: watchedDate });
-          await supabase.from('user_movies').delete().match({ user_id: session.user.id, movie_id: movie.id, status: 'watchlist' });
-          await supabase.from('user_activity').insert({ 
-            user_id: session.user.id, 
-            movie_id: movie.id, 
-            genres: movie.genre_ids || [], 
-            action_type: 'marked_history', 
-            weight: 5,
-            original_language: movie.original_language || 'en'
-          });
-        }
       },
-      removeFromHistory: async (id) => {
+      removeFromHistory: (id) => {
         set((state) => ({ history: state.history.filter((m) => m.id !== id) }));
-        const { session } = useStore.getState();
-        if (session?.user) await supabase.from('user_movies').delete().match({ user_id: session.user.id, movie_id: id, status: 'history' });
       },
       
-      trackMovieView: async (movie, source) => {
-        const { session } = useStore.getState();
-        if (session?.user) {
-          await supabase.from('user_activity').insert({
-            user_id: session.user.id,
-            movie_id: movie.id,
-            genres: movie.genre_ids || [],
-            action_type: `viewed_from_${source}`,
-            weight: source === 'search' ? 2 : 1, // Search clicks mean higher intent
-            original_language: movie.original_language || 'en'
-          });
-        }
+      trackMovieView: (movie, source) => {
+        // Track locally if needed or no-op
       },
       
-      setThemeMode: (mode) => {
-        set({ themeMode: mode });
-        const { session } = useStore.getState();
-        if (session?.user) supabase.from('profiles').update({ theme_mode: mode }).eq('id', session.user.id);
-      },
+      setThemeMode: (mode) => set({ themeMode: mode }),
       setOnboarded: (status) => set({ isOnboarded: status }),
       
       addRecentSearch: (query) => set((state) => ({

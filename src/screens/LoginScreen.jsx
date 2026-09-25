@@ -3,7 +3,6 @@ import { Box, Typography, TextField, Avatar, Button, IconButton, Chip, Dialog, L
 import { Refresh, ChevronLeft } from '@mui/icons-material';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
-import { supabase } from '../services/supabaseClient';
 import GenreChips from '../components/GenreChips';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { allLanguages } from '../data/languages';
@@ -111,28 +110,36 @@ export default function LoginScreen() {
     }, 600);
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setIsLoggingIn(true);
 
-    // Save whatever the user has filled in so far — if they completed the form,
-    // App.jsx will push this to Supabase after redirect. If they haven't,
-    // App.jsx will detect the empty genres and keep them on the onboarding screen.
-    if (nameInput.trim()) setUserName(nameInput);
-    if (avatarPreview) setAvatar(avatarPreview);
-    if (genresInput.length > 0) {
-      useStore.setState({ selectedGenres: genresInput, selectedLanguages: languagesInput });
-    }
-    
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/home`
-      }
-    });
-    if (error) {
-      console.error(error);
+    const finalName = nameInput.trim() || 'Movie Lover';
+    const finalAvatar = avatarPreview || `https://api.dicebear.com/7.x/avataaars/svg?seed=cinemora`;
+    const finalGenres = genresInput.length > 0 ? genresInput : ['Action', 'Sci-Fi'];
+    const finalLanguages = languagesInput.length > 0 ? languagesInput : ['en'];
+
+    setUserName(finalName);
+    setAvatar(finalAvatar);
+    setStoreGenres(finalGenres);
+    setSelectedLanguages(finalLanguages);
+
+    setTimeout(() => {
+      useStore.setState({
+        session: {
+          user: {
+            id: 'local-user',
+            email: 'user@cinemora.app',
+            user_metadata: {
+              full_name: finalName,
+              avatar_url: finalAvatar
+            }
+          }
+        },
+        isOnboarded: true
+      });
       setIsLoggingIn(false);
-    }
+      navigate('/home');
+    }, 450);
   };
 
   const isFormValid = genresInput.length > 0 && nameInput.trim().length > 0;

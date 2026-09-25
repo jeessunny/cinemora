@@ -1,4 +1,3 @@
-import { supabase } from './supabaseClient';
 import useStore from '../store';
 
 // Maps genre IDs to names (TMDB mapping)
@@ -25,45 +24,41 @@ const GENRE_ID_TO_NAME = {
 };
 
 /**
- * Custom Recommendation Algorithm
- * 1. Fetches all user activity (views, favorites, history).
- * 2. Tallies the weights per genre.
+ * Recommendation Algorithm (Local & Offline Capable)
+ * 1. Reads local user activity (history, favorites, watchlist) from store.
+ * 2. Tallies the weights per genre and language.
  * 3. Returns the top genres for the user based on behavior.
- * 4. Falls back to their explicitly selected onboarding genres if no activity exists.
+ * 4. Falls back to their selected onboarding genres and languages.
  */
 export const getRecommendationData = async () => {
-  const { session, selectedGenres, selectedLanguages } = useStore.getState();
-  
-  const fallbackLanguage = selectedLanguages?.length > 0 ? selectedLanguages[0] : 'en';
-  
-  if (!session?.user) {
-    return { topGenres: selectedGenres, topLanguages: selectedLanguages?.length > 0 ? selectedLanguages : ['en'] };
-  }
+  const { selectedGenres = [], selectedLanguages = [], history = [], favorites = [], watchlist = [] } = useStore.getState();
 
-  const { data: activity, error } = await supabase
-    .from('user_activity')
-    .select('genres, weight, original_language')
-    .eq('user_id', session.user.id);
-
-  if (error || !activity || activity.length === 0) {
-    return { topGenres: selectedGenres, topLanguages: selectedLanguages?.length > 0 ? selectedLanguages : ['en'] };
-  }
-
-  // Calculate scores
   const genreScores = {};
   const languageScores = {};
-  
-  activity.forEach(row => {
-    if (row.genres && Array.isArray(row.genres)) {
-      row.genres.forEach(genreId => {
-        const genreName = GENRE_ID_TO_NAME[genreId] || String(genreId);
-        genreScores[genreName] = (genreScores[genreName] || 0) + row.weight;
+
+  const processMovie = (movie, weight) => {
+    if (!movie) return;
+    if (Array.isArray(movie.genres)) {
+      movie.genres.forEach(g => {
+        const name = typeof g === 'string' ? g : (GENRE_ID_TO_NAME[g] || String(g));
+        genreScores[name] = (genreScores[name] || 0) + weight;
+      });
+    } else if (Array.isArray(movie.genre_ids)) {
+      movie.genre_ids.forEach(id => {
+        const name = GENRE_ID_TO_NAME[id] || String(id);
+        genreScores[name] = (genreScores[name] || 0) + weight;
       });
     }
-    if (row.original_language) {
-      languageScores[row.original_language] = (languageScores[row.original_language] || 0) + row.weight;
+
+    const lang = movie.original_language;
+    if (lang && typeof lang === 'string') {
+      languageScores[lang] = (languageScores[lang] || 0) + weight;
     }
-  });
+  };
+
+  history.forEach(m => processMovie(m, 5));
+  favorites.forEach(m => processMovie(m, 4));
+  watchlist.forEach(m => processMovie(m, 2));
 
   // Sort by highest score
   const sortedGenres = Object.entries(genreScores)
@@ -74,10 +69,11 @@ export const getRecommendationData = async () => {
     .sort(([, a], [, b]) => b - a)
     .map(([lang]) => lang);
 
-  const topGenres = sortedGenres.length > 0 ? sortedGenres.slice(0, 3) : selectedGenres;
-  
-  // TMDB with_original_language only accepts a single language string, NOT pipe-separated
-  const topLanguages = Array.from(new Set([...sortedLanguages.slice(0, 3), ...(selectedLanguages || [])]));
+  const topGenres = sortedGenres.length > 0
+    ? Array.from(new Set([...sortedGenres.slice(0, 3), ...(selectedGenres || [])]))
+    : (selectedGenres && selectedGenres.length > 0 ? selectedGenres : ['Action']);
+
+  const topLanguages = Array.from(new Set([...sortedLanguages.slice(0, 3), ...(selectedLanguages || ['en'])]));
 
   return { topGenres, topLanguages };
 };

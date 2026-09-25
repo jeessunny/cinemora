@@ -1,10 +1,30 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase URL or Anon Key is missing. Supabase features will not work.")
-}
-
-export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder')
+// Local mock Supabase client — Supabase integration temporarily bypassed for offline/demo mode
+export const supabase = {
+  auth: {
+    getSession: async () => ({ data: { session: null }, error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signInWithOAuth: async () => ({ data: null, error: null }),
+    signOut: async () => ({ error: null }),
+    getUser: async () => ({ data: { user: null }, error: null })
+  },
+  from: () => ({
+    select: () => ({
+      eq: () => ({
+        single: async () => ({ data: null, error: null }),
+        then: (resolve) => resolve({ data: [], error: null })
+      }),
+      single: async () => ({ data: null, error: null }),
+      then: (resolve) => resolve({ data: [], error: null })
+    }),
+    insert: async () => ({ data: null, error: null }),
+    upsert: async () => ({ data: null, error: null }),
+    update: () => ({
+      eq: async () => ({ data: null, error: null }),
+      match: async () => ({ data: null, error: null })
+    }),
+    delete: () => ({
+      eq: async () => ({ data: null, error: null }),
+      match: async () => ({ data: null, error: null })
+    })
+  })
+};
