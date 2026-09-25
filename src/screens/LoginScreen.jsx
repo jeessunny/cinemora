@@ -36,7 +36,6 @@ export default function LoginScreen() {
   const [languagesInput, setLanguagesInput] = useState(storeLanguages || []);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [tmdbLanguages, setTmdbLanguages] = useState(allLanguages);
   const [langDialogOpen, setLangDialogOpen] = useState(false);
   const [langSearchQuery, setLangSearchQuery] = useState('');
@@ -110,9 +109,9 @@ export default function LoginScreen() {
     }, 600);
   };
 
-  const handleGoogleLogin = () => {
-    setIsLoggingIn(true);
+  const isFormValid = genresInput.length > 0 && nameInput.trim().length > 0;
 
+  const handleSaveOrStart = () => {
     const finalName = nameInput.trim() || 'Movie Lover';
     const finalAvatar = avatarPreview || `https://api.dicebear.com/7.x/avataaars/svg?seed=cinemora`;
     const finalGenres = genresInput.length > 0 ? genresInput : ['Action', 'Sci-Fi'];
@@ -122,43 +121,25 @@ export default function LoginScreen() {
     setAvatar(finalAvatar);
     setStoreGenres(finalGenres);
     setSelectedLanguages(finalLanguages);
+    setOnboarded(true);
 
-    setTimeout(() => {
-      useStore.setState({
-        session: {
-          user: {
-            id: 'local-user',
-            email: 'user@cinemora.app',
-            user_metadata: {
-              full_name: finalName,
-              avatar_url: finalAvatar
-            }
+    useStore.setState({
+      session: {
+        user: {
+          id: 'local-user',
+          email: 'user@cinemora.app',
+          user_metadata: {
+            full_name: finalName,
+            avatar_url: finalAvatar
           }
-        },
-        isOnboarded: true
-      });
-      setIsLoggingIn(false);
-      navigate('/home');
-    }, 450);
-  };
-
-  const isFormValid = genresInput.length > 0 && nameInput.trim().length > 0;
-
-  const handleSubmit = () => {
-    if (isFormValid) {
-      setUserName(nameInput);
-      setAvatar(avatarPreview);
-      
-      // Update global store AND trigger Supabase sync
-      setStoreGenres(genresInput);
-      setSelectedLanguages(languagesInput);
-      
-      setOnboarded(true);
-      if (isEditing) {
-        navigate('/settings', { replace: true });
-      } else {
-        navigate('/home');
+        }
       }
+    });
+
+    if (isEditing) {
+      navigate('/settings', { replace: true });
+    } else {
+      navigate('/home');
     }
   };
 
@@ -451,58 +432,29 @@ export default function LoginScreen() {
           )}
         </Box>
       </Dialog>
-      {(!session && !isEditing) ? (
-        <Box sx={{ mt: 'auto', pt: 2, pb: 2, width: '100%', display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            size="large"
-            disabled={!!isLoggingIn}
-            onClick={handleGoogleLogin}
-            sx={{ 
-              py: 1.6, 
-              borderRadius: '8px', 
-              fontSize: '16px',
-              fontWeight: 700,
-              textTransform: 'none',
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              }
-            }}
-          >
-            {isLoggingIn ? 'Connecting...' : 'Continue with Google'}
-          </Button>
-          <Typography variant="caption" sx={{ textAlign: 'center', color: 'text.secondary', mt: -0.5 }}>
-            Sign in or create a new account automatically
-          </Typography>
-        </Box>
-      ) : (
-        <Box sx={{ mt: 'auto', pt: 2, pb: 2, width: '100%' }}>
-          <Button
-            variant="contained"
-            fullWidth
-            size="large"
-            disabled={!isFormValid}
-            onClick={handleSubmit}
-            sx={{ 
-              py: 1.6, 
-              borderRadius: '8px', 
-              fontSize: '16px',
-              fontWeight: 700,
-              textTransform: 'none',
-              bgcolor: isFormValid ? 'primary.main' : 'action.disabledBackground',
-              color: isFormValid ? 'primary.contrastText' : 'action.disabled',
-              '&:hover': {
-                bgcolor: 'primary.dark'
-              }
-            }}
-          >
-            {isEditing ? 'Save Changes' : 'Complete Setup'}
-          </Button>
-        </Box>
-      )}
+      <Box sx={{ mt: 'auto', pt: 2, pb: 2, width: '100%' }}>
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          disabled={isEditing && !isFormValid}
+          onClick={handleSaveOrStart}
+          sx={{ 
+            py: 1.6, 
+            borderRadius: '8px', 
+            fontSize: '16px',
+            fontWeight: 700,
+            textTransform: 'none',
+            bgcolor: (isEditing && !isFormValid) ? 'action.disabledBackground' : 'primary.main',
+            color: (isEditing && !isFormValid) ? 'action.disabled' : 'primary.contrastText',
+            '&:hover': {
+              bgcolor: 'primary.dark'
+            }
+          }}
+        >
+          {isEditing ? 'Save Changes' : 'Get Started'}
+        </Button>
+      </Box>
 
       {/* Discard changes dialog matches Yes/No format */}
       <ConfirmDialog
