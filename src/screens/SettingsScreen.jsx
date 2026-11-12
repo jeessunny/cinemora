@@ -6,8 +6,10 @@ import {
 import { 
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
-  Animation, ViewDay, Search, Settings, Logout, DeleteForever
+  Animation, ViewDay, Search, Settings, Logout, DeleteForever,
+  SystemUpdate, InfoOutlined, OpenInNew
 } from '@mui/icons-material';
+import updateManager, { CURRENT_VERSION } from '../services/updater';
 import { useNavigate } from 'react-router-dom';
 import {
   DndContext,
@@ -367,6 +369,34 @@ export default function SettingsScreen() {
             ))}
           </SortableContext>
         </DndContext>
+      </List>
+
+      {/* ═══════ UPDATES & ABOUT ═══════ */}
+      {sectionTitle('Updates & About')}
+      <List sx={{ bgcolor: 'surface.surfaceContainer', borderRadius: '16px', overflow: 'hidden', mb: 1 }}>
+        <ListItemButton sx={{ py: 2 }} onClick={() => updateManager.checkForUpdates(true)}>
+          <ListItemIcon sx={{ minWidth: 40 }}><SystemUpdate color="primary" /></ListItemIcon>
+          <ListItemText 
+            primary="Check for Updates" 
+            secondary={`Current version: v${CURRENT_VERSION}`}
+            primaryTypographyProps={{ fontWeight: 600 }}
+            secondaryTypographyProps={{ fontSize: '12px' }}
+          />
+        </ListItemButton>
+        <Divider />
+        <ListItemButton 
+          sx={{ py: 2 }} 
+          onClick={() => window.open('https://github.com/jeessunny/cinemora', '_blank')}
+        >
+          <ListItemIcon sx={{ minWidth: 40 }}><InfoOutlined /></ListItemIcon>
+          <ListItemText 
+            primary="About Cinemora" 
+            secondary="Native Movie Discovery • GitHub Release"
+            primaryTypographyProps={{ fontWeight: 600 }}
+            secondaryTypographyProps={{ fontSize: '12px' }}
+          />
+          <OpenInNew sx={{ fontSize: 18, color: 'text.secondary' }} />
+        </ListItemButton>
       </List>
 
       {/* ═══════ DATA ═══════ */}

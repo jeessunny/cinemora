@@ -1,0 +1,129 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Signed Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm ci || npm install
+
+      - name: Build Web Assets (Vite)
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/v') }}
+
+      - name: Make gradlew Executable
+        run: chmod +x android/gradlew
+
+      - name: Configure Keystore
+        id: decode_keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_ALIAS_SECRET: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD_SECRET: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD_SECRET: ${{ secrets.STORE_PASSWORD }}
+        run: |
+          mkdir -p android/app/keystore
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding keystore from repository secrets..."
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/keystore/release.jks
+            echo "KEY_ALIAS=$KEY_ALIAS_SECRET" >> "$GITHUB_ENV"
+            echo "KEY_PASSWORD=$KEY_PASSWORD_SECRET" >> "$GITHUB_ENV"
+            echo "STORE_PASSWORD=$STORE_PASSWORD_SECRET" >> "$GITHUB_ENV"
+          elif [ -f "android/app/keystore/release.jks" ]; then
+            echo "Using existing repository release.jks..."
+            echo "KEY_ALIAS=cinemora" >> "$GITHUB_ENV"
+            echo "KEY_PASSWORD=cinemora_release_pass" >> "$GITHUB_ENV"
+            echo "STORE_PASSWORD=cinemora_release_pass" >> "$GITHUB_ENV"
+          else
+            echo "Generating fallback release keystore..."
+            keytool -genkeypair -v -keystore android/app/keystore/release.jks \
+              -alias cinemora -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass cinemora_release_pass -keypass cinemora_release_pass \
+              -dname "CN=Cinemora, OU=Mobile, O=Development, C=US"
+            echo "KEY_ALIAS=cinemora" >> "$GITHUB_ENV"
+            echo "KEY_PASSWORD=cinemora_release_pass" >> "$GITHUB_ENV"
+            echo "STORE_PASSWORD=cinemora_release_pass" >> "$GITHUB_ENV"
+          fi
+          echo "KEYSTORE_FILE=keystore/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build Release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Locate & Rename Release APK
+        id: prepare_apk
+        run: |
+          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "Error: No release APK found!"
+            exit 1
+          fi
+          echo "Found APK: $APK_PATH"
+          mkdir -p release_output
+          TARGET_PATH="release_output/cinemora-release.apk"
+          cp "$APK_PATH" "$TARGET_PATH"
+          sha256sum "$TARGET_PATH" > "$TARGET_PATH.sha256"
+          echo "apk_path=$TARGET_PATH" >> "$GITHUB_OUTPUT"
+          echo "checksum_path=$TARGET_PATH.sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Signed APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinemora-release-apk
+          path: |
+            release_output/cinemora-release.apk
+            release_output/cinemora-release.apk.sha256
+          retention-days: 14
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release_output/cinemora-release.apk
+            release_output/cinemora-release.apk.sha256
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

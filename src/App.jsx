@@ -1,9 +1,13 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, Box, CircularProgress } from '@mui/material';
 import { getTheme } from './theme';
 import useStore from './store';
 import NavBar from './components/NavBar';
+import UpdateDialog from './components/UpdateDialog';
+import updateManager from './services/updater';
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
@@ -92,6 +96,38 @@ const AnimatedPage = ({ children }) => {
   );
 };
 
+const BackButtonHandler = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let backListener = null;
+    CapApp.addListener('backButton', () => {
+      if (updateManager.state.showDialog) {
+        updateManager.dismissDialog();
+        return;
+      }
+      if (location.pathname === '/home' || location.pathname === '/') {
+        CapApp.exitApp();
+      } else {
+        navigate(-1);
+      }
+    }).then((listener) => {
+      backListener = listener;
+    });
+
+    return () => {
+      if (backListener && backListener.remove) {
+        backListener.remove();
+      }
+    };
+  }, [location, navigate]);
+
+  return null;
+};
+
 const Layout = ({ children }) => {
   const location = useLocation();
   // Support hiding navigation on Login (/) and MovieDetails routes
@@ -99,8 +135,10 @@ const Layout = ({ children }) => {
   
   return (
     <>
+      <BackButtonHandler />
       <AnimatedPage>{children}</AnimatedPage>
       {!hideNav && <NavBar />}
+      <UpdateDialog />
     </>
   );
 };
@@ -132,6 +170,15 @@ export default function App() {
   const accentColor = useStore(state => state.accentColor);
   // State to hold active resolved theme mode
   const [resolvedMode, setResolvedMode] = useState('dark');
+
+  // Check for updates silently in background on boot
+  useEffect(() => {
+    try {
+      updateManager.checkForUpdates(false);
+    } catch (e) {
+      console.warn('Initial update check error:', e);
+    }
+  }, []);
 
   // Listen to system theme preferences when mode is 'system'
   useEffect(() => {

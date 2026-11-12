@@ -68,6 +68,11 @@ export const mapMovie = (m) => ({
   })) || []
 });
 
+// Determine API Base URL — if running inside native APK or localhost, route to production proxy
+const API_BASE_URL = (typeof window !== 'undefined' && window.location.origin && window.location.origin.includes('vercel.app'))
+  ? window.location.origin
+  : 'https://cinemora-jeessunnys-projects.vercel.app';
+
 // Core fetch function — routes through /api/tmdb proxy with caching + dedup
 const fetchTMDB = async (path, extraParams = {}) => {
   const cacheKey = `${path}?${JSON.stringify(extraParams)}`;
@@ -80,7 +85,7 @@ const fetchTMDB = async (path, extraParams = {}) => {
   if (inFlight.has(cacheKey)) return inFlight.get(cacheKey);
 
   const request = (async () => {
-    const url = new URL('/api/tmdb', window.location.origin);
+    const url = new URL('/api/tmdb', API_BASE_URL);
     url.searchParams.append('path', path);
     if (Object.keys(extraParams).length > 0) {
       url.searchParams.append('query', JSON.stringify(extraParams));

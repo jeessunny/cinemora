@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#E50914</color>
+    <color name="colorPrimaryDark">#0F0D0D</color>
+    <color name="colorAccent">#E50914</color>
+    <color name="cinemora_bg">#0F0D0D</color>
+    <color name="cinemora_surface">#181818</color>
+</resources>
