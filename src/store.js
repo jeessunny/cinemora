@@ -21,7 +21,8 @@ const useStore = create(
       watchlist: [],
       favorites: [],
       history: [],
-      themeMode: 'system', // Default to system theme
+      themeMode: 'system', // 'system' | 'dark' | 'light' | 'black'
+      amoledBlack: false, // Pure pitch black mode
       isOnboarded: false,
       recentSearches: [],
 
@@ -38,6 +39,7 @@ const useStore = create(
         userName: profile.user_name || state.userName,
         avatar: profile.avatar_url || state.avatar,
         themeMode: profile.theme_mode || state.themeMode,
+        amoledBlack: profile.amoled_black !== undefined ? profile.amoled_black : state.amoledBlack,
         accentColor: profile.accent_color || state.accentColor,
         animationsEnabled: profile.animations_enabled !== null ? profile.animations_enabled : state.animationsEnabled,
         navSettingsEnabled: profile.nav_settings_enabled !== null ? profile.nav_settings_enabled : state.navSettingsEnabled,
@@ -48,6 +50,7 @@ const useStore = create(
         homeSections: profile.home_sections || state.homeSections,
       })),
       setAccentColor: (color) => set({ accentColor: color }),
+      setAmoledBlack: (val) => set({ amoledBlack: val }),
       setFloatingNavBar: (val) => set({ floatingNavBar: val }),
       setAnimationsEnabled: (val) => set({ animationsEnabled: val }),
       setNavSearchEnabled: (val) => set({ navSearchEnabled: val }),
@@ -81,6 +84,7 @@ const useStore = create(
         isOnboarded: false,
         recentSearches: [],
         themeMode: 'system',
+        amoledBlack: false,
         accentColor: '#E50914',
         floatingNavBar: true,
         homeSections: DEFAULT_SECTIONS,

@@ -7,7 +7,7 @@ import {
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
   Animation, ViewDay, Search, Settings, Logout, DeleteForever,
-  SystemUpdate, InfoOutlined, OpenInNew
+  SystemUpdate, InfoOutlined, OpenInNew, Brightness2
 } from '@mui/icons-material';
 import updateManager, { CURRENT_VERSION } from '../services/updater';
 import { useNavigate } from 'react-router-dom';
@@ -113,6 +113,8 @@ export default function SettingsScreen() {
   const selectedGenres = useStore(state => state.selectedGenres) || [];
   const themeMode = useStore(state => state.themeMode);
   const setThemeMode = useStore(state => state.setThemeMode);
+  const amoledBlack = useStore(state => state.amoledBlack);
+  const setAmoledBlack = useStore(state => state.setAmoledBlack);
   const clearHistory = useStore(state => state.clearHistory);
   const resetRecommendations = useStore(state => state.resetRecommendations);
   const setOnboarded = useStore(state => state.setOnboarded);
@@ -251,8 +253,32 @@ export default function SettingsScreen() {
             options={[
               { label: 'Light', value: 'light' },
               { label: 'System', value: 'system' },
-              { label: 'Dark', value: 'dark' }
+              { label: 'Dark', value: 'dark' },
+              { label: 'Pitch Black', value: 'black' }
             ]}
+          />
+        </ListItem>
+
+        <Divider />
+
+        {/* Pitch Black / AMOLED Toggle */}
+        <ListItem sx={{ py: 1.5, px: 2 }}>
+          <ListItemIcon sx={{ minWidth: 40 }}><Brightness2 color="primary" /></ListItemIcon>
+          <ListItemText 
+            primary="Pure Pitch Black (AMOLED)" 
+            secondary="Pure #000000 black surfaces for OLED battery saving"
+            primaryTypographyProps={{ fontWeight: 600 }} 
+            secondaryTypographyProps={{ fontSize: '12px' }}
+          />
+          <Switch 
+            checked={!!amoledBlack || themeMode === 'black'} 
+            onChange={(e) => {
+              setAmoledBlack(e.target.checked);
+              if (e.target.checked && themeMode === 'light') {
+                setThemeMode('dark');
+              }
+            }}
+            color="primary"
           />
         </ListItem>
 
@@ -371,7 +397,30 @@ export default function SettingsScreen() {
         </DndContext>
       </List>
 
-      {/* ═══════ UPDATES & ABOUT ═══════ */}
+      {/* ═══════ DATA ═══════ */}
+      {sectionTitle('Data')}
+      <List sx={{ bgcolor: 'surface.surfaceContainer', borderRadius: '16px', overflow: 'hidden', mb: 1 }}>
+        <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('history')}>
+          <ListItemIcon sx={{ minWidth: 40 }}><DeleteSweep /></ListItemIcon>
+          <ListItemText primary="Clear Watch History" primaryTypographyProps={{ fontWeight: 600 }} />
+        </ListItemButton>
+        
+        <Divider />
+        
+        <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('reset')}>
+          <ListItemIcon sx={{ minWidth: 40 }}><RestartAlt color="error" /></ListItemIcon>
+          <ListItemText primary="Reset Recommendations" primaryTypographyProps={{ color: 'error', fontWeight: 600 }} />
+        </ListItemButton>
+        
+        <Divider />
+        
+        <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('delete')}>
+          <ListItemIcon sx={{ minWidth: 40 }}><DeleteForever color="error" /></ListItemIcon>
+          <ListItemText primary="Delete Account" primaryTypographyProps={{ color: 'error', fontWeight: 600 }} />
+        </ListItemButton>
+      </List>
+
+      {/* ═══════ UPDATES & ABOUT (LAST SECTION) ═══════ */}
       {sectionTitle('Updates & About')}
       <List sx={{ bgcolor: 'surface.surfaceContainer', borderRadius: '16px', overflow: 'hidden', mb: 1 }}>
         <ListItemButton sx={{ py: 2 }} onClick={() => updateManager.checkForUpdates(true)}>
@@ -399,32 +448,9 @@ export default function SettingsScreen() {
         </ListItemButton>
       </List>
 
-      {/* ═══════ DATA ═══════ */}
-      {sectionTitle('Data')}
-      <List sx={{ bgcolor: 'surface.surfaceContainer', borderRadius: '16px', overflow: 'hidden', mb: 1 }}>
-        <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('history')}>
-          <ListItemIcon sx={{ minWidth: 40 }}><DeleteSweep /></ListItemIcon>
-          <ListItemText primary="Clear Watch History" primaryTypographyProps={{ fontWeight: 600 }} />
-        </ListItemButton>
-        
-        <Divider />
-        
-        <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('reset')}>
-          <ListItemIcon sx={{ minWidth: 40 }}><RestartAlt color="error" /></ListItemIcon>
-          <ListItemText primary="Reset Recommendations" primaryTypographyProps={{ color: 'error', fontWeight: 600 }} />
-        </ListItemButton>
-        
-        <Divider />
-        
-        <ListItemButton sx={{ py: 2 }} onClick={() => setConfirmDialog('delete')}>
-          <ListItemIcon sx={{ minWidth: 40 }}><DeleteForever color="error" /></ListItemIcon>
-          <ListItemText primary="Delete Account" primaryTypographyProps={{ color: 'error', fontWeight: 600 }} />
-        </ListItemButton>
-      </List>
-
       <Typography variant="labelMedium" color="text.secondary" align="center" 
         sx={{ mt: 4, display: 'block', opacity: 0.6 }}>
-        Cinemora v2.1.0
+        Cinemora v{CURRENT_VERSION} (Native)
       </Typography>
 
       <ConfirmDialog

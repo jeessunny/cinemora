@@ -8,8 +8,7 @@ import UpdateDialog from './components/UpdateDialog';
 import updateManager from './services/updater';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
+import { StatusBar } from '@capacitor/status-bar';
 
 // Lazy-loaded screens — each is a separate JS chunk loaded on demand
 const LoginScreen = lazy(() => import('./screens/LoginScreen'));
@@ -167,9 +166,22 @@ try {
 
 export default function App() {
   const themeMode = useStore(state => state.themeMode);
+  const amoledBlack = useStore(state => state.amoledBlack);
   const accentColor = useStore(state => state.accentColor);
   // State to hold active resolved theme mode
   const [resolvedMode, setResolvedMode] = useState('dark');
+
+  // Configure native status bar — hide and merge edge-to-edge
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        StatusBar.setOverlaysWebView({ overlay: true });
+        StatusBar.hide();
+      } catch (e) {
+        console.warn('Status bar configuration error:', e);
+      }
+    }
+  }, []);
 
   // Check for updates silently in background on boot
   useEffect(() => {
@@ -180,19 +192,23 @@ export default function App() {
     }
   }, []);
 
-  // Listen to system theme preferences when mode is 'system'
+  // Listen to system theme preferences when mode is 'system', support pure pitch black
   useEffect(() => {
-    if (themeMode === 'system') {
+    if (themeMode === 'black') {
+      setResolvedMode('black');
+    } else if (themeMode === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      setResolvedMode(mediaQuery.matches ? 'dark' : 'light');
+      setResolvedMode(mediaQuery.matches ? (amoledBlack ? 'black' : 'dark') : 'light');
 
-      const listener = (e) => setResolvedMode(e.matches ? 'dark' : 'light');
+      const listener = (e) => setResolvedMode(e.matches ? (amoledBlack ? 'black' : 'dark') : 'light');
       mediaQuery.addEventListener('change', listener);
       return () => mediaQuery.removeEventListener('change', listener);
+    } else if (themeMode === 'dark') {
+      setResolvedMode(amoledBlack ? 'black' : 'dark');
     } else {
-      setResolvedMode(themeMode);
+      setResolvedMode('light');
     }
-  }, [themeMode]);
+  }, [themeMode, amoledBlack]);
 
   // Disable all animations globally if user turns them off
   const animationsEnabled = useStore(state => state.animationsEnabled);
@@ -209,7 +225,8 @@ export default function App() {
     document.documentElement.style.setProperty('--accent-color', accentColor);
   }, [accentColor]);
 
-  const theme = getTheme(resolvedMode, accentColor);
+  const isPitchBlack = resolvedMode === 'black' || amoledBlack;
+  const theme = getTheme(resolvedMode, accentColor, isPitchBlack);
 
   return (
     <ErrorBoundary>
@@ -232,8 +249,6 @@ export default function App() {
             </Suspense>
           </Layout>
         </BrowserRouter>
-        <Analytics />
-        <SpeedInsights />
       </ThemeProvider>
     </ErrorBoundary>
   );

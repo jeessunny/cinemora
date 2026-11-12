@@ -18,7 +18,7 @@ const lightenHex = (hex, percent) => {
   return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
 };
 
-const getDarkPalette = (accent) => ({
+const getDarkPalette = (accent, isPitchBlack = false) => ({
   mode: 'dark',
   primary: {
     main: accent,
@@ -27,7 +27,7 @@ const getDarkPalette = (accent) => ({
     contrastText: '#FFFFFF',
   },
   secondary: {
-    main: '#2F2F2F',
+    main: isPitchBlack ? '#121212' : '#2F2F2F',
     light: '#4F4F4F',
     dark: '#1A1A1A',
     contrastText: '#FFFFFF',
@@ -44,22 +44,22 @@ const getDarkPalette = (accent) => ({
     contrastText: '#FFFFFF',
   },
   background: {
-    default: '#0F0D0D',
-    paper: '#181818',
+    default: isPitchBlack ? '#000000' : '#0F0D0D',
+    paper: isPitchBlack ? '#000000' : '#181818',
   },
   surface: {
-    main: '#0F0D0D',
-    surfaceContainerLow: '#141414',
-    surfaceContainer: '#181818',
-    surfaceContainerHigh: '#202020',
-    surfaceContainerHighest: '#282828',
+    main: isPitchBlack ? '#000000' : '#0F0D0D',
+    surfaceContainerLow: isPitchBlack ? '#050505' : '#141414',
+    surfaceContainer: isPitchBlack ? '#0A0A0A' : '#181818',
+    surfaceContainerHigh: isPitchBlack ? '#121212' : '#202020',
+    surfaceContainerHighest: isPitchBlack ? '#1A1A1A' : '#282828',
   },
   text: {
     primary: '#FFFFFF',
     secondary: '#B3B3B3',
     disabled: '#7F7F7F',
   },
-  divider: 'rgba(255, 255, 255, 0.1)',
+  divider: isPitchBlack ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.1)',
 });
 
 const getLightPalette = (accent) => ({
@@ -133,87 +133,92 @@ const shape = {
   small: 8,
 };
 
-export const getTheme = (mode, accentColor = '#E50914') => createTheme({
-  palette: mode === 'dark' ? getDarkPalette(accentColor) : getLightPalette(accentColor),
-  typography,
-  shape,
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        body: {
-          backgroundColor: mode === 'dark' ? '#0F0D0D' : '#FFFFFF',
-          color: mode === 'dark' ? '#FFFFFF' : '#121212',
-          transition: 'background-color 0.3s ease, color 0.3s ease',
+export const getTheme = (mode, accentColor = '#E50914', isPitchBlack = false) => {
+  const isDark = mode === 'dark' || mode === 'black';
+  const effectivePitchBlack = isPitchBlack || mode === 'black';
+
+  return createTheme({
+    palette: isDark ? getDarkPalette(accentColor, effectivePitchBlack) : getLightPalette(accentColor),
+    typography,
+    shape,
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            backgroundColor: effectivePitchBlack ? '#000000' : (isDark ? '#0F0D0D' : '#FFFFFF'),
+            color: isDark ? '#FFFFFF' : '#121212',
+            transition: 'background-color 0.2s ease, color 0.2s ease',
+          },
         },
       },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-          textTransform: 'none',
-          padding: '10px 24px',
-          fontWeight: 600,
-          transition: 'all 0.2s ease',
-          boxShadow: 'none !important',
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: 'none',
+            padding: '10px 24px',
+            fontWeight: 600,
+            transition: 'all 0.2s ease',
+            boxShadow: 'none !important',
+          },
+          contained: {
+            boxShadow: 'none !important',
+            '&:hover': {
+              boxShadow: 'none !important',
+            },
+          },
         },
-        contained: {
-          boxShadow: 'none !important',
-          '&:hover': {
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            backgroundImage: 'none !important',
+            boxShadow: 'none !important',
+            border: 'none !important',
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none !important',
             boxShadow: 'none !important',
           },
         },
       },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          backgroundImage: 'none !important',
-          boxShadow: 'none !important',
-          border: 'none !important',
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: 6,
+            transition: 'all 0.2s ease',
+          },
         },
       },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none !important',
-          boxShadow: 'none !important',
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            borderRadius: 16,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5) !important',
+          },
         },
       },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          borderRadius: 6,
-          transition: 'all 0.2s ease',
+      MuiBottomNavigation: {
+        styleOverrides: {
+          root: {
+            backgroundColor: effectivePitchBlack ? '#000000' : (isDark ? '#141414' : '#F1F3F5'),
+          },
         },
       },
-    },
-    MuiDialog: {
-      styleOverrides: {
-        paper: {
-          borderRadius: 16,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5) !important',
-        },
-      },
-    },
-    MuiBottomNavigation: {
-      styleOverrides: {
-        root: {
-          backgroundColor: mode === 'dark' ? '#141414' : '#F1F3F5',
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 8,
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 8,
+            },
           },
         },
       },
     },
-  },
-});
+  });
+};
