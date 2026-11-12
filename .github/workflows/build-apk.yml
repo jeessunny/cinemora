@@ -100,9 +100,9 @@ jobs:
           mkdir -p release_output
           TARGET_PATH="release_output/cinemora-release.apk"
           cp "$APK_PATH" "$TARGET_PATH"
-          sha256sum "$TARGET_PATH" > "$TARGET_PATH.sha256"
+          (cd release_output && sha256sum cinemora-release.apk > cinemora-release.apk.sha256)
           echo "apk_path=$TARGET_PATH" >> "$GITHUB_OUTPUT"
-          echo "checksum_path=$TARGET_PATH.sha256" >> "$GITHUB_OUTPUT"
+          echo "checksum_path=release_output/cinemora-release.apk.sha256" >> "$GITHUB_OUTPUT"
 
       - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
