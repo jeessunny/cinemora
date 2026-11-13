@@ -117,22 +117,30 @@ export default function LibraryScreen() {
         { label: 'All', value: 'all', count: counts.all },
         { label: 'Movies', value: 'movie', count: counts.movies },
         { label: 'Series', value: 'tv', count: counts.series },
-      ].map((chip) => (
-        <Chip
-          key={chip.value}
-          label={`${chip.label} (${chip.count})`}
-          onClick={() => setCategory(chip.value)}
-          variant={category === chip.value ? 'filled' : 'outlined'}
-          color={category === chip.value ? 'primary' : 'default'}
-          sx={{
-            fontWeight: 700,
-            fontSize: '12px',
-            height: 32,
-            borderRadius: '16px',
-            transition: 'all 0.25s ease',
-          }}
-        />
-      ))}
+      ].map((chip) => {
+        const isSelected = category === chip.value;
+        return (
+          <Chip
+            key={chip.value}
+            label={`${chip.label} (${chip.count})`}
+            onClick={() => setCategory(chip.value)}
+            sx={{
+              fontWeight: 700,
+              fontSize: '12px',
+              height: 32,
+              borderRadius: '16px',
+              transition: 'all 0.25s ease',
+              bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainerLow',
+              color: isSelected ? 'primary.contrastText' : 'text.secondary',
+              border: '1px solid',
+              borderColor: isSelected ? 'primary.main' : 'divider',
+              '&:hover': {
+                bgcolor: isSelected ? 'primary.main' : 'surface.surfaceContainerHigh',
+              }
+            }}
+          />
+        );
+      })}
     </Box>
   );
 
@@ -151,6 +159,8 @@ export default function LibraryScreen() {
           width: '100%',
           borderRadius: '14px',
           bgcolor: 'surface.surfaceContainerHigh',
+          border: '1px solid',
+          borderColor: 'divider',
           transition: 'background-color 0.3s ease',
         }}
       >
@@ -158,14 +168,25 @@ export default function LibraryScreen() {
           <Search sx={{ fontSize: 20, color: 'text.secondary' }} />
         </IconButton>
         <InputBase
-          sx={{ flex: 1, fontSize: '14px' }}
+          sx={{ 
+            flex: 1, 
+            fontSize: '14px',
+            color: 'text.primary',
+            '& .MuiInputBase-input': {
+              color: 'text.primary',
+              '&::placeholder': {
+                color: 'text.secondary',
+                opacity: 0.8
+              }
+            }
+          }}
           placeholder="Search history..."
           value={historySearch}
           onChange={(e) => setHistorySearch(e.target.value)}
         />
         {historySearch && (
           <IconButton sx={{ p: '8px' }} aria-label="clear" onClick={() => setHistorySearch('')}>
-            <Clear sx={{ fontSize: 18 }} />
+            <Clear sx={{ fontSize: 18, color: 'text.secondary' }} />
           </IconButton>
         )}
       </Paper>
@@ -228,7 +249,16 @@ export default function LibraryScreen() {
   };
 
   return (
-    <Box sx={{ pb: 12, p: 2, display: 'flex', flexDirection: 'column', minHeight: '100vh', boxSizing: 'border-box' }}>
+    <Box sx={{ 
+      pb: 12, 
+      p: 2, 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      boxSizing: 'border-box',
+      bgcolor: 'background.default',
+      color: 'text.primary',
+    }}>
       {/* Title */}
       <Typography
         variant="headlineMedium"

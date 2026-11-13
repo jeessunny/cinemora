@@ -12,6 +12,8 @@ export default function SegmentedButton({ value, onChange, options, fullWidth = 
         fullWidth={fullWidth}
         sx={{
           bgcolor: 'surface.surfaceContainerLow',
+          border: '1px solid',
+          borderColor: 'divider',
           borderRadius: 8,
           p: 0.5,
           '& .MuiToggleButton-root': {

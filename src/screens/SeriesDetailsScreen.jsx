@@ -161,7 +161,9 @@ export default function SeriesDetailsScreen() {
     return statuses.length > 0 ? statuses : null;
   };
 
-  const scrimColor = theme.palette.mode === 'dark' ? '15, 13, 13' : '255, 255, 255';
+  const scrimColor = theme.palette.background.default === '#000000'
+    ? '0, 0, 0'
+    : (theme.palette.mode === 'dark' ? '15, 13, 13' : '255, 255, 255');
 
   const actionButtonStyle = (name) => ({
     textAlign: 'center',

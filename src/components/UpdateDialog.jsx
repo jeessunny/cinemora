@@ -36,7 +36,7 @@ function CleanReleaseNotesView({ rawNotes }) {
   return (
     <Box
       sx={{
-        bgcolor: 'rgba(255, 255, 255, 0.05)',
+        bgcolor: 'surface.surfaceContainerLow',
         borderRadius: '12px',
         p: 2,
         maxHeight: 220,
@@ -44,12 +44,13 @@ function CleanReleaseNotesView({ rawNotes }) {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid',
+        borderColor: 'divider',
         '&::-webkit-scrollbar': {
           width: '6px',
         },
         '&::-webkit-scrollbar-thumb': {
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          backgroundColor: 'divider',
           borderRadius: '3px',
         }
       }}
@@ -171,7 +172,8 @@ export default function UpdateDialog() {
           width: '90%',
           backgroundImage: 'none',
           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.7)',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
+          border: '1px solid',
+          borderColor: 'divider'
         }
       }}
     >

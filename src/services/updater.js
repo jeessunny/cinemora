@@ -1,6 +1,6 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
-export const CURRENT_VERSION = '2.3.2';
+export const CURRENT_VERSION = '2.3.3';
 export const GITHUB_OWNER = 'jeessunny';
 export const GITHUB_REPO = 'cinemora';
 

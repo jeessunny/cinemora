@@ -150,6 +150,7 @@ export default function LoginScreen() {
       flexDirection: 'column', 
       minHeight: '100vh',
       bgcolor: 'background.default',
+      color: 'text.primary',
       alignItems: 'center',
       boxSizing: 'border-box',
       position: 'relative'

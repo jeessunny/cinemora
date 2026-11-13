@@ -168,8 +168,29 @@ export default function App() {
   const themeMode = useStore(state => state.themeMode);
   const amoledBlack = useStore(state => state.amoledBlack);
   const accentColor = useStore(state => state.accentColor);
-  // State to hold active resolved theme mode
-  const [resolvedMode, setResolvedMode] = useState('dark');
+
+  // Compute resolved mode synchronously to avoid first-render flash or mismatched theme
+  const getInitialResolvedMode = () => {
+    let mode = themeMode;
+    if (mode === 'black') mode = 'dark';
+    if (mode === 'system') {
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return 'dark';
+    }
+    return mode === 'light' ? 'light' : 'dark';
+  };
+
+  const [resolvedMode, setResolvedMode] = useState(getInitialResolvedMode);
+
+  // Migrate legacy 'black' themeMode to 'dark' with amoledBlack: true
+  useEffect(() => {
+    if (themeMode === 'black') {
+      useStore.getState().setThemeMode('dark');
+      useStore.getState().setAmoledBlack(true);
+    }
+  }, [themeMode]);
 
   // Configure native status bar — hide and merge edge-to-edge
   useEffect(() => {
@@ -192,23 +213,19 @@ export default function App() {
     }
   }, []);
 
-  // Listen to system theme preferences when mode is 'system', support pure pitch black
+  // Listen to system theme preferences when mode is 'system'
   useEffect(() => {
-    if (themeMode === 'black') {
-      setResolvedMode('black');
-    } else if (themeMode === 'system') {
+    if (themeMode === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      setResolvedMode(mediaQuery.matches ? (amoledBlack ? 'black' : 'dark') : 'light');
+      setResolvedMode(mediaQuery.matches ? 'dark' : 'light');
 
-      const listener = (e) => setResolvedMode(e.matches ? (amoledBlack ? 'black' : 'dark') : 'light');
+      const listener = (e) => setResolvedMode(e.matches ? 'dark' : 'light');
       mediaQuery.addEventListener('change', listener);
       return () => mediaQuery.removeEventListener('change', listener);
-    } else if (themeMode === 'dark') {
-      setResolvedMode(amoledBlack ? 'black' : 'dark');
     } else {
-      setResolvedMode('light');
+      setResolvedMode(themeMode === 'light' ? 'light' : 'dark');
     }
-  }, [themeMode, amoledBlack]);
+  }, [themeMode]);
 
   // Disable all animations globally if user turns them off
   const animationsEnabled = useStore(state => state.animationsEnabled);
@@ -225,13 +242,14 @@ export default function App() {
     document.documentElement.style.setProperty('--accent-color', accentColor);
   }, [accentColor]);
 
-  const isPitchBlack = (resolvedMode === 'dark' || resolvedMode === 'black') && Boolean(amoledBlack);
+  // Pure pitch black AMOLED mode is strictly isolated to dark mode
+  const isPitchBlack = resolvedMode === 'dark' && Boolean(amoledBlack);
   const theme = getTheme(resolvedMode, accentColor, isPitchBlack);
 
   return (
     <ErrorBoundary>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
+        <CssBaseline enableColorScheme />
         <BrowserRouter>
           <Layout>
             <Suspense fallback={<LazyFallback />}>

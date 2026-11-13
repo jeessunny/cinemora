@@ -7,7 +7,7 @@ export default function ConfirmDialog({ open, title, content, onConfirm, onCance
       open={open} 
       onClose={onCancel}
       PaperProps={{
-        sx: { borderRadius: '28px', bgcolor: 'surface.surfaceContainerHigh' }
+        sx: { borderRadius: '28px', bgcolor: 'surface.surfaceContainerHigh', border: '1px solid', borderColor: 'divider' }
       }}
     >
       <DialogTitle sx={{ pb: 1 }}>{title}</DialogTitle>

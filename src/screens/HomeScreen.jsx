@@ -224,7 +224,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <Box sx={{ pb: 12, bgcolor: 'background.default', minHeight: '100vh' }}>
+    <Box sx={{ pb: 12, bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh' }}>
       {/* Header */}
       <Box sx={{ 
         p: 2, 

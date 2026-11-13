@@ -75,7 +75,16 @@ export default function SearchScreen() {
   };
 
   return (
-    <Box sx={{ pb: 12, p: 2, display: 'flex', flexDirection: 'column', minHeight: '100vh', boxSizing: 'border-box' }}>
+    <Box sx={{ 
+      pb: 12, 
+      p: 2, 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh', 
+      boxSizing: 'border-box',
+      bgcolor: 'background.default',
+      color: 'text.primary',
+    }}>
       {/* Left-aligned Search Screen Title */}
       <Typography 
         variant="headlineMedium" 
@@ -183,13 +192,19 @@ export default function SearchScreen() {
                     <Chip 
                       key={i} 
                       label={s} 
-                      icon={<History fontSize="small" />} 
+                      icon={<History fontSize="small" sx={{ color: 'text.secondary' }} />} 
                       onClick={() => { setQuery(s); handleSearchSubmit(s); }}
-                      variant="outlined"
                       sx={{ 
                         borderRadius: '8px',
+                        bgcolor: 'surface.surfaceContainerLow',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        color: 'text.primary',
                         animation: 'chipCascade 0.3s ease-out both',
                         animationDelay: `${i * 0.06}s`,
+                        '&:hover': {
+                          bgcolor: 'surface.surfaceContainerHigh',
+                        }
                       }}
                     />
                   ))}
@@ -216,13 +231,19 @@ export default function SearchScreen() {
                   <Chip 
                     key={i} 
                     label={s} 
-                    icon={<TrendingUp fontSize="small" />}
+                    icon={<TrendingUp fontSize="small" sx={{ color: 'text.secondary' }} />}
                     onClick={() => { setQuery(s); handleSearchSubmit(s); }}
                     sx={{ 
                       borderRadius: '8px', 
                       bgcolor: 'surface.surfaceContainerLow',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      color: 'text.primary',
                       animation: 'chipCascade 0.3s ease-out both',
                       animationDelay: `${i * 0.06}s`,
+                      '&:hover': {
+                        bgcolor: 'surface.surfaceContainerHigh',
+                      }
                     }}
                   />
                 ))}

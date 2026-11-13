@@ -27,7 +27,7 @@ const getDarkPalette = (accent, isPitchBlack = false) => ({
     contrastText: '#FFFFFF',
   },
   secondary: {
-    main: isPitchBlack ? '#121212' : '#2F2F2F',
+    main: isPitchBlack ? '#101010' : '#2F2F2F',
     light: '#4F4F4F',
     dark: '#1A1A1A',
     contrastText: '#FFFFFF',
@@ -49,17 +49,17 @@ const getDarkPalette = (accent, isPitchBlack = false) => ({
   },
   surface: {
     main: isPitchBlack ? '#000000' : '#0F0D0D',
-    surfaceContainerLow: isPitchBlack ? '#050505' : '#141414',
-    surfaceContainer: isPitchBlack ? '#0A0A0A' : '#181818',
-    surfaceContainerHigh: isPitchBlack ? '#121212' : '#202020',
-    surfaceContainerHighest: isPitchBlack ? '#1A1A1A' : '#282828',
+    surfaceContainerLow: isPitchBlack ? '#000000' : '#141414',
+    surfaceContainer: isPitchBlack ? '#000000' : '#181818',
+    surfaceContainerHigh: isPitchBlack ? '#080808' : '#202020',
+    surfaceContainerHighest: isPitchBlack ? '#121212' : '#282828',
   },
   text: {
     primary: '#FFFFFF',
     secondary: '#B3B3B3',
     disabled: '#7F7F7F',
   },
-  divider: isPitchBlack ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.1)',
+  divider: isPitchBlack ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.1)',
 });
 
 const getLightPalette = (accent) => ({
@@ -134,8 +134,8 @@ const shape = {
 };
 
 export const getTheme = (mode, accentColor = '#E50914', isPitchBlack = false) => {
-  const isDark = mode === 'dark' || mode === 'black';
-  const effectivePitchBlack = isPitchBlack || mode === 'black';
+  const isDark = mode === 'dark';
+  const effectivePitchBlack = isDark && Boolean(isPitchBlack);
 
   return createTheme({
     palette: isDark ? getDarkPalette(accentColor, effectivePitchBlack) : getLightPalette(accentColor),
@@ -192,6 +192,9 @@ export const getTheme = (mode, accentColor = '#E50914', isPitchBlack = false) =>
           root: {
             borderRadius: 6,
             transition: 'all 0.2s ease',
+          },
+          outlined: {
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.15)',
           },
         },
       },

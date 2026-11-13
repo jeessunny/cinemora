@@ -9,7 +9,6 @@ export default function NavBar() {
   const location = useLocation();
   const floatingNavBar = useStore(state => state.floatingNavBar);
   const animationsEnabled = useStore(state => state.animationsEnabled);
-  const navSearchEnabled = useStore(state => state.navSearchEnabled ?? true);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled ?? true);
 
   const getTabValue = () => {
@@ -37,7 +36,7 @@ export default function NavBar() {
     borderBottomWidth: floatingNavBar ? '1px' : 0,
     borderLeftWidth: floatingNavBar ? '1px' : 0,
     borderRightWidth: floatingNavBar ? '1px' : 0,
-    borderColor: 'surface.surfaceContainerHighest',
+    borderColor: 'divider',
     paddingBottom: floatingNavBar ? 0 : 'env(safe-area-inset-bottom)',
     // Premium spring-like transition for morphing between floating and fixed states, and changing items
     transition: animationsEnabled ? 'all 0.5s cubic-bezier(0.34, 1.3, 0.64, 1)' : 'none',
@@ -103,15 +102,6 @@ export default function NavBar() {
           icon={<SearchRounded />} 
           disableRipple
           onClick={() => navigate('/search')}
-          sx={{
-            flex: navSearchEnabled ? 1 : 0,
-            maxWidth: navSearchEnabled ? 168 : 0,
-            minWidth: navSearchEnabled ? 'auto' : 0,
-            padding: navSearchEnabled ? undefined : 0,
-            opacity: navSearchEnabled ? undefined : '0 !important',
-            pointerEvents: navSearchEnabled ? 'auto' : 'none',
-            overflow: 'hidden'
-          }}
         />
         <BottomNavigationAction 
           label="Library" 

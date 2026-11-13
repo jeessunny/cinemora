@@ -6,7 +6,7 @@ import {
 import { 
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
-  Animation, ViewDay, Search, Settings, Logout, DeleteForever,
+  Animation, ViewDay, Settings, Logout, DeleteForever,
   SystemUpdate, InfoOutlined, OpenInNew, Brightness2, VideoLibraryRounded
 } from '@mui/icons-material';
 import updateManager, { CURRENT_VERSION } from '../services/updater';
@@ -130,8 +130,6 @@ export default function SettingsScreen() {
   const resetHomeSections = useStore(state => state.resetHomeSections);
   const animationsEnabled = useStore(state => state.animationsEnabled);
   const setAnimationsEnabled = useStore(state => state.setAnimationsEnabled);
-  const navSearchEnabled = useStore(state => state.navSearchEnabled);
-  const setNavSearchEnabled = useStore(state => state.setNavSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
   const setNavSettingsEnabled = useStore(state => state.setNavSettingsEnabled);
 
@@ -194,7 +192,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <Box sx={{ px: 2, pt: 2, pb: 16, display: 'flex', flexDirection: 'column', bgcolor: 'background.default', minHeight: '100vh', boxSizing: 'border-box' }}>
+    <Box sx={{ px: 2, pt: 2, pb: 16, display: 'flex', flexDirection: 'column', bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh', boxSizing: 'border-box' }}>
       
       {/* Left-aligned Settings Title */}
       <Typography 
@@ -261,16 +259,17 @@ export default function SettingsScreen() {
         <Divider />
 
         {/* Pitch Black / AMOLED Toggle */}
-        <ListItem sx={{ py: 1.5, px: 2 }}>
-          <ListItemIcon sx={{ minWidth: 40 }}><Brightness2 color="primary" /></ListItemIcon>
+        <ListItem sx={{ py: 1.5, px: 2, opacity: themeMode === 'light' ? 0.45 : 1 }}>
+          <ListItemIcon sx={{ minWidth: 40 }}><Brightness2 color={themeMode === 'light' ? 'disabled' : 'primary'} /></ListItemIcon>
           <ListItemText 
             primary="Pure Pitch Black (AMOLED)" 
-            secondary="Pure #000000 black surfaces for OLED battery saving"
-            primaryTypographyProps={{ fontWeight: 600 }} 
+            secondary={themeMode === 'light' ? 'Available in Dark or System mode' : 'Pure #000000 black surfaces for OLED battery saving'}
+            primaryTypographyProps={{ fontWeight: 600, color: themeMode === 'light' ? 'text.disabled' : 'text.primary' }} 
             secondaryTypographyProps={{ fontSize: '12px' }}
           />
           <Switch 
-            checked={!!amoledBlack} 
+            disabled={themeMode === 'light'}
+            checked={Boolean(amoledBlack && themeMode !== 'light')} 
             onChange={(e) => setAmoledBlack(e.target.checked)}
             color="primary"
           />
@@ -313,16 +312,6 @@ export default function SettingsScreen() {
           <Switch 
             checked={!!floatingNavBar} 
             onChange={(e) => setFloatingNavBar(e.target.checked)}
-            color="primary"
-          />
-        </ListItem>
-        <Divider />
-        <ListItem sx={{ py: 1.5, px: 2 }}>
-          <ListItemIcon sx={{ minWidth: 40 }}><Search color="primary" /></ListItemIcon>
-          <ListItemText primary="Show Search Tab" primaryTypographyProps={{ fontWeight: 600 }} />
-          <Switch 
-            checked={!!navSearchEnabled} 
-            onChange={(e) => setNavSearchEnabled(e.target.checked)}
             color="primary"
           />
         </ListItem>
