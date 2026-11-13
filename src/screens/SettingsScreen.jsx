@@ -130,8 +130,8 @@ export default function SettingsScreen() {
   const resetHomeSections = useStore(state => state.resetHomeSections);
   const animationsEnabled = useStore(state => state.animationsEnabled);
   const setAnimationsEnabled = useStore(state => state.setAnimationsEnabled);
-  const navLibraryEnabled = useStore(state => state.navLibraryEnabled ?? state.navSearchEnabled ?? true);
-  const setNavLibraryEnabled = useStore(state => state.setNavLibraryEnabled || state.setNavSearchEnabled);
+  const navSearchEnabled = useStore(state => state.navSearchEnabled);
+  const setNavSearchEnabled = useStore(state => state.setNavSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
   const setNavSettingsEnabled = useStore(state => state.setNavSettingsEnabled);
 
@@ -251,10 +251,9 @@ export default function SettingsScreen() {
             onChange={setThemeMode}
             fullWidth
             options={[
-              { label: 'Light', value: 'light' },
               { label: 'System', value: 'system' },
               { label: 'Dark', value: 'dark' },
-              { label: 'Pitch Black', value: 'black' }
+              { label: 'Light', value: 'light' }
             ]}
           />
         </ListItem>
@@ -271,13 +270,8 @@ export default function SettingsScreen() {
             secondaryTypographyProps={{ fontSize: '12px' }}
           />
           <Switch 
-            checked={!!amoledBlack || themeMode === 'black'} 
-            onChange={(e) => {
-              setAmoledBlack(e.target.checked);
-              if (e.target.checked && themeMode === 'light') {
-                setThemeMode('dark');
-              }
-            }}
+            checked={!!amoledBlack} 
+            onChange={(e) => setAmoledBlack(e.target.checked)}
             color="primary"
           />
         </ListItem>
@@ -324,11 +318,11 @@ export default function SettingsScreen() {
         </ListItem>
         <Divider />
         <ListItem sx={{ py: 1.5, px: 2 }}>
-          <ListItemIcon sx={{ minWidth: 40 }}><VideoLibraryRounded color="primary" /></ListItemIcon>
-          <ListItemText primary="Show Library Tab" primaryTypographyProps={{ fontWeight: 600 }} />
+          <ListItemIcon sx={{ minWidth: 40 }}><Search color="primary" /></ListItemIcon>
+          <ListItemText primary="Show Search Tab" primaryTypographyProps={{ fontWeight: 600 }} />
           <Switch 
-            checked={!!navLibraryEnabled} 
-            onChange={(e) => setNavLibraryEnabled(e.target.checked)}
+            checked={!!navSearchEnabled} 
+            onChange={(e) => setNavSearchEnabled(e.target.checked)}
             color="primary"
           />
         </ListItem>

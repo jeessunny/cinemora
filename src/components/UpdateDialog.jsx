@@ -300,10 +300,19 @@ export default function UpdateDialog() {
         )}
 
         {isUpToDate && (
-          <Box sx={{ py: 2, textAlign: 'center' }}>
-            <Typography variant="bodyMedium" sx={{ color: 'text.primary', fontSize: '14px' }}>
+          <Box sx={{ py: 1.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Typography variant="bodyMedium" sx={{ color: 'text.primary', fontSize: '14px', textAlign: 'center' }}>
               Cinemora <strong>v{CURRENT_VERSION}</strong> is the latest version available. No updates needed!
             </Typography>
+
+            {updateInfo?.releaseNotes && (
+              <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Typography variant="labelMedium" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                  What's New:
+                </Typography>
+                <CleanReleaseNotesView rawNotes={updateInfo.releaseNotes} />
+              </Box>
+            )}
           </Box>
         )}
 

@@ -1,69 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Chip } from '@mui/material';
-import { SearchOff, History, TrendingUp } from '@mui/icons-material';
+import React, { useState, useMemo } from 'react';
+import { Box, Typography, InputBase, IconButton, Paper, Chip } from '@mui/material';
+import { BookmarkBorder, FavoriteBorder, HistoryToggleOff, Search, Clear } from '@mui/icons-material';
 import useStore from '../store';
-import { searchMovies, getPopularSearches } from '../services/tmdb';
-import SearchBar from '../components/SearchBar';
 import SegmentedButton from '../components/SegmentedButton';
 import PosterCard from '../components/PosterCard';
 import EmptyState from '../components/EmptyState';
-import MovieSkeleton from '../components/MovieSkeleton';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function LibraryScreen() {
-  const recentSearches = useStore(state => state.recentSearches);
-  const addRecentSearch = useStore(state => state.addRecentSearch);
-  const clearRecentSearches = useStore(state => state.clearRecentSearches);
+  const navigate = useNavigate();
   const watchlist = useStore(state => state.watchlist);
   const favorites = useStore(state => state.favorites);
   const history = useStore(state => state.history);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get('tab') || 'watchlist';
+  const [category, setCategory] = useState('all'); // 'all' | 'movie' | 'tv'
+  const [historySearch, setHistorySearch] = useState('');
 
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState('movies');
-  const [isTyping, setIsTyping] = useState(false);
-  const [results, setResults] = useState([]);
-  const [dynamicPopularSearches, setDynamicPopularSearches] = useState([]);
-
-  useEffect(() => {
-    const fetchPopular = async () => {
-      try {
-        const pops = await getPopularSearches(type);
-        setDynamicPopularSearches(pops);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchPopular();
-  }, [type]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const fetchResults = async () => {
-      if (query.trim()) {
-        try {
-          const res = await searchMovies(query, type);
-          if (!cancelled) setResults(res);
-        } catch (err) {
-          if (!cancelled) console.error(err);
-        }
-      } else {
-        setResults([]);
-      }
-      if (!cancelled) setIsTyping(false);
-    };
-
-    const timer = setTimeout(fetchResults, 300);
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [query, type]);
-
-  const handleSearch = (val) => {
-    setQuery(val);
-    setIsTyping(true);
-  };
-
-  const handleSearchSubmit = (val) => {
-    if (val.trim()) {
-      addRecentSearch(val.trim());
-    }
+  // Reset category when switching tabs
+  const handleTabChange = (newTab) => {
+    setSearchParams({ tab: newTab }, { replace: true });
+    setCategory('all');
+    setHistorySearch('');
   };
 
   const getStatus = (id) => {
@@ -74,48 +32,234 @@ export default function LibraryScreen() {
     return statuses.length > 0 ? statuses : null;
   };
 
+  // Filter data by category (movie vs tv)
+  const filterByCategory = (data) => {
+    if (category === 'all') return data;
+    return data.filter(m => {
+      const type = m.type || 'movie';
+      return type === category;
+    });
+  };
+
+  // Get filtered + searched data for the active tab
+  const getFilteredData = () => {
+    let data = [];
+    switch (tab) {
+      case 'watchlist': data = watchlist; break;
+      case 'favorites': data = favorites; break;
+      case 'history': data = history; break;
+      default: break;
+    }
+
+    // Apply category filter
+    data = filterByCategory(data);
+
+    // Apply search filter for history tab
+    if (tab === 'history' && historySearch.trim()) {
+      const q = historySearch.toLowerCase().trim();
+      data = data.filter(m =>
+        (m.title || '').toLowerCase().includes(q)
+      );
+    }
+
+    return data;
+  };
+
+  const filteredData = useMemo(getFilteredData, [tab, category, historySearch, watchlist, favorites, history]);
+
+  // Count items in each category for the current tab
+  const getCounts = () => {
+    let data = [];
+    switch (tab) {
+      case 'watchlist': data = watchlist; break;
+      case 'favorites': data = favorites; break;
+      case 'history': data = history; break;
+      default: break;
+    }
+    const movies = data.filter(m => (m.type || 'movie') === 'movie').length;
+    const series = data.filter(m => (m.type || 'movie') === 'tv').length;
+    return { all: data.length, movies, series };
+  };
+
+  const counts = useMemo(getCounts, [tab, watchlist, favorites, history]);
+
+  const emptyPropsMap = {
+    watchlist: {
+      icon: BookmarkBorder,
+      title: 'Your watchlist is empty',
+      subtitle: 'Save movies you want to watch later.',
+      actionLabel: 'Find Movies',
+      onAction: () => navigate('/search')
+    },
+    favorites: {
+      icon: FavoriteBorder,
+      title: 'No favorites yet',
+      subtitle: 'Heart the movies you love to see them here.',
+      actionLabel: 'Discover',
+      onAction: () => navigate('/home')
+    },
+    history: {
+      icon: HistoryToggleOff,
+      title: 'No watch history',
+      subtitle: 'Movies you mark as watched will appear here.',
+    },
+  };
+
+  const renderCategoryChips = () => (
+    <Box sx={{
+      display: 'flex',
+      gap: 1,
+      mb: 2.5,
+      animation: 'fadeSlideUp 0.3s ease-out both',
+      animationDelay: '0.05s',
+    }}>
+      {[
+        { label: 'All', value: 'all', count: counts.all },
+        { label: 'Movies', value: 'movie', count: counts.movies },
+        { label: 'Series', value: 'tv', count: counts.series },
+      ].map((chip) => (
+        <Chip
+          key={chip.value}
+          label={`${chip.label} (${chip.count})`}
+          onClick={() => setCategory(chip.value)}
+          variant={category === chip.value ? 'filled' : 'outlined'}
+          color={category === chip.value ? 'primary' : 'default'}
+          sx={{
+            fontWeight: 700,
+            fontSize: '12px',
+            height: 32,
+            borderRadius: '16px',
+            transition: 'all 0.25s ease',
+          }}
+        />
+      ))}
+    </Box>
+  );
+
+  const renderHistorySearch = () => (
+    <Box sx={{
+      mb: 2,
+      animation: 'fadeSlideUp 0.3s ease-out both',
+      animationDelay: '0.1s',
+    }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: '4px 8px',
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          borderRadius: '14px',
+          bgcolor: 'surface.surfaceContainerHigh',
+          transition: 'background-color 0.3s ease',
+        }}
+      >
+        <IconButton sx={{ p: '8px' }} aria-label="search">
+          <Search sx={{ fontSize: 20, color: 'text.secondary' }} />
+        </IconButton>
+        <InputBase
+          sx={{ flex: 1, fontSize: '14px' }}
+          placeholder="Search history..."
+          value={historySearch}
+          onChange={(e) => setHistorySearch(e.target.value)}
+        />
+        {historySearch && (
+          <IconButton sx={{ p: '8px' }} aria-label="clear" onClick={() => setHistorySearch('')}>
+            <Clear sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
+      </Paper>
+    </Box>
+  );
+
+  const renderGrid = () => {
+    if (filteredData.length === 0) {
+      // If we have data in the tab but the filter/search cleared it
+      const hasDataInTab = (tab === 'watchlist' ? watchlist : tab === 'favorites' ? favorites : history).length > 0;
+
+      if (hasDataInTab) {
+        return (
+          <Box sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pb: 10,
+          }}>
+            <Typography variant="bodyLarge" color="text.secondary" fontWeight={600} sx={{ textAlign: 'center' }}>
+              {historySearch
+                ? `No results for "${historySearch}"`
+                : category === 'tv'
+                  ? 'No series in this list'
+                  : 'No movies in this list'}
+            </Typography>
+            <Typography variant="bodySmall" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+              {historySearch ? 'Try a different search term.' : 'Try switching the category filter.'}
+            </Typography>
+          </Box>
+        );
+      }
+
+      return (
+        <Box sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          pb: 10,
+        }}>
+          <EmptyState {...emptyPropsMap[tab]} />
+        </Box>
+      );
+    }
+
+    return (
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, pb: 14 }}>
+        {filteredData.map((movie, index) => (
+          <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
+            <PosterCard movie={movie} status={getStatus(movie.id)} animDelay={Math.min(index * 0.05, 0.3)} />
+          </Box>
+        ))}
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{ pb: 12, p: 2, display: 'flex', flexDirection: 'column', minHeight: '100vh', boxSizing: 'border-box' }}>
-      {/* Left-aligned Library Screen Title */}
-      <Typography 
-        variant="headlineMedium" 
-        fontWeight={800} 
-        sx={{ 
-          mb: 3, 
-          textAlign: 'left', 
-          width: '100%', 
-          display: 'block' 
+      {/* Title */}
+      <Typography
+        variant="headlineMedium"
+        fontWeight={800}
+        sx={{
+          mb: 3,
+          textAlign: 'left',
+          width: '100%',
+          display: 'block'
         }}
       >
         Library
       </Typography>
 
-      <Box sx={{ mb: 2 }}>
-        <SearchBar 
-          placeholder="Search library, movies, genres..." 
-          value={query} 
-          onChange={handleSearch} 
-          onClear={() => setQuery('')}
-          onSubmit={handleSearchSubmit}
-        />
-      </Box>
-
-      {/* Movie and TV Show toggle stays preserved */}
-      <Box sx={{ mb: 2.2 }}>
+      {/* Main Tab Selector */}
+      <Box sx={{ mb: 3.5 }}>
         <SegmentedButton
-          value={type}
-          onChange={setType}
+          value={tab}
+          onChange={handleTabChange}
           fullWidth
           options={[
-            { label: 'Movies', value: 'movies' },
-            { label: 'TV Shows', value: 'tv' }
+            { label: 'Watchlist', value: 'watchlist' },
+            { label: 'Favorites', value: 'favorites' },
+            { label: 'History', value: 'history' }
           ]}
         />
       </Box>
 
-      {/* Animated content area — key forces remount on type switch for fadeSlideUp replay */}
+      {/* Content area with animation on tab switch */}
       <Box
-        key={type}
+        key={`${tab}-${category}`}
         sx={{
           display: 'flex',
           flexDirection: 'column',
@@ -123,113 +267,14 @@ export default function LibraryScreen() {
           animation: 'fadeSlideUp 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
         }}
       >
-        {query ? (
-          isTyping ? (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Box key={i} sx={{ width: 'calc(50% - 8px)' }}>
-                  <MovieSkeleton type="poster" />
-                </Box>
-              ))}
-            </Box>
-          ) : results.length > 0 ? (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, pb: 10 }}>
-              {results.map((movie, index) => (
-                <Box key={movie.id} sx={{ width: 'calc(50% - 8px)', display: 'flex', justifyContent: 'center' }}>
-                  <PosterCard movie={movie} status={getStatus(movie.id)} animDelay={Math.min(index * 0.05, 0.3)} source="search" />
-                </Box>
-              ))}
-            </Box>
-          ) : (
-            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
-              <EmptyState 
-                icon={SearchOff} 
-                title="No results found" 
-                subtitle={type === 'tv' 
-                  ? "No TV shows match your search. Try switching to Movies." 
-                  : "Try adjusting your search or filters to find what you're looking for."
-                } 
-              />
-            </Box>
-          )
-        ) : (
-          <Box>
-            {recentSearches.length > 0 && (
-              <Box sx={{ mb: 3.5 }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-                  <Typography 
-                    variant="titleMedium" 
-                    sx={{ 
-                      fontWeight: 800, 
-                      textAlign: 'center', 
-                      width: '100%', 
-                      display: 'block', 
-                      mb: 1.5 
-                    }}
-                  >
-                    Recent Searches
-                  </Typography>
-                  <Typography 
-                    variant="labelLarge" 
-                    color="primary" 
-                    sx={{ cursor: 'pointer', fontWeight: 700 }} 
-                    onClick={clearRecentSearches}
-                  >
-                    Clear All
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.2, justifyContent: 'center' }}>
-                  {recentSearches.map((s, i) => (
-                    <Chip 
-                      key={i} 
-                      label={s} 
-                      icon={<History fontSize="small" />} 
-                      onClick={() => { setQuery(s); handleSearchSubmit(s); }}
-                      variant="outlined"
-                      sx={{ 
-                        borderRadius: '8px',
-                        animation: 'chipCascade 0.3s ease-out both',
-                        animationDelay: `${i * 0.06}s`,
-                      }}
-                    />
-                  ))}
-                </Box>
-              </Box>
-            )}
+        {/* Category Chips (always visible) */}
+        {renderCategoryChips()}
 
-            {/* Conditional spacing based on recent search content presence */}
-            <Box sx={{ mt: recentSearches.length > 0 ? 3.5 : 0.5 }}>
-              <Typography 
-                variant="titleMedium" 
-                sx={{ 
-                  fontWeight: 800, 
-                  textAlign: 'center', 
-                  width: '100%', 
-                  display: 'block', 
-                  mb: 2.2 
-                }}
-              >
-                Popular Searches
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.2, justifyContent: 'center' }}>
-                {dynamicPopularSearches.map((s, i) => (
-                  <Chip 
-                    key={i} 
-                    label={s} 
-                    icon={<TrendingUp fontSize="small" />}
-                    onClick={() => { setQuery(s); handleSearchSubmit(s); }}
-                    sx={{ 
-                      borderRadius: '8px', 
-                      bgcolor: 'surface.surfaceContainerLow',
-                      animation: 'chipCascade 0.3s ease-out both',
-                      animationDelay: `${i * 0.06}s`,
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          </Box>
-        )}
+        {/* History Search (only on history tab) */}
+        {tab === 'history' && renderHistorySearch()}
+
+        {/* Grid / Empty state */}
+        {renderGrid()}
       </Box>
     </Box>
   );

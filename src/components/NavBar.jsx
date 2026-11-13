@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { HomeRounded, VideoLibraryRounded, BookmarkRounded, SettingsRounded } from '@mui/icons-material';
+import { HomeRounded, SearchRounded, VideoLibraryRounded, SettingsRounded } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 
@@ -9,14 +9,14 @@ export default function NavBar() {
   const location = useLocation();
   const floatingNavBar = useStore(state => state.floatingNavBar);
   const animationsEnabled = useStore(state => state.animationsEnabled);
-  const navLibraryEnabled = useStore(state => state.navLibraryEnabled ?? state.navSearchEnabled ?? true);
-  const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
+  const navSearchEnabled = useStore(state => state.navSearchEnabled ?? true);
+  const navSettingsEnabled = useStore(state => state.navSettingsEnabled ?? true);
 
   const getTabValue = () => {
     const path = location.pathname;
     if (path.includes('/home')) return 'home';
-    if (path.includes('/library') || path.includes('/search')) return 'library';
-    if (path.includes('/saved')) return 'saved';
+    if (path.includes('/search')) return 'search';
+    if (path.includes('/library') || path.includes('/saved')) return 'library';
     if (path.includes('/settings') || path.includes('/setting')) return 'settings';
     return 'none';
   };
@@ -98,27 +98,27 @@ export default function NavBar() {
           onClick={() => navigate('/home')}
         />
         <BottomNavigationAction 
+          label="Search" 
+          value="search"
+          icon={<SearchRounded />} 
+          disableRipple
+          onClick={() => navigate('/search')}
+          sx={{
+            flex: navSearchEnabled ? 1 : 0,
+            maxWidth: navSearchEnabled ? 168 : 0,
+            minWidth: navSearchEnabled ? 'auto' : 0,
+            padding: navSearchEnabled ? undefined : 0,
+            opacity: navSearchEnabled ? undefined : '0 !important',
+            pointerEvents: navSearchEnabled ? 'auto' : 'none',
+            overflow: 'hidden'
+          }}
+        />
+        <BottomNavigationAction 
           label="Library" 
           value="library"
           icon={<VideoLibraryRounded />} 
           disableRipple
           onClick={() => navigate('/library')}
-          sx={{
-            flex: navLibraryEnabled ? 1 : 0,
-            maxWidth: navLibraryEnabled ? 168 : 0,
-            minWidth: navLibraryEnabled ? 'auto' : 0,
-            padding: navLibraryEnabled ? undefined : 0,
-            opacity: navLibraryEnabled ? undefined : '0 !important',
-            pointerEvents: navLibraryEnabled ? 'auto' : 'none',
-            overflow: 'hidden'
-          }}
-        />
-        <BottomNavigationAction 
-          label="Saved" 
-          value="saved"
-          icon={<BookmarkRounded />} 
-          disableRipple
-          onClick={() => navigate('/saved')}
         />
         <BottomNavigationAction 
           label="Settings" 

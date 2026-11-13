@@ -1,6 +1,6 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 
-export const CURRENT_VERSION = '2.3.1';
+export const CURRENT_VERSION = '2.3.2';
 export const GITHUB_OWNER = 'jeessunny';
 export const GITHUB_REPO = 'cinemora';
 
@@ -178,6 +178,11 @@ class UpdateService {
         if (isManual) {
           this.updateState({
             status: 'uptodate',
+            updateInfo: {
+              versionName: tagName || `v${CURRENT_VERSION}`,
+              releaseNotes: release.body || 'Current version includes the latest stability improvements, UI updates, and performance optimizations.',
+              fileSize: apkAsset?.size || 0
+            },
             showDialog: true
           });
         } else {

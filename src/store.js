@@ -30,8 +30,7 @@ const useStore = create(
       floatingNavBar: true, // true = floating pill, false = fixed bottom
       homeSections: DEFAULT_SECTIONS,
       animationsEnabled: true, // Master toggle for all animations
-      navLibraryEnabled: true, // Toggle for Library tab visibility in NavBar
-      navSearchEnabled: true, // Backwards-compatible alias
+      navSearchEnabled: true, // Toggle for Search tab visibility in NavBar
       navSettingsEnabled: true, // Toggle for Settings tab visibility in NavBar
 
       // === Customization Actions ===
@@ -39,8 +38,7 @@ const useStore = create(
       setAmoledBlack: (val) => set({ amoledBlack: val }),
       setFloatingNavBar: (val) => set({ floatingNavBar: val }),
       setAnimationsEnabled: (val) => set({ animationsEnabled: val }),
-      setNavLibraryEnabled: (val) => set({ navLibraryEnabled: val, navSearchEnabled: val }),
-      setNavSearchEnabled: (val) => set({ navLibraryEnabled: val, navSearchEnabled: val }),
+      setNavSearchEnabled: (val) => set({ navSearchEnabled: val }),
       setNavSettingsEnabled: (val) => set({ navSettingsEnabled: val }),
 
       toggleHomeSection: (id) => set((state) => ({
@@ -75,7 +73,6 @@ const useStore = create(
         floatingNavBar: true,
         homeSections: DEFAULT_SECTIONS,
         animationsEnabled: true,
-        navLibraryEnabled: true,
         navSearchEnabled: true,
         navSettingsEnabled: true
       }),

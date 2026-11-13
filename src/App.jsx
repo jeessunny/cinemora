@@ -13,8 +13,8 @@ import { StatusBar } from '@capacitor/status-bar';
 // Lazy-loaded screens — each is a separate JS chunk loaded on demand
 const LoginScreen = lazy(() => import('./screens/LoginScreen'));
 const HomeScreen = lazy(() => import('./screens/HomeScreen'));
+const SearchScreen = lazy(() => import('./screens/SearchScreen'));
 const LibraryScreen = lazy(() => import('./screens/LibraryScreen'));
-const SavedScreen = lazy(() => import('./screens/SavedScreen'));
 const SettingsScreen = lazy(() => import('./screens/SettingsScreen'));
 const MovieDetailsScreen = lazy(() => import('./screens/MovieDetailsScreen'));
 const SeriesDetailsScreen = lazy(() => import('./screens/SeriesDetailsScreen'));
@@ -225,7 +225,7 @@ export default function App() {
     document.documentElement.style.setProperty('--accent-color', accentColor);
   }, [accentColor]);
 
-  const isPitchBlack = resolvedMode === 'black' || amoledBlack;
+  const isPitchBlack = (resolvedMode === 'dark' || resolvedMode === 'black') && Boolean(amoledBlack);
   const theme = getTheme(resolvedMode, accentColor, isPitchBlack);
 
   return (
@@ -238,9 +238,9 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<LoginScreen />} />
                 <Route path="/home" element={<ProtectedRoute><HomeScreen /></ProtectedRoute>} />
+                <Route path="/search" element={<ProtectedRoute><SearchScreen /></ProtectedRoute>} />
                 <Route path="/library" element={<ProtectedRoute><LibraryScreen /></ProtectedRoute>} />
-                <Route path="/search" element={<Navigate to="/library" replace />} />
-                <Route path="/saved" element={<ProtectedRoute><SavedScreen /></ProtectedRoute>} />
+                <Route path="/saved" element={<Navigate to="/library" replace />} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
                 <Route path="/setting" element={<ProtectedRoute><SettingsScreen /></ProtectedRoute>} />
                 <Route path="/movie/:id" element={<ProtectedRoute><MovieDetailsScreen /></ProtectedRoute>} />
