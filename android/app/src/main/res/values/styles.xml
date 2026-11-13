@@ -8,8 +8,9 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+    <style name="AppTheme.NoActionBarLaunch" parent="AppTheme">
         <item name="android:background">@drawable/splash</item>
         <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
     </style>
 </resources>
