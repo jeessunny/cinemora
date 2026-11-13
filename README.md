@@ -12,8 +12,10 @@
 ## ✨ Features
 
 - 📱 **Native Android Experience**: Packaged with Capacitor 6 for native Android performance, hardware back button gesture navigation, and hardware acceleration.
+- 🎬 **Cinema-Themed App Icon**: Beautiful high-resolution cinema launcher icon featuring 3D clapperboard, glowing film reel, and adaptive icon layers.
 - 🖤 **Pure Pitch Black (AMOLED Mode)**: True `#000000` pitch black background and container styling engineered for OLED displays and battery efficiency.
-- 🔲 **Edge-to-Edge Merged Status Bar**: The Android status bar is merged and hidden, allowing backdrop art and posters to span the entire screen.
+- 🔲 **Edge-to-Edge Immersive Fullscreen**: True edge-to-edge layout supporting Android gesture navigation and camera cutouts with transparent system bars.
+- 📚 **Media Library**: Dedicated Library tab with categorized movie and TV discovery, fast local filtering, and search history.
 - 🔄 **In-App Updater (Studyio Architecture)**:
   - Automated GitHub Releases checking via `api.github.com`.
   - Background streaming APK download with live percentage and MB progress indicators.

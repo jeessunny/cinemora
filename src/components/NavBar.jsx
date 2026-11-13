@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material';
-import { HomeRounded, SearchRounded, BookmarkRounded, SettingsRounded } from '@mui/icons-material';
+import { HomeRounded, VideoLibraryRounded, BookmarkRounded, SettingsRounded } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from '../store';
 
@@ -9,13 +9,13 @@ export default function NavBar() {
   const location = useLocation();
   const floatingNavBar = useStore(state => state.floatingNavBar);
   const animationsEnabled = useStore(state => state.animationsEnabled);
-  const navSearchEnabled = useStore(state => state.navSearchEnabled);
+  const navLibraryEnabled = useStore(state => state.navLibraryEnabled ?? state.navSearchEnabled ?? true);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
 
   const getTabValue = () => {
     const path = location.pathname;
     if (path.includes('/home')) return 'home';
-    if (path.includes('/search')) return 'search';
+    if (path.includes('/library') || path.includes('/search')) return 'library';
     if (path.includes('/saved')) return 'saved';
     if (path.includes('/settings') || path.includes('/setting')) return 'settings';
     return 'none';
@@ -98,18 +98,18 @@ export default function NavBar() {
           onClick={() => navigate('/home')}
         />
         <BottomNavigationAction 
-          label="Search" 
-          value="search"
-          icon={<SearchRounded />} 
+          label="Library" 
+          value="library"
+          icon={<VideoLibraryRounded />} 
           disableRipple
-          onClick={() => navigate('/search')}
+          onClick={() => navigate('/library')}
           sx={{
-            flex: navSearchEnabled ? 1 : 0,
-            maxWidth: navSearchEnabled ? 168 : 0,
-            minWidth: navSearchEnabled ? 'auto' : 0,
-            padding: navSearchEnabled ? undefined : 0,
-            opacity: navSearchEnabled ? undefined : '0 !important',
-            pointerEvents: navSearchEnabled ? 'auto' : 'none',
+            flex: navLibraryEnabled ? 1 : 0,
+            maxWidth: navLibraryEnabled ? 168 : 0,
+            minWidth: navLibraryEnabled ? 'auto' : 0,
+            padding: navLibraryEnabled ? undefined : 0,
+            opacity: navLibraryEnabled ? undefined : '0 !important',
+            pointerEvents: navLibraryEnabled ? 'auto' : 'none',
             overflow: 'hidden'
           }}
         />

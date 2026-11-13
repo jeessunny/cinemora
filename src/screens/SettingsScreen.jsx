@@ -7,7 +7,7 @@ import {
   DeleteSweep, RestartAlt, Palette, Visibility, VisibilityOff,
   DragIndicator, ArrowUpward, ArrowDownward, ColorLens,
   Animation, ViewDay, Search, Settings, Logout, DeleteForever,
-  SystemUpdate, InfoOutlined, OpenInNew, Brightness2
+  SystemUpdate, InfoOutlined, OpenInNew, Brightness2, VideoLibraryRounded
 } from '@mui/icons-material';
 import updateManager, { CURRENT_VERSION } from '../services/updater';
 import { useNavigate } from 'react-router-dom';
@@ -130,8 +130,8 @@ export default function SettingsScreen() {
   const resetHomeSections = useStore(state => state.resetHomeSections);
   const animationsEnabled = useStore(state => state.animationsEnabled);
   const setAnimationsEnabled = useStore(state => state.setAnimationsEnabled);
-  const navSearchEnabled = useStore(state => state.navSearchEnabled);
-  const setNavSearchEnabled = useStore(state => state.setNavSearchEnabled);
+  const navLibraryEnabled = useStore(state => state.navLibraryEnabled ?? state.navSearchEnabled ?? true);
+  const setNavLibraryEnabled = useStore(state => state.setNavLibraryEnabled || state.setNavSearchEnabled);
   const navSettingsEnabled = useStore(state => state.navSettingsEnabled);
   const setNavSettingsEnabled = useStore(state => state.setNavSettingsEnabled);
 
@@ -324,11 +324,11 @@ export default function SettingsScreen() {
         </ListItem>
         <Divider />
         <ListItem sx={{ py: 1.5, px: 2 }}>
-          <ListItemIcon sx={{ minWidth: 40 }}><Search color="primary" /></ListItemIcon>
-          <ListItemText primary="Show Search Tab" primaryTypographyProps={{ fontWeight: 600 }} />
+          <ListItemIcon sx={{ minWidth: 40 }}><VideoLibraryRounded color="primary" /></ListItemIcon>
+          <ListItemText primary="Show Library Tab" primaryTypographyProps={{ fontWeight: 600 }} />
           <Switch 
-            checked={!!navSearchEnabled} 
-            onChange={(e) => setNavSearchEnabled(e.target.checked)}
+            checked={!!navLibraryEnabled} 
+            onChange={(e) => setNavLibraryEnabled(e.target.checked)}
             color="primary"
           />
         </ListItem>

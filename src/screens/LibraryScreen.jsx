@@ -9,7 +9,7 @@ import PosterCard from '../components/PosterCard';
 import EmptyState from '../components/EmptyState';
 import MovieSkeleton from '../components/MovieSkeleton';
 
-export default function SearchScreen() {
+export default function LibraryScreen() {
   const recentSearches = useStore(state => state.recentSearches);
   const addRecentSearch = useStore(state => state.addRecentSearch);
   const clearRecentSearches = useStore(state => state.clearRecentSearches);
@@ -76,7 +76,7 @@ export default function SearchScreen() {
 
   return (
     <Box sx={{ pb: 12, p: 2, display: 'flex', flexDirection: 'column', minHeight: '100vh', boxSizing: 'border-box' }}>
-      {/* Left-aligned Search Screen Title */}
+      {/* Left-aligned Library Screen Title */}
       <Typography 
         variant="headlineMedium" 
         fontWeight={800} 
@@ -87,12 +87,12 @@ export default function SearchScreen() {
           display: 'block' 
         }}
       >
-        Search
+        Library
       </Typography>
 
       <Box sx={{ mb: 2 }}>
         <SearchBar 
-          placeholder="Search movies, genres..." 
+          placeholder="Search library, movies, genres..." 
           value={query} 
           onChange={handleSearch} 
           onClear={() => setQuery('')}

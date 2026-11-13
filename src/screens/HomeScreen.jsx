@@ -11,7 +11,6 @@ import {
 } from '../services/tmdb';
 import HeroCard from '../components/HeroCard';
 import ScrollRail from '../components/ScrollRail';
-import SearchBar from '../components/SearchBar';
 import { getRecommendationData } from '../services/recommendationEngine';
 
 // Need to map genre name to TMDB genre ID
@@ -268,15 +267,6 @@ export default function HomeScreen() {
             transition: 'transform 0.2s',
             '&:hover': { transform: 'scale(1.1)' }
           }} 
-        />
-      </Box>
-
-      {/* Search Bar */}
-      <Box sx={{ px: 2, mb: 4 }}>
-        <SearchBar 
-          placeholder="Search movies, genres..." 
-          readOnly 
-          onClick={() => navigate('/search')}
         />
       </Box>
 

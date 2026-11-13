@@ -26,7 +26,6 @@ export default function LoginScreen() {
   const storeLanguages = useStore(state => state.selectedLanguages);
   const setOnboarded = useStore(state => state.setOnboarded);
   const isOnboarded = useStore(state => state.isOnboarded);
-  const session = useStore(state => state.session);
   const storeAvatar = useStore(state => state.avatar);
   const storeUserName = useStore(state => state.userName);
   
@@ -122,19 +121,6 @@ export default function LoginScreen() {
     setStoreGenres(finalGenres);
     setSelectedLanguages(finalLanguages);
     setOnboarded(true);
-
-    useStore.setState({
-      session: {
-        user: {
-          id: 'local-user',
-          email: 'user@cinemora.app',
-          user_metadata: {
-            full_name: finalName,
-            avatar_url: finalAvatar
-          }
-        }
-      }
-    });
 
     if (isEditing) {
       navigate('/settings', { replace: true });
