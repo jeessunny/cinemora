@@ -480,7 +480,7 @@ fun SearchBar(
             BasicTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                textStyle = TextStyle(
+                textStyle = LocalTextStyle.current.copy(
                     color = colors.textPrimary,
                     fontSize = 14.sp
                 ),

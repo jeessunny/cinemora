@@ -8,6 +8,8 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:dialogTheme">@style/TransparentDialogTheme</item>
         <item name="android:alertDialogTheme">@style/TransparentDialogTheme</item>
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="fontFamily">@font/inter_regular</item>
     </style>
 
     <style name="TransparentDialogTheme" parent="Theme.AppCompat.Dialog">
@@ -16,6 +18,8 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="fontFamily">@font/inter_regular</item>
     </style>
 
     <style name="AppTheme.NoActionBarLaunch" parent="AppTheme">
