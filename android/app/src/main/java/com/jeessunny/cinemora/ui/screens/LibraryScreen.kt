@@ -110,11 +110,13 @@ fun LibraryScreen(
             }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         // Category Filter Chips (All, Movies, Series)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 18.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             val chips = listOf(
@@ -135,13 +137,13 @@ fun LibraryScreen(
                             RoundedCornerShape(16.dp)
                         )
                         .clickable { selectedCategory = value }
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                        .padding(horizontal = 16.dp, vertical = 7.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = label,
                         fontSize = 12.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         color = if (selected) Color.White else colors.textSecondary
                     )
                 }
@@ -150,34 +152,33 @@ fun LibraryScreen(
 
         // History Search Bar
         if (currentTab == "history" && history.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(12.dp))
             SearchBar(
                 query = historySearch,
                 onQueryChange = { historySearch = it },
                 placeholder = "Search history...",
                 onClear = { historySearch = "" },
-                modifier = Modifier.height(48.dp)
+                modifier = Modifier
+                    .height(48.dp)
+                    .padding(bottom = 14.dp)
             )
         }
-
-        Spacer(modifier = Modifier.height(14.dp))
 
         if (displayedList.isEmpty()) {
             val emptyInfo = when (currentTab) {
                 "favorites" -> Triple(
                     Icons.Outlined.FavoriteBorder,
                     "No favorites yet",
-                    "Heart the movies and series you love to see them here."
+                    "Heart the movies you love to see them here."
                 )
                 "history" -> Triple(
                     Icons.Outlined.HistoryToggleOff,
                     "No watch history",
-                    "Titles you mark as watched will appear here."
+                    "Movies you mark as watched will appear here."
                 )
                 else -> Triple(
                     Icons.Outlined.BookmarkBorder,
                     "Your watchlist is empty",
-                    "Save movies and series you want to watch later."
+                    "Save movies you want to watch later."
                 )
             }
 
@@ -185,27 +186,39 @@ fun LibraryScreen(
                 icon = emptyInfo.first,
                 title = emptyInfo.second,
                 subtitle = emptyInfo.third,
-                actionLabel = if (currentTab == "watchlist") "Find Movies" else null,
-                onAction = onFindMovies,
+                actionLabel = when (currentTab) {
+                    "watchlist" -> "Find Movies"
+                    "favorites" -> "Discover"
+                    else -> null
+                },
+                onAction = when (currentTab) {
+                    "watchlist" -> onFindMovies
+                    "favorites" -> onFindMovies // Navigates to find/discover
+                    else -> null
+                },
                 modifier = Modifier.weight(1f)
             )
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 96.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 100.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 items(displayedList, key = { it.id }) { movie ->
-                    PosterCard(
-                        movie = movie,
-                        isWatchlist = watchlistIds.contains(movie.id),
-                        isFavorite = favoriteIds.contains(movie.id),
-                        isHistory = historyIds.contains(movie.id),
-                        onClick = { onMovieClick(movie) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        PosterCard(
+                            movie = movie,
+                            isWatchlist = watchlistIds.contains(movie.id),
+                            isFavorite = favoriteIds.contains(movie.id),
+                            isHistory = historyIds.contains(movie.id),
+                            onClick = { onMovieClick(movie) }
+                        )
+                    }
                 }
             }
         }

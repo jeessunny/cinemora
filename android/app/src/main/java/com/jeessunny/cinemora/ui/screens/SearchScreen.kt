@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jeessunny.cinemora.data.CatalogData
@@ -32,6 +33,7 @@ import com.jeessunny.cinemora.ui.components.SearchBar
 import com.jeessunny.cinemora.ui.components.SegmentedButton
 import com.jeessunny.cinemora.ui.theme.LocalCinemoraColors
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
     prefs: PreferencesManager,
@@ -107,23 +109,27 @@ fun SearchScreen(
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 96.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 100.dp),
                     modifier = Modifier.weight(1f)
                 ) {
                     items(results, key = { it.id }) { movie ->
-                        PosterCard(
-                            movie = movie,
-                            isWatchlist = watchlistIds.contains(movie.id),
-                            isFavorite = favoriteIds.contains(movie.id),
-                            isHistory = historyIds.contains(movie.id),
-                            onClick = {
-                                prefs.addRecentSearch(query.trim())
-                                onMovieClick(movie)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            PosterCard(
+                                movie = movie,
+                                isWatchlist = watchlistIds.contains(movie.id),
+                                isFavorite = favoriteIds.contains(movie.id),
+                                isHistory = historyIds.contains(movie.id),
+                                onClick = {
+                                    prefs.addRecentSearch(query.trim())
+                                    onMovieClick(movie)
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -131,99 +137,113 @@ fun SearchScreen(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(top = 8.dp)
+                    .padding(top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Recent Searches
                 if (recentSearches.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
                     ) {
                         Text(
                             text = "Recent Searches",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = colors.textPrimary,
+                            textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Clear All",
-                            fontSize = 13.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = colors.primary,
                             modifier = Modifier.clickable { prefs.clearRecentSearches() }
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp)
                     ) {
-                        items(recentSearches) { term ->
+                        recentSearches.forEach { term ->
                             Row(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(colors.surfaceContainerLow)
                                     .border(1.dp, colors.divider, RoundedCornerShape(8.dp))
-                                    .clickable { query = term }
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .clickable {
+                                        query = term
+                                        prefs.addRecentSearch(term)
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 9.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.History,
                                     contentDescription = null,
                                     tint = colors.textSecondary,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(17.dp)
                                 )
                                 Text(
                                     text = term,
                                     fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
                                     color = colors.textPrimary
                                 )
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                // Popular Searches
+                // Popular Searches (Centered Title & Centered FlowRow of Chips matching OG)
                 Text(
                     text = "Popular Searches",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.textPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(CatalogData.POPULAR_SEARCHES) { term ->
+                    CatalogData.POPULAR_SEARCHES.forEach { term ->
                         Row(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(colors.surfaceContainerLow)
                                 .border(1.dp, colors.divider, RoundedCornerShape(8.dp))
-                                .clickable { query = term }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .clickable {
+                                    query = term
+                                    prefs.addRecentSearch(term)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 9.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.TrendingUp,
                                 contentDescription = null,
                                 tint = colors.textSecondary,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(17.dp)
                             )
                             Text(
                                 text = term,
                                 fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
                                 color = colors.textPrimary
                             )
                         }

@@ -56,21 +56,24 @@ fun CinemoraNavBar(
     currentRoute: String,
     onNavigate: (String) -> Unit,
     floating: Boolean = true,
+    showSettingsTab: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalCinemoraColors.current
-    val tabs = listOf(
+    val allTabs = listOf(
         Triple("home", "Home", Icons.Rounded.Home),
         Triple("search", "Search", Icons.Rounded.Search),
         Triple("library", "Library", Icons.Rounded.VideoLibrary),
         Triple("settings", "Settings", Icons.Rounded.Settings)
     )
+    val tabs = if (showSettingsTab) allTabs else allTabs.filter { it.first != "settings" }
 
     val navShape = if (floating) RoundedCornerShape(32.dp) else RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+    val navBg = if (!colors.isDark) Color(0xFFFFFFFF) else if (colors.isPitchBlack) Color(0xFF000000) else Color(0xFF141414)
     val paddingModifier = if (floating) {
         Modifier
-            .padding(horizontal = 20.dp, vertical = 12.dp)
-            .shadow(elevation = 16.dp, shape = navShape)
+            .padding(horizontal = 20.dp, vertical = 14.dp)
+            .shadow(elevation = 12.dp, shape = navShape)
     } else {
         Modifier.fillMaxWidth()
     }
@@ -79,9 +82,9 @@ fun CinemoraNavBar(
         modifier = modifier
             .then(paddingModifier)
             .clip(navShape)
-            .background(colors.surfaceContainer)
+            .background(navBg)
             .border(1.dp, colors.divider, navShape)
-            .height(64.dp)
+            .height(if (floating) 64.dp else 72.dp)
             .fillMaxWidth()
     ) {
         Row(
@@ -107,17 +110,17 @@ fun CinemoraNavBar(
                     Icon(
                         imageVector = icon,
                         contentDescription = label,
-                        tint = if (selected) colors.primary else colors.textSecondary,
+                        tint = if (selected) colors.primary else colors.textSecondary.copy(alpha = 0.85f),
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(25.dp)
                             .scale(scale)
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = label,
-                        fontSize = if (selected) 11.sp else 10.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (selected) colors.primary else colors.textSecondary
+                        fontSize = if (selected) 12.sp else 11.sp,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                        color = if (selected) colors.primary else colors.textSecondary.copy(alpha = 0.85f)
                     )
                 }
             }
@@ -138,23 +141,17 @@ fun PosterCard(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalCinemoraColors.current
-    var isPressed by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1.0f,
-        animationSpec = spring(dampingRatio = 0.7f, stiffness = 500f)
-    )
 
     Box(
         modifier = modifier
             .width(150.dp)
             .height(225.dp)
-            .scale(scale)
+            .shadow(4.dp, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(colors.surfaceContainerLow)
-            .border(1.dp, colors.divider, RoundedCornerShape(12.dp))
             .clickable { onClick() }
     ) {
-        // Poster Image
+        // Full Card Background Image
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(movie.posterUrl)
@@ -165,7 +162,7 @@ fun PosterCard(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Gradient overlay at bottom
+        // Gradient Scrim Overlay at the bottom (65% height)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -173,7 +170,11 @@ fun PosterCard(
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color(0xCC000000), Color(0xF2000000))
+                        colors = listOf(
+                            Color.Transparent,
+                            Color(0x99000000),
+                            Color(0xF2000000)
+                        )
                     )
                 )
         )
@@ -182,111 +183,88 @@ fun PosterCard(
         Row(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(6.dp),
+                .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             if (isFavorite) {
                 Box(
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(26.dp)
                         .clip(CircleShape)
-                        .background(Color(0xCC000000)),
+                        .background(Color(0xBF000000)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Favorite,
                         contentDescription = "Favorite",
                         tint = Color(0xFFE50914),
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }
             if (isWatchlist) {
                 Box(
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(26.dp)
                         .clip(CircleShape)
-                        .background(Color(0xCC000000)),
+                        .background(Color(0xBF000000)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Bookmark,
                         contentDescription = "Watchlist",
                         tint = colors.primary,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }
             if (isHistory) {
                 Box(
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(26.dp)
                         .clip(CircleShape)
-                        .background(Color(0xCC000000)),
+                        .background(Color(0xBF000000)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
                         contentDescription = "Watched",
                         tint = Color(0xFF46D369),
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }
         }
 
-        // Title and Year / Rating info at bottom
+        // Title and Year info at bottom
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
             Text(
                 text = movie.title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                maxLines = 1,
+                lineHeight = 16.sp,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(2.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = "${movie.year}",
-                    fontSize = 11.sp,
-                    color = Color(0xFFCCCCCC)
-                )
-                Text(
-                    text = "•",
-                    fontSize = 10.sp,
-                    color = Color(0xFF888888)
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = Color(0xFFFFC107),
-                        modifier = Modifier.size(11.dp)
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Text(
-                        text = String.format("%.1f", movie.rating),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White
-                    )
-                }
-            }
+            Text(
+                text = "${movie.year}",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xBFFFFFFF)
+            )
         }
     }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 3. Hero Card
+// 3. Hero Card (400 dp, View Details button)
 // ═══════════════════════════════════════════════════════════════════════════
 @Composable
 fun HeroCard(
@@ -295,15 +273,15 @@ fun HeroCard(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalCinemoraColors.current
-    val scrimColor = if (colors.isPitchBlack) Color(0xFF000000) else Color(0xFF0F0D0D)
+    val scrimEnd = if (colors.isPitchBlack) Color(0xF2000000) else Color(0xF20F0D0D)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(240.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .height(400.dp)
+            .shadow(6.dp, RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(28.dp))
             .background(colors.surfaceContainerLow)
-            .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
             .clickable { onClick() }
     ) {
         AsyncImage(
@@ -316,17 +294,15 @@ fun HeroCard(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Gradient Scrim
+        // Gradient Scrim to top
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color(0x80000000),
-                            Color(0xE6000000)
-                        )
+                        0.0f to Color.Transparent,
+                        0.35f to Color.Transparent,
+                        1.0f to scrimEnd
                     )
                 )
         )
@@ -336,64 +312,74 @@ fun HeroCard(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(24.dp)
         ) {
+            // Genre and Match Chips
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 10.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(colors.primary)
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = movie.genres.firstOrNull() ?: "Featured",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                movie.genres.take(2).forEach { g ->
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0x33FFFFFF))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = g,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White
+                        )
+                    }
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = Color(0xFFFFC107),
-                        modifier = Modifier.size(13.dp)
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
+                val match = movie.matchPercentage ?: 99
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(colors.primary)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
                     Text(
-                        text = "${movie.rating}",
+                        text = "$match% Match",
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = Color.White
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
-
             Text(
                 text = movie.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
                 color = Color.White,
-                maxLines = 1,
+                lineHeight = 32.sp,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            Text(
-                text = movie.synopsis,
-                fontSize = 12.sp,
-                color = Color(0xFFDDDDDD),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 16.sp
-            )
+            Button(
+                onClick = onClick,
+                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                contentPadding = PaddingValues(vertical = 10.dp)
+            ) {
+                Text(
+                    text = "View Details",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
         }
     }
 }
@@ -414,25 +400,23 @@ fun ScrollRail(
     val colors = LocalCinemoraColors.current
     if (movies.isEmpty()) return
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary
-            )
-        }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 18.dp)
+    ) {
+        Text(
+            text = title,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = colors.textPrimary,
+            letterSpacing = (-0.3).sp,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        )
 
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(movies, key = { it.id }) { movie ->
                 PosterCard(
@@ -520,7 +504,7 @@ fun SearchBar(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 6. Segmented Button
+// 6. Segmented Button (Capsule Style)
 // ═══════════════════════════════════════════════════════════════════════════
 @Composable
 fun SegmentedButton(
@@ -534,9 +518,9 @@ fun SegmentedButton(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(28.dp))
             .background(colors.surfaceContainerLow)
-            .border(1.dp, colors.divider, RoundedCornerShape(8.dp))
+            .border(1.dp, colors.divider, RoundedCornerShape(28.dp))
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -548,12 +532,12 @@ fun SegmentedButton(
                     .clip(RoundedCornerShape(24.dp))
                     .background(if (selected) colors.primary else Color.Transparent)
                     .clickable { onSelect(value) }
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 9.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = label,
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                     color = if (selected) Color.White else colors.textSecondary
                 )

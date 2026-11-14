@@ -1,8 +1,8 @@
-### What's New in Cinemora v2.3.4 🎬
+### What's New in Cinemora v2.3.5 🎬
 
-- 🚀 **100% Native Kotlin & Jetpack Compose**: Full architectural transformation into pure Native Kotlin powered by Jetpack Compose and Material 3, retaining 100% exact UI/UX fidelity with zero webview overhead.
-- ⚡ **Blazing Fast Native Performance**: Smooth 120Hz native scrolling, instant screen transitions, and memory-optimized asynchronous poster caching with Coil.
-- 🖤 **Pure Pitch Black AMOLED & Themes**: Native dynamic color engine supporting System, Dark, Light, and pure `#000000` AMOLED modes alongside 10 custom accent colors.
-- 🔍 **First-Class 4-Tab Navigation**: Floating and fixed capsule navigation bar with Home, Search, Library, and Settings.
-- 🔄 **Direct In-App Updater**: Built-in GitHub release checker, background APK download manager with live progress, and instant FileProvider installation.
-- 🔐 **Seamless Upgrade**: Signed with the permanent Cinemora release certificate to update cleanly over previous installations.
+- 🎨 **100% Pixel-Perfect OG UI/UX Alignment**: Complete screen-by-screen audit and cross-check matching the original Cinemora design.
+- 🌟 **Enhanced HeroCard**: Restored full 400dp height, 28dp pill curves, genre match chips, and prominent "View Details" action button.
+- 🔍 **Centered Search Experience**: Aligned Popular Searches in a centered flex-wrap chip layout with trending indicators (`↗`) and centered Recent Searches.
+- 📚 **Refined Library Tabs**: Restored exact 3-tab segmented button (Watchlist, Favorites, History), category pill counters (`All`, `Movies`, `Series`), and customized empty states with action triggers.
+- ⚙️ **Exact Settings Architecture**: Restored all original sections (Appearance, Navigation, Animation, Home Screen Sections with reset, Data actions, and Updates & About), SVG/PNG avatar rendering, and toggleable Settings navbar tab.
+- 🚀 **Performance & Coil SVG Support**: Seamless Dicebear vector avatar decoding and 120Hz native scrolling.

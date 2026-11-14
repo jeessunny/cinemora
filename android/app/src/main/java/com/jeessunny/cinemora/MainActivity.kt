@@ -37,6 +37,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         prefs = PreferencesManager(this)
 
+        val imageLoader = coil.ImageLoader.Builder(this)
+            .components {
+                add(coil.decode.SvgDecoder.Factory())
+            }
+            .crossfade(true)
+            .build()
+        coil.Coil.setImageLoader(imageLoader)
+
         enableEdgeToEdgeFullscreen()
 
         // Background update check on launch
@@ -107,6 +115,7 @@ fun CinemoraApp(prefs: PreferencesManager) {
     val currentRoute = navBackStackEntry?.destination?.route ?: "home"
 
     val floatingNavBar by prefs.floatingNavBar.collectAsState()
+    val navSettingsEnabled by prefs.navSettingsEnabled.collectAsState()
     val isOnboarded by prefs.isOnboarded.collectAsState()
 
     val startDestination = if (isOnboarded) "home" else "login"
@@ -228,6 +237,7 @@ fun CinemoraApp(prefs: PreferencesManager) {
                     }
                 },
                 floating = floatingNavBar,
+                showSettingsTab = navSettingsEnabled,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }

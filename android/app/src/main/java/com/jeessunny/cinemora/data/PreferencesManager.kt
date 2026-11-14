@@ -41,6 +41,9 @@ class PreferencesManager(context: Context) {
     private val _animationsEnabled = MutableStateFlow(getAnimationsEnabled())
     val animationsEnabled: StateFlow<Boolean> = _animationsEnabled.asStateFlow()
 
+    private val _navSettingsEnabled = MutableStateFlow(getNavSettingsEnabled())
+    val navSettingsEnabled: StateFlow<Boolean> = _navSettingsEnabled.asStateFlow()
+
     private val _isOnboarded = MutableStateFlow(getIsOnboarded())
     val isOnboarded: StateFlow<Boolean> = _isOnboarded.asStateFlow()
 
@@ -78,7 +81,7 @@ class PreferencesManager(context: Context) {
         _userName.value = name
     }
 
-    fun getAvatar(): String = prefs.getString("user_avatar", "https://api.dicebear.com/7.x/bottts/svg?seed=Cinemora") ?: "https://api.dicebear.com/7.x/bottts/svg?seed=Cinemora"
+    fun getAvatar(): String = prefs.getString("user_avatar", "https://api.dicebear.com/7.x/avataaars/png?seed=MovieLover") ?: "https://api.dicebear.com/7.x/avataaars/png?seed=MovieLover"
     fun setAvatar(url: String) {
         prefs.edit().putString("user_avatar", url).apply()
         _avatar.value = url
@@ -126,6 +129,12 @@ class PreferencesManager(context: Context) {
     fun setAnimationsEnabled(enabled: Boolean) {
         prefs.edit().putBoolean("animations_enabled", enabled).apply()
         _animationsEnabled.value = enabled
+    }
+
+    fun getNavSettingsEnabled(): Boolean = prefs.getBoolean("nav_settings_enabled", true)
+    fun setNavSettingsEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("nav_settings_enabled", enabled).apply()
+        _navSettingsEnabled.value = enabled
     }
 
     // --- Collections (Watchlist, Favorites, History) ---
@@ -245,7 +254,7 @@ class PreferencesManager(context: Context) {
         prefs.edit().clear().apply()
         _isOnboarded.value = false
         _userName.value = ""
-        _avatar.value = "https://api.dicebear.com/7.x/bottts/svg?seed=Cinemora"
+        _avatar.value = "https://api.dicebear.com/7.x/avataaars/png?seed=MovieLover"
         _watchlist.value = emptyList()
         _favorites.value = emptyList()
         _history.value = emptyList()
@@ -255,6 +264,7 @@ class PreferencesManager(context: Context) {
         _accentColor.value = "#E50914"
         _floatingNavBar.value = true
         _animationsEnabled.value = true
+        _navSettingsEnabled.value = true
         _homeSections.value = defaultSections
     }
 }

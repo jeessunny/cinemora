@@ -9,8 +9,8 @@ android {
         applicationId "com.jeessunny.cinemora"
         minSdkVersion 24
         targetSdkVersion 34
-        versionCode 20304
-        versionName "2.3.4"
+        versionCode 20305
+        versionName "2.3.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -18,7 +18,7 @@ android {
 
         buildConfigField "String", "GITHUB_OWNER", "\"jeessunny\""
         buildConfigField "String", "GITHUB_REPO", "\"cinemora\""
-        buildConfigField "String", "APP_VERSION", "\"2.3.4\""
+        buildConfigField "String", "APP_VERSION", "\"2.3.5\""
     }
 
     buildFeatures {
@@ -98,6 +98,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.7.0'
     implementation 'io.coil-kt:coil-compose:2.6.0'
+    implementation 'io.coil-kt:coil-svg:2.6.0'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     implementation 'androidx.core:core-splashscreen:1.0.1'

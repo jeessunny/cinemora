@@ -47,7 +47,7 @@ fun LoginScreen(
     var avatarUrl by remember {
         mutableStateOf(
             if (prefs.getAvatar().isNotBlank()) prefs.getAvatar()
-            else "https://api.dicebear.com/7.x/bottts/svg?seed=$seed"
+            else "https://api.dicebear.com/7.x/avataaars/png?seed=$seed"
         )
     }
 
@@ -91,20 +91,19 @@ fun LoginScreen(
                         .build(),
                     contentDescription = "Avatar",
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(90.dp)
                         .clip(CircleShape)
-                        .background(colors.surfaceContainerHigh)
-                        .border(2.dp, colors.primary, CircleShape)
+                        .background(colors.surfaceContainerHighest)
                 )
 
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(colors.primary)
                         .clickable {
                             seed = Random.nextInt(1000, 9999)
-                            avatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=$seed"
+                            avatarUrl = "https://api.dicebear.com/7.x/avataaars/png?seed=$seed"
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -117,7 +116,15 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Tap the shuffle icon to change your avatar",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.textSecondary
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Name Input
             OutlinedTextField(

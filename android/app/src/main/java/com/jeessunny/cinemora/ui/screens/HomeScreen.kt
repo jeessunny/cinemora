@@ -69,7 +69,7 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .background(colors.background),
-        contentPadding = PaddingValues(bottom = 96.dp)
+        contentPadding = PaddingValues(bottom = 100.dp)
     ) {
         // Top Header
         item {
@@ -81,33 +81,39 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 16.dp)
+                ) {
                     Text(
                         text = if (userName.isNotBlank()) userName else "Movie Lover",
-                        fontSize = 24.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = colors.textPrimary,
+                        lineHeight = 32.sp,
                         maxLines = 1
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = greeting,
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         color = colors.textSecondary,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
+                val avatarUrl = if (avatar.isNotBlank()) avatar else "https://api.dicebear.com/7.x/avataaars/png?seed=${if (userName.isNotBlank()) userName else "MovieLover"}"
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(avatar)
+                        .data(avatarUrl)
                         .crossfade(true)
                         .build(),
                     contentDescription = "Profile",
                     modifier = Modifier
-                        .size(46.dp)
+                        .size(48.dp)
                         .clip(CircleShape)
                         .background(colors.surfaceContainerHigh)
-                        .border(1.5.dp, colors.primary, CircleShape)
                         .clickable { onAvatarClick() }
                 )
             }
@@ -116,13 +122,12 @@ fun HomeScreen(
         // Hero Card
         if (heroMovie != null) {
             item {
-                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                Box(modifier = Modifier.padding(horizontal = 16.dp, top = 8.dp, bottom = 12.dp)) {
                     HeroCard(
                         movie = heroMovie,
                         onClick = { onMovieClick(heroMovie) }
                     )
                 }
-                Spacer(modifier = Modifier.height(10.dp))
             }
         }
 
