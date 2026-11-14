@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -99,9 +101,13 @@ class MainActivity : ComponentActivity() {
             }
 
             val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-            insetsController.hide(WindowInsetsCompat.Type.systemBars())
-            insetsController.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            if (::prefs.isInitialized && prefs.getShowStatusBar()) {
+                insetsController.show(WindowInsetsCompat.Type.statusBars())
+            } else {
+                insetsController.hide(WindowInsetsCompat.Type.statusBars())
+                insetsController.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
         } catch (e: Exception) {
             // Edge-to-edge fallback
         }
@@ -116,12 +122,31 @@ fun CinemoraApp(prefs: PreferencesManager) {
 
     val floatingNavBar by prefs.floatingNavBar.collectAsState()
     val navSettingsEnabled by prefs.navSettingsEnabled.collectAsState()
+    val showStatusBar by prefs.showStatusBar.collectAsState()
     val isOnboarded by prefs.isOnboarded.collectAsState()
 
     val startDestination = if (isOnboarded) "home" else "login"
 
     val isTopLevelRoute = currentRoute in listOf("home", "search", "library", "settings")
     val colors = LocalCinemoraColors.current
+    val view = LocalView.current
+
+    DisposableEffect(showStatusBar, colors.background, colors.isDark) {
+        val window = (view.context as? android.app.Activity)?.window
+        if (window != null) {
+            val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+            if (showStatusBar) {
+                insetsController.show(WindowInsetsCompat.Type.statusBars())
+                window.statusBarColor = colors.background.toArgb()
+                insetsController.isAppearanceLightStatusBars = !colors.isDark
+            } else {
+                insetsController.hide(WindowInsetsCompat.Type.statusBars())
+                insetsController.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        }
+        onDispose {}
+    }
 
     Box(
         modifier = Modifier

@@ -40,7 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.graphics.drawable.ColorDrawable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeessunny.cinemora.model.Movie
@@ -671,15 +676,40 @@ fun UpdateDialogView() {
 
     if (!showDialog) return
 
-    Dialog(onDismissRequest = { UpdateManager.dismissDialog() }) {
+    Dialog(
+        onDismissRequest = { UpdateManager.dismissDialog() },
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        (LocalView.current.parent as? DialogWindowProvider)?.window?.let { window ->
+            window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+        }
+
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.92f)
-                .clip(RoundedCornerShape(20.dp))
-                .background(colors.surfaceContainer)
-                .border(1.dp, colors.divider, RoundedCornerShape(20.dp))
-                .padding(20.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.65f))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { UpdateManager.dismissDialog() },
+            contentAlignment = Alignment.Center
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.90f)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(colors.surfaceContainer)
+                    .border(1.dp, colors.divider, RoundedCornerShape(20.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { /* prevent dismissal on dialog card click */ }
+                    .padding(20.dp)
+            ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -859,4 +889,5 @@ fun UpdateDialogView() {
             }
         }
     }
+}
 }

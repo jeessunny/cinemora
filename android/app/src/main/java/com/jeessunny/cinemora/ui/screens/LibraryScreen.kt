@@ -150,7 +150,7 @@ fun LibraryScreen(
             }
         }
 
-        // History Search Bar
+        // History Search Bar (full standard 52dp thickness matching other elements)
         if (currentTab == "history" && history.isNotEmpty()) {
             SearchBar(
                 query = historySearch,
@@ -158,8 +158,8 @@ fun LibraryScreen(
                 placeholder = "Search history...",
                 onClear = { historySearch = "" },
                 modifier = Modifier
-                    .height(48.dp)
-                    .padding(bottom = 14.dp)
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             )
         }
 

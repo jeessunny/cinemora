@@ -1,8 +1,8 @@
-### What's New in Cinemora v2.3.6 🎬
+### What's New in Cinemora v2.3.7 🎬
 
-- 🎨 **Pixel-Perfect OG UI/UX Alignment Across All Screens**:
-  - **Floating Capsule Navbar**: Exact dynamic surface color matching the OG design (`#F1F3F5` in light mode, `#181818` in dark, `#000000` in AMOLED) with subtle border and elevation.
-  - **Dynamic Home Screen Sections in Settings**: Accurately computes and labels dynamic personalized sections ("Because You Like <TopGenre>", "More <SecondGenre>") to match the original app.
-  - **Movie & Series Details Parity**: Standardized section titles ("Synopsis", "Cast", "Seasons & Episodes"), 18dp season pill chips, 90dp cast avatar items, and exact OG action button sequence (Watched, Favorite, Watchlist, Share) with vibrant status colors.
-  - **Search & Library Parity**: Centered Popular Searches chips with trending icons, centered Recent Searches with clear action, 3-tab segmented control, and outline empty states with action buttons.
-- 🚀 **100% Native Kotlin Jetpack Compose**: High-performance 120Hz smooth animations, Coil SVG avatar support, and permanent keystore compatibility for seamless OTA updates.
+- 🔄 **Functional Drag-and-Drop Home Screen Sections**: Direct touch-and-drag reordering on section drag handles with live row reordering and instant persistence.
+- 🔍 **Dynamic Search History**: Replaced static popular searches with dynamic search history chips, individual item removals, and an app-themed "Clear History" button.
+- 📏 **Standard 52dp Thickness for Library History Search Bar**: Aligned the search bar in the watch history tab to full thickness matching the search screen and design system.
+- 🛡️ **Update Popup Background Scrim Fix**: Eliminated white screen artifacts behind in-app update popups; dialogs now feature transparent window frames with dark translucent backdrop scrims.
+- 📱 **Show/Hide Status Bar Setting**: Added a toggle switch in Settings (Navigation) to show or hide the system status bar, dynamically blending background colors and dark/light icon tinting across Light, Dark, and Pure Pitch Black (AMOLED) modes.
+- 🌙 **Pitch Black Moon Icon Orientation**: Tilted and flipped the AMOLED moon icon to face right with an upward angle.

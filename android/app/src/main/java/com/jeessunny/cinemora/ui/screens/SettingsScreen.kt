@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -16,13 +17,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeessunny.cinemora.BuildConfig
@@ -52,10 +58,16 @@ fun SettingsScreen(
     val floatingNavBar by prefs.floatingNavBar.collectAsState()
     val animationsEnabled by prefs.animationsEnabled.collectAsState()
     val navSettingsEnabled by prefs.navSettingsEnabled.collectAsState()
+    val showStatusBar by prefs.showStatusBar.collectAsState()
     val homeSections by prefs.homeSections.collectAsState()
     val watchlist by prefs.watchlist.collectAsState()
     val favorites by prefs.favorites.collectAsState()
     val history by prefs.history.collectAsState()
+
+    var localSections by remember(homeSections) { mutableStateOf(homeSections) }
+    var draggingIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffsetY by remember { mutableStateOf(0f) }
+    val density = LocalDensity.current
 
     val (topGenres, _) = remember(history, favorites, watchlist) {
         RecommendationEngine.getRecommendationData(prefs)
@@ -207,7 +219,9 @@ fun SettingsScreen(
                             Icons.Rounded.Brightness2,
                             contentDescription = null,
                             tint = if (amoledDisabled) colors.textSecondary.copy(alpha = 0.5f) else colors.primary,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier
+                                .size(22.dp)
+                                .graphicsLayer(scaleX = -1f, rotationZ = -25f)
                         )
                         Column {
                             Text(
@@ -339,6 +353,38 @@ fun SettingsScreen(
                         )
                     )
                 }
+
+                HorizontalDivider(color = colors.divider)
+
+                // Show Status Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(Icons.Rounded.StayCurrentPortrait, contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
+                        Column {
+                            Text(text = "Show Status Bar", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(text = "Blends seamlessly with app themes", fontSize = 12.sp, color = colors.textSecondary)
+                        }
+                    }
+
+                    Switch(
+                        checked = showStatusBar,
+                        onCheckedChange = { prefs.setShowStatusBar(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = colors.primary
+                        )
+                    )
+                }
             }
 
             // ═══════ ANIMATION ═══════
@@ -413,10 +459,22 @@ fun SettingsScreen(
                     .background(colors.surfaceContainer)
                     .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
             ) {
-                homeSections.forEachIndexed { index, section ->
+                localSections.forEachIndexed { index, section ->
+                    val isDraggingThis = draggingIndex == index
+                    val dragModifier = if (isDraggingThis) {
+                        Modifier
+                            .zIndex(10f)
+                            .graphicsLayer { translationY = dragOffsetY }
+                            .shadow(6.dp, RoundedCornerShape(8.dp))
+                            .background(colors.surfaceContainerHigh)
+                    } else {
+                        Modifier.zIndex(1f)
+                    }
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .then(dragModifier)
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
@@ -426,12 +484,56 @@ fun SettingsScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(
-                                imageVector = Icons.Rounded.DragIndicator,
-                                contentDescription = null,
-                                tint = colors.textSecondary.copy(alpha = 0.6f),
-                                modifier = Modifier.size(22.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .pointerInput(section.id) {
+                                        val rowHeightPx = with(density) { 54.dp.toPx() }
+                                        detectDragGestures(
+                                            onDragStart = {
+                                                draggingIndex = index
+                                                dragOffsetY = 0f
+                                            },
+                                            onDrag = { change, dragAmount ->
+                                                change.consume()
+                                                dragOffsetY += dragAmount.y
+                                                val currentIdx = draggingIndex ?: return@detectDragGestures
+                                                val steps = (dragOffsetY / rowHeightPx).toInt()
+                                                if (steps != 0) {
+                                                    val targetIdx = (currentIdx + steps).coerceIn(0, localSections.lastIndex)
+                                                    if (targetIdx != currentIdx) {
+                                                        val list = localSections.toMutableList()
+                                                        val item = list.removeAt(currentIdx)
+                                                        list.add(targetIdx, item)
+                                                        localSections = list
+                                                        draggingIndex = targetIdx
+                                                        dragOffsetY -= steps * rowHeightPx
+                                                    }
+                                                }
+                                            },
+                                            onDragEnd = {
+                                                draggingIndex = null
+                                                dragOffsetY = 0f
+                                                prefs.saveHomeSections(localSections)
+                                            },
+                                            onDragCancel = {
+                                                draggingIndex = null
+                                                dragOffsetY = 0f
+                                                localSections = homeSections
+                                            }
+                                        )
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.DragIndicator,
+                                    contentDescription = "Drag to reorder",
+                                    tint = if (isDraggingThis) colors.primary else colors.textSecondary.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
                             val displayLabel = when (section.id) {
                                 "genre1" -> "Because You Like $g1"
                                 "genre2" -> "More $g2"
@@ -446,7 +548,13 @@ fun SettingsScreen(
                         }
 
                         IconButton(
-                            onClick = { prefs.toggleHomeSection(section.id) },
+                            onClick = {
+                                val updated = localSections.map {
+                                    if (it.id == section.id) it.copy(enabled = !it.enabled) else it
+                                }
+                                localSections = updated
+                                prefs.saveHomeSections(updated)
+                            },
                             modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
@@ -456,7 +564,7 @@ fun SettingsScreen(
                             )
                         }
                     }
-                    if (index < homeSections.size - 1) {
+                    if (index < localSections.size - 1) {
                         HorizontalDivider(color = colors.divider)
                     }
                 }

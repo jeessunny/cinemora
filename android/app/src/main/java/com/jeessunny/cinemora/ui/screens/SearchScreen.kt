@@ -9,8 +9,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material.icons.rounded.TrendingUp
@@ -138,39 +141,62 @@ fun SearchScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.Start
             ) {
-                // Recent Searches
                 if (recentSearches.isNotEmpty()) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Recent Searches",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = colors.textPrimary,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Clear All",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.primary,
-                            modifier = Modifier.clickable { prefs.clearRecentSearches() }
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.History,
+                                contentDescription = null,
+                                tint = colors.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "Search History",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = colors.textPrimary
+                            )
+                        }
+
+                        // Themed Clear Button
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { prefs.clearRecentSearches() }
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.DeleteSweep,
+                                contentDescription = "Clear History",
+                                tint = colors.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Clear History",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.primary
+                            )
+                        }
                     }
 
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         recentSearches.forEach { term ->
                             Row(
@@ -182,7 +208,7 @@ fun SearchScreen(
                                         query = term
                                         prefs.addRecentSearch(term)
                                     }
-                                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                                    .padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
@@ -190,7 +216,7 @@ fun SearchScreen(
                                     imageVector = Icons.Rounded.History,
                                     contentDescription = null,
                                     tint = colors.textSecondary,
-                                    modifier = Modifier.size(17.dp)
+                                    modifier = Modifier.size(16.dp)
                                 )
                                 Text(
                                     text = term,
@@ -198,55 +224,55 @@ fun SearchScreen(
                                     fontWeight = FontWeight.Medium,
                                     color = colors.textPrimary
                                 )
+                                Icon(
+                                    imageVector = Icons.Rounded.Close,
+                                    contentDescription = "Remove",
+                                    tint = colors.textSecondary.copy(alpha = 0.6f),
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .clip(CircleShape)
+                                        .clickable { prefs.removeRecentSearch(term) }
+                                )
                             }
                         }
                     }
-                }
-
-                // Popular Searches (Centered Title & Centered FlowRow of Chips matching OG)
-                Text(
-                    text = "Popular Searches",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = colors.textPrimary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                )
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    CatalogData.POPULAR_SEARCHES.forEach { term ->
-                        Row(
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 48.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(colors.surfaceContainerLow)
-                                .border(1.dp, colors.divider, RoundedCornerShape(8.dp))
-                                .clickable {
-                                    query = term
-                                    prefs.addRecentSearch(term)
-                                }
-                                .padding(horizontal = 14.dp, vertical = 9.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                .size(72.dp)
+                                .clip(CircleShape)
+                                .background(colors.surfaceContainerHighest),
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.TrendingUp,
+                                imageVector = Icons.Rounded.History,
                                 contentDescription = null,
-                                tint = colors.textSecondary,
-                                modifier = Modifier.size(17.dp)
-                            )
-                            Text(
-                                text = term,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = colors.textPrimary
+                                tint = colors.primary,
+                                modifier = Modifier.size(36.dp)
                             )
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "No Search History",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Your recent searches will appear here dynamically.",
+                            fontSize = 13.sp,
+                            color = colors.textSecondary,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }

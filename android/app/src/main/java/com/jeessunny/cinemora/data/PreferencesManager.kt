@@ -44,6 +44,9 @@ class PreferencesManager(context: Context) {
     private val _navSettingsEnabled = MutableStateFlow(getNavSettingsEnabled())
     val navSettingsEnabled: StateFlow<Boolean> = _navSettingsEnabled.asStateFlow()
 
+    private val _showStatusBar = MutableStateFlow(getShowStatusBar())
+    val showStatusBar: StateFlow<Boolean> = _showStatusBar.asStateFlow()
+
     private val _isOnboarded = MutableStateFlow(getIsOnboarded())
     val isOnboarded: StateFlow<Boolean> = _isOnboarded.asStateFlow()
 
@@ -137,6 +140,12 @@ class PreferencesManager(context: Context) {
         _navSettingsEnabled.value = enabled
     }
 
+    fun getShowStatusBar(): Boolean = prefs.getBoolean("show_status_bar", false)
+    fun setShowStatusBar(enabled: Boolean) {
+        prefs.edit().putBoolean("show_status_bar", enabled).apply()
+        _showStatusBar.value = enabled
+    }
+
     // --- Collections (Watchlist, Favorites, History) ---
     private fun getMovieList(key: String): List<Movie> {
         val json = prefs.getString(key, null) ?: return emptyList()
@@ -223,6 +232,13 @@ class PreferencesManager(context: Context) {
         _recentSearches.value = emptyList()
     }
 
+    fun removeRecentSearch(query: String) {
+        val current = getRecentSearches().toMutableList()
+        current.remove(query)
+        prefs.edit().putString("recent_searches", gson.toJson(current)).apply()
+        _recentSearches.value = current
+    }
+
     // --- Home Sections ---
     fun getHomeSections(): List<HomeSection> {
         val json = prefs.getString("home_sections", null) ?: return defaultSections
@@ -237,6 +253,15 @@ class PreferencesManager(context: Context) {
     fun saveHomeSections(sections: List<HomeSection>) {
         prefs.edit().putString("home_sections", gson.toJson(sections)).apply()
         _homeSections.value = sections
+    }
+
+    fun reorderHomeSections(fromIndex: Int, toIndex: Int) {
+        val current = getHomeSections().toMutableList()
+        if (fromIndex in current.indices && toIndex in current.indices && fromIndex != toIndex) {
+            val item = current.removeAt(fromIndex)
+            current.add(toIndex, item)
+            saveHomeSections(current)
+        }
     }
 
     fun toggleHomeSection(id: String) {
@@ -265,6 +290,7 @@ class PreferencesManager(context: Context) {
         _floatingNavBar.value = true
         _animationsEnabled.value = true
         _navSettingsEnabled.value = true
+        _showStatusBar.value = false
         _homeSections.value = defaultSections
     }
 }
