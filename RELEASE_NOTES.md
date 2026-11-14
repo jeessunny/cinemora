@@ -1,8 +1,8 @@
-### What's New in Cinemora v2.3.5 🎬
+### What's New in Cinemora v2.3.6 🎬
 
-- 🎨 **100% Pixel-Perfect OG UI/UX Alignment**: Complete screen-by-screen audit and cross-check matching the original Cinemora design.
-- 🌟 **Enhanced HeroCard**: Restored full 400dp height, 28dp pill curves, genre match chips, and prominent "View Details" action button.
-- 🔍 **Centered Search Experience**: Aligned Popular Searches in a centered flex-wrap chip layout with trending indicators (`↗`) and centered Recent Searches.
-- 📚 **Refined Library Tabs**: Restored exact 3-tab segmented button (Watchlist, Favorites, History), category pill counters (`All`, `Movies`, `Series`), and customized empty states with action triggers.
-- ⚙️ **Exact Settings Architecture**: Restored all original sections (Appearance, Navigation, Animation, Home Screen Sections with reset, Data actions, and Updates & About), SVG/PNG avatar rendering, and toggleable Settings navbar tab.
-- 🚀 **Performance & Coil SVG Support**: Seamless Dicebear vector avatar decoding and 120Hz native scrolling.
+- 🎨 **Pixel-Perfect OG UI/UX Alignment Across All Screens**:
+  - **Floating Capsule Navbar**: Exact dynamic surface color matching the OG design (`#F1F3F5` in light mode, `#181818` in dark, `#000000` in AMOLED) with subtle border and elevation.
+  - **Dynamic Home Screen Sections in Settings**: Accurately computes and labels dynamic personalized sections ("Because You Like <TopGenre>", "More <SecondGenre>") to match the original app.
+  - **Movie & Series Details Parity**: Standardized section titles ("Synopsis", "Cast", "Seasons & Episodes"), 18dp season pill chips, 90dp cast avatar items, and exact OG action button sequence (Watched, Favorite, Watchlist, Share) with vibrant status colors.
+  - **Search & Library Parity**: Centered Popular Searches chips with trending icons, centered Recent Searches with clear action, 3-tab segmented control, and outline empty states with action buttons.
+- 🚀 **100% Native Kotlin Jetpack Compose**: High-performance 120Hz smooth animations, Coil SVG avatar support, and permanent keystore compatibility for seamless OTA updates.

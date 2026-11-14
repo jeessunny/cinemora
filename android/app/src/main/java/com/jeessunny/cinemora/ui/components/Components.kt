@@ -69,7 +69,7 @@ fun CinemoraNavBar(
     val tabs = if (showSettingsTab) allTabs else allTabs.filter { it.first != "settings" }
 
     val navShape = if (floating) RoundedCornerShape(32.dp) else RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-    val navBg = if (!colors.isDark) Color(0xFFFFFFFF) else if (colors.isPitchBlack) Color(0xFF000000) else Color(0xFF141414)
+    val navBg = if (colors.isPitchBlack) Color(0xFF000000) else colors.surfaceContainer
     val paddingModifier = if (floating) {
         Modifier
             .padding(horizontal = 20.dp, vertical = 14.dp)

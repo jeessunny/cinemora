@@ -224,7 +224,7 @@ fun SeriesDetailsScreen(
             }
         }
 
-        // Action Buttons Row (Watchlist, Favorite, Watched, Share)
+        // Action Buttons Row (Watched, Favorite, Watchlist, Share matching OG)
         item {
             Row(
                 modifier = Modifier
@@ -234,34 +234,34 @@ fun SeriesDetailsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SeriesActionButton(
-                    icon = if (isWatchlist) Icons.Rounded.Bookmark else Icons.Outlined.BookmarkBorder,
-                    label = if (isWatchlist) "Added" else "Watchlist",
-                    active = isWatchlist,
-                    activeColor = colors.primary,
-                    onClick = { prefs.toggleWatchlist(series) }
-                )
-
-                SeriesActionButton(
-                    icon = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    label = if (isFavorite) "Liked" else "Favorite",
-                    active = isFavorite,
-                    activeColor = Color(0xFFE50914),
-                    onClick = { prefs.toggleFavorite(series) }
-                )
-
-                SeriesActionButton(
                     icon = if (isHistory) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircleOutline,
-                    label = if (isHistory) "Watched" else "Mark Seen",
+                    label = "Watched",
                     active = isHistory,
                     activeColor = Color(0xFF46D369),
                     onClick = { prefs.toggleHistory(series) }
                 )
 
                 SeriesActionButton(
+                    icon = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    label = "Favorite",
+                    active = isFavorite,
+                    activeColor = Color(0xFFE50914),
+                    onClick = { prefs.toggleFavorite(series) }
+                )
+
+                SeriesActionButton(
+                    icon = if (isWatchlist) Icons.Rounded.Bookmark else Icons.Outlined.BookmarkBorder,
+                    label = "Watchlist",
+                    active = isWatchlist,
+                    activeColor = colors.primary,
+                    onClick = { prefs.toggleWatchlist(series) }
+                )
+
+                SeriesActionButton(
                     icon = Icons.Rounded.Share,
                     label = "Share",
                     active = false,
-                    activeColor = colors.primary,
+                    activeColor = colors.textSecondary,
                     onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -280,7 +280,7 @@ fun SeriesDetailsScreen(
         item {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text(
-                    text = "Storyline",
+                    text = "Synopsis",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary
@@ -301,7 +301,7 @@ fun SeriesDetailsScreen(
         item {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Episodes",
+                    text = "Seasons & Episodes",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary,
@@ -323,12 +323,12 @@ fun SeriesDetailsScreen(
                         val selected = selectedSeasonNumber == season.seasonNumber
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(18.dp))
                                 .background(if (selected) colors.primary else colors.surfaceContainerLow)
                                 .border(
                                     1.dp,
                                     if (selected) colors.primary else colors.divider,
-                                    RoundedCornerShape(8.dp)
+                                    RoundedCornerShape(18.dp)
                                 )
                                 .clickable { selectedSeasonNumber = season.seasonNumber }
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -409,7 +409,7 @@ fun SeriesDetailsScreen(
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Top Cast",
+                        text = "Cast",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -425,7 +425,7 @@ fun SeriesDetailsScreen(
                         items(series.cast) { member ->
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.width(80.dp)
+                                modifier = Modifier.width(90.dp)
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
@@ -438,12 +438,11 @@ fun SeriesDetailsScreen(
                                         .size(64.dp)
                                         .clip(CircleShape)
                                         .background(colors.surfaceContainerHigh)
-                                        .border(1.dp, colors.divider, CircleShape)
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
                                     text = member.name,
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = colors.textPrimary,
                                     maxLines = 1,
@@ -451,7 +450,7 @@ fun SeriesDetailsScreen(
                                 )
                                 Text(
                                     text = member.character,
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = colors.textSecondary,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis

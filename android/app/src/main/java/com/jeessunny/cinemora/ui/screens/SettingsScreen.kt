@@ -27,6 +27,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeessunny.cinemora.BuildConfig
 import com.jeessunny.cinemora.data.PreferencesManager
+import com.jeessunny.cinemora.data.RecommendationEngine
 import com.jeessunny.cinemora.service.UpdateManager
 import com.jeessunny.cinemora.ui.components.SegmentedButton
 import com.jeessunny.cinemora.ui.theme.ACCENT_COLORS
@@ -52,6 +53,15 @@ fun SettingsScreen(
     val animationsEnabled by prefs.animationsEnabled.collectAsState()
     val navSettingsEnabled by prefs.navSettingsEnabled.collectAsState()
     val homeSections by prefs.homeSections.collectAsState()
+    val watchlist by prefs.watchlist.collectAsState()
+    val favorites by prefs.favorites.collectAsState()
+    val history by prefs.history.collectAsState()
+
+    val (topGenres, _) = remember(history, favorites, watchlist) {
+        RecommendationEngine.getRecommendationData(prefs)
+    }
+    val g1 = topGenres.getOrNull(0) ?: "Action"
+    val g2 = topGenres.getOrNull(1) ?: "Sci-Fi"
 
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
@@ -422,8 +432,13 @@ fun SettingsScreen(
                                 tint = colors.textSecondary.copy(alpha = 0.6f),
                                 modifier = Modifier.size(22.dp)
                             )
+                            val displayLabel = when (section.id) {
+                                "genre1" -> "Because You Like $g1"
+                                "genre2" -> "More $g2"
+                                else -> section.label
+                            }
                             Text(
-                                text = section.label,
+                                text = displayLabel,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = colors.textPrimary

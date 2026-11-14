@@ -222,7 +222,7 @@ fun MovieDetailsScreen(
             }
         }
 
-        // Action Buttons Row (Watchlist, Favorite, Watched, Share)
+        // Action Buttons Row (Watched, Favorite, Watchlist, Share matching OG)
         item {
             Row(
                 modifier = Modifier
@@ -232,34 +232,34 @@ fun MovieDetailsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ActionButton(
-                    icon = if (isWatchlist) Icons.Rounded.Bookmark else Icons.Outlined.BookmarkBorder,
-                    label = if (isWatchlist) "Added" else "Watchlist",
-                    active = isWatchlist,
-                    activeColor = colors.primary,
-                    onClick = { prefs.toggleWatchlist(movie) }
-                )
-
-                ActionButton(
-                    icon = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    label = if (isFavorite) "Liked" else "Favorite",
-                    active = isFavorite,
-                    activeColor = Color(0xFFE50914),
-                    onClick = { prefs.toggleFavorite(movie) }
-                )
-
-                ActionButton(
                     icon = if (isHistory) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircleOutline,
-                    label = if (isHistory) "Watched" else "Mark Seen",
+                    label = "Watched",
                     active = isHistory,
                     activeColor = Color(0xFF46D369),
                     onClick = { prefs.toggleHistory(movie) }
                 )
 
                 ActionButton(
+                    icon = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    label = "Favorite",
+                    active = isFavorite,
+                    activeColor = Color(0xFFE50914),
+                    onClick = { prefs.toggleFavorite(movie) }
+                )
+
+                ActionButton(
+                    icon = if (isWatchlist) Icons.Rounded.Bookmark else Icons.Outlined.BookmarkBorder,
+                    label = "Watchlist",
+                    active = isWatchlist,
+                    activeColor = colors.primary,
+                    onClick = { prefs.toggleWatchlist(movie) }
+                )
+
+                ActionButton(
                     icon = Icons.Rounded.Share,
                     label = "Share",
                     active = false,
-                    activeColor = colors.primary,
+                    activeColor = colors.textSecondary,
                     onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -278,7 +278,7 @@ fun MovieDetailsScreen(
         item {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text(
-                    text = "Storyline",
+                    text = "Synopsis",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary
@@ -300,7 +300,7 @@ fun MovieDetailsScreen(
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Top Cast",
+                        text = "Cast",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
@@ -316,7 +316,7 @@ fun MovieDetailsScreen(
                         items(movie.cast) { member ->
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.width(80.dp)
+                                modifier = Modifier.width(90.dp)
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
@@ -329,12 +329,11 @@ fun MovieDetailsScreen(
                                         .size(64.dp)
                                         .clip(CircleShape)
                                         .background(colors.surfaceContainerHigh)
-                                        .border(1.dp, colors.divider, CircleShape)
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
                                     text = member.name,
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = colors.textPrimary,
                                     maxLines = 1,
@@ -342,7 +341,7 @@ fun MovieDetailsScreen(
                                 )
                                 Text(
                                     text = member.character,
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = colors.textSecondary,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
