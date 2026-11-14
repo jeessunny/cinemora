@@ -415,7 +415,7 @@ fun ScrollRail(
         )
 
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp, bottom = 16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(movies, key = { it.id }) { movie ->

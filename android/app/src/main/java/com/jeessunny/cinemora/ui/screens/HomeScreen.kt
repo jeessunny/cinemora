@@ -122,7 +122,7 @@ fun HomeScreen(
         // Hero Card
         if (heroMovie != null) {
             item {
-                Box(modifier = Modifier.padding(horizontal = 16.dp, top = 8.dp, bottom = 12.dp)) {
+                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)) {
                     HeroCard(
                         movie = heroMovie,
                         onClick = { onMovieClick(heroMovie) }
