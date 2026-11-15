@@ -1,5 +1,8 @@
 package com.jeessunny.cinemora
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Build
 import android.os.Bundle
 import android.view.Window
@@ -139,18 +142,35 @@ fun CinemoraApp(prefs: PreferencesManager) {
     val view = LocalView.current
 
     DisposableEffect(showStatusBar, colors.background, colors.isDark) {
-        val window = (view.context as? android.app.Activity)?.window
-        if (window != null) {
-            val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-            if (showStatusBar) {
-                insetsController.show(WindowInsetsCompat.Type.statusBars())
-                window.statusBarColor = colors.background.toArgb()
-                insetsController.isAppearanceLightStatusBars = !colors.isDark
-            } else {
-                insetsController.hide(WindowInsetsCompat.Type.statusBars())
-                insetsController.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        try {
+            var ctx: Context? = view.context
+            var act: Activity? = null
+            while (ctx is ContextWrapper) {
+                if (ctx is Activity) {
+                    act = ctx
+                    break
+                }
+                ctx = ctx.baseContext
             }
+            val window = act?.window
+            if (window != null) {
+                val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+                if (showStatusBar) {
+                    insetsController.show(WindowInsetsCompat.Type.statusBars())
+                    try {
+                        window.statusBarColor = colors.background.toArgb()
+                    } catch (ignored: Throwable) {}
+                    try {
+                        insetsController.isAppearanceLightStatusBars = !colors.isDark
+                    } catch (ignored: Throwable) {}
+                } else {
+                    insetsController.hide(WindowInsetsCompat.Type.statusBars())
+                    insetsController.systemBarsBehavior =
+                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                }
+            }
+        } catch (ignored: Throwable) {
+            // Safe fallback preventing any settings crash
         }
         onDispose {}
     }

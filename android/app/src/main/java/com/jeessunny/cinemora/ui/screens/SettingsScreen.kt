@@ -2,8 +2,6 @@ package com.jeessunny.cinemora.ui.screens
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -440,45 +438,18 @@ fun SettingsScreen(
                     .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
             ) {
                 val rowHeightPx = with(density) { 56.dp.toPx() }
-                val activeDragIdx = draggingIndex
-                val targetDropIdx = if (activeDragIdx != null) {
-                    val slots = (dragOffsetY / rowHeightPx).roundToInt()
-                    (activeDragIdx + slots).coerceIn(0, localSections.lastIndex)
-                } else null
 
                 localSections.forEachIndexed { index, section ->
-                    val isDraggingThis = activeDragIdx == index
-
-                    val targetShiftY = when {
-                        isDraggingThis -> dragOffsetY
-                        activeDragIdx != null && targetDropIdx != null -> {
-                            if (activeDragIdx < targetDropIdx && index > activeDragIdx && index <= targetDropIdx) {
-                                -rowHeightPx
-                            } else if (activeDragIdx > targetDropIdx && index < activeDragIdx && index >= targetDropIdx) {
-                                rowHeightPx
-                            } else {
-                                0f
-                            }
-                        }
-                        else -> 0f
-                    }
-
-                    val animatedShiftY by animateFloatAsState(
-                        targetValue = if (isDraggingThis) dragOffsetY else targetShiftY,
-                        animationSpec = if (isDraggingThis) spring(stiffness = 2000f) else spring(dampingRatio = 0.8f, stiffness = 450f),
-                        label = "section_reorder_shift_$index"
-                    )
+                    val isDraggingThis = draggingIndex == index
 
                     val dragModifier = if (isDraggingThis) {
                         Modifier
                             .zIndex(10f)
-                            .graphicsLayer { translationY = animatedShiftY }
+                            .graphicsLayer { translationY = dragOffsetY }
                             .shadow(8.dp, RoundedCornerShape(12.dp))
                             .background(colors.surfaceContainerHighest)
                     } else {
-                        Modifier
-                            .zIndex(1f)
-                            .graphicsLayer { translationY = animatedShiftY }
+                        Modifier.zIndex(1f)
                     }
 
                     Row(
@@ -499,7 +470,7 @@ fun SettingsScreen(
                                     .size(36.dp)
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(if (isDraggingThis) colors.primary.copy(alpha = 0.15f) else Color.Transparent)
-                                    .pointerInput(Unit) {
+                                    .pointerInput(section.id) {
                                         detectDragGestures(
                                             onDragStart = {
                                                 draggingIndex = index
@@ -511,13 +482,16 @@ fun SettingsScreen(
                                             },
                                             onDragEnd = {
                                                 val from = draggingIndex
-                                                val to = targetDropIdx
-                                                if (from != null && to != null && from != to) {
-                                                    val list = localSections.toMutableList()
-                                                    val item = list.removeAt(from)
-                                                    list.add(to, item)
-                                                    localSections = list
-                                                    prefs.saveHomeSections(list)
+                                                if (from != null && localSections.isNotEmpty()) {
+                                                    val slots = (dragOffsetY / rowHeightPx).roundToInt()
+                                                    val to = (from + slots).coerceIn(0, localSections.lastIndex)
+                                                    if (from != to && from in localSections.indices && to in localSections.indices) {
+                                                        val list = localSections.toMutableList()
+                                                        val item = list.removeAt(from)
+                                                        list.add(to, item)
+                                                        localSections = list
+                                                        prefs.saveHomeSections(list)
+                                                    }
                                                 }
                                                 draggingIndex = null
                                                 dragOffsetY = 0f
@@ -554,72 +528,22 @@ fun SettingsScreen(
                             )
                         }
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        // Visibility Toggle (clean icon button, no cluttering arrows)
+                        IconButton(
+                            onClick = {
+                                val updated = localSections.map {
+                                    if (it.id == section.id) it.copy(enabled = !it.enabled) else it
+                                }
+                                localSections = updated
+                                prefs.saveHomeSections(updated)
+                            },
+                            modifier = Modifier.size(28.dp)
                         ) {
-                            // Quick Reorder Arrows
-                            if (index > 0) {
-                                IconButton(
-                                    onClick = {
-                                        val list = localSections.toMutableList()
-                                        val item = list.removeAt(index)
-                                        list.add(index - 1, item)
-                                        localSections = list
-                                        prefs.saveHomeSections(list)
-                                    },
-                                    modifier = Modifier.size(28.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.KeyboardArrowUp,
-                                        contentDescription = "Move Up",
-                                        tint = colors.textSecondary.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.size(28.dp))
-                            }
-
-                            if (index < localSections.size - 1) {
-                                IconButton(
-                                    onClick = {
-                                        val list = localSections.toMutableList()
-                                        val item = list.removeAt(index)
-                                        list.add(index + 1, item)
-                                        localSections = list
-                                        prefs.saveHomeSections(list)
-                                    },
-                                    modifier = Modifier.size(28.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.KeyboardArrowDown,
-                                        contentDescription = "Move Down",
-                                        tint = colors.textSecondary.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.size(28.dp))
-                            }
-
-                            // Visibility Toggle
-                            IconButton(
-                                onClick = {
-                                    val updated = localSections.map {
-                                        if (it.id == section.id) it.copy(enabled = !it.enabled) else it
-                                    }
-                                    localSections = updated
-                                    prefs.saveHomeSections(updated)
-                                },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (section.enabled) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
-                                    contentDescription = "Toggle",
-                                    tint = if (section.enabled) colors.primary else colors.textSecondary.copy(alpha = 0.5f)
-                                )
-                            }
+                            Icon(
+                                imageVector = if (section.enabled) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
+                                contentDescription = "Toggle",
+                                tint = if (section.enabled) colors.primary else colors.textSecondary.copy(alpha = 0.5f)
+                            )
                         }
                     }
                     if (index < localSections.size - 1) {

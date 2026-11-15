@@ -39,6 +39,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeessunny.cinemora.data.CatalogData
 import com.jeessunny.cinemora.data.PreferencesManager
+import com.jeessunny.cinemora.ui.components.DialogTransparentBackground
 import com.jeessunny.cinemora.ui.theme.LocalCinemoraColors
 import kotlin.random.Random
 
@@ -311,9 +312,7 @@ fun LoginScreen(
                 dismissOnClickOutside = true
             )
         ) {
-            (LocalView.current.parent as? DialogWindowProvider)?.window?.let { window ->
-                window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
-            }
+            DialogTransparentBackground()
 
             Box(
                 modifier = Modifier

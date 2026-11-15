@@ -43,7 +43,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.graphics.drawable.ColorDrawable
+import android.view.View
+import android.view.ViewParent
+import android.view.WindowManager
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -75,7 +79,10 @@ fun CinemoraNavBar(
     )
     val tabs = if (showSettingsTab) allTabs else allTabs.filter { it.first != "settings" }
 
-    val animSpec = spring<androidx.compose.ui.unit.Dp>(dampingRatio = 0.8f, stiffness = 350f)
+    val animSpec = androidx.compose.animation.core.tween<androidx.compose.ui.unit.Dp>(
+        durationMillis = 280,
+        easing = androidx.compose.animation.core.FastOutSlowInEasing
+    )
     val horizontalPadding by animateDpAsState(targetValue = if (floating) 20.dp else 0.dp, animationSpec = animSpec, label = "nav_h_pad")
     val bottomPadding by animateDpAsState(targetValue = if (floating) 14.dp else 0.dp, animationSpec = animSpec, label = "nav_b_pad")
     val navHeight by animateDpAsState(targetValue = if (floating) 64.dp else 72.dp, animationSpec = animSpec, label = "nav_height")
@@ -83,20 +90,26 @@ fun CinemoraNavBar(
     val topRadius by animateDpAsState(targetValue = if (floating) 32.dp else 16.dp, animationSpec = animSpec, label = "nav_top_radius")
     val bottomRadius by animateDpAsState(targetValue = if (floating) 32.dp else 0.dp, animationSpec = animSpec, label = "nav_bottom_radius")
 
+    val safeElevation = elevation.coerceAtLeast(0.dp)
+    val safeTopRadius = topRadius.coerceAtLeast(0.dp)
+    val safeBottomRadius = bottomRadius.coerceAtLeast(0.dp)
+    val safeHorizontalPadding = horizontalPadding.coerceAtLeast(0.dp)
+    val safeBottomPadding = bottomPadding.coerceAtLeast(0.dp)
+
     val navShape = RoundedCornerShape(
-        topStart = topRadius,
-        topEnd = topRadius,
-        bottomStart = bottomRadius,
-        bottomEnd = bottomRadius
+        topStart = safeTopRadius,
+        topEnd = safeTopRadius,
+        bottomStart = safeBottomRadius,
+        bottomEnd = safeBottomRadius
     )
     val navBg = if (colors.isPitchBlack) Color(0xFF000000) else colors.surfaceContainer
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = horizontalPadding)
-            .padding(bottom = bottomPadding)
-            .shadow(elevation = elevation, shape = navShape)
+            .padding(horizontal = safeHorizontalPadding)
+            .padding(bottom = safeBottomPadding)
+            .shadow(elevation = safeElevation, shape = navShape)
             .clip(navShape)
             .background(navBg)
             .border(1.dp, colors.divider, navShape)
@@ -538,6 +551,7 @@ fun SegmentedButton(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
+            .height(46.dp)
             .clip(RoundedCornerShape(28.dp))
             .background(colors.surfaceContainerLow)
             .border(1.dp, colors.divider, RoundedCornerShape(28.dp))
@@ -551,18 +565,18 @@ fun SegmentedButton(
             label = "segmented_indicator_offset"
         )
 
-        // Sliding indicator pill
+        // Sliding indicator pill (only 1 tab wide, properly bounds to tab)
         Box(
             modifier = Modifier
                 .offset(x = indicatorOffset)
                 .width(tabWidth)
-                .matchParentSize()
+                .height(38.dp)
                 .clip(RoundedCornerShape(24.dp))
                 .background(colors.primary)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -571,12 +585,12 @@ fun SegmentedButton(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .fillMaxHeight()
                         .clip(RoundedCornerShape(24.dp))
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { onSelect(value) }
-                        .padding(vertical = 9.dp),
+                        ) { onSelect(value) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -705,6 +719,37 @@ fun EmptyState(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// 8.5 Dialog Transparent Background Helper
+// ═══════════════════════════════════════════════════════════════════════════
+@Composable
+fun DialogTransparentBackground() {
+    val view = LocalView.current
+    DisposableEffect(view) {
+        fun makeTransparent() {
+            var p: ViewParent? = view.parent
+            while (p != null) {
+                if (p is DialogWindowProvider) {
+                    p.window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+                    p.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                    break
+                }
+                p = p.parent
+            }
+        }
+        makeTransparent()
+        val listener = object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) { makeTransparent() }
+            override fun onViewDetachedFromWindow(v: View) {}
+        }
+        view.addOnAttachStateChangeListener(listener)
+        view.post { makeTransparent() }
+        onDispose {
+            view.removeOnAttachStateChangeListener(listener)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // 9. Update Dialog
 // ═══════════════════════════════════════════════════════════════════════════
 @Composable
@@ -724,9 +769,7 @@ fun UpdateDialogView() {
             dismissOnClickOutside = true
         )
     ) {
-        (LocalView.current.parent as? DialogWindowProvider)?.window?.let { window ->
-            window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
-        }
+        DialogTransparentBackground()
 
         Box(
             modifier = Modifier
@@ -740,7 +783,7 @@ fun UpdateDialogView() {
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.90f)
+                    .fillMaxWidth(0.92f)
                     .clip(RoundedCornerShape(20.dp))
                     .background(colors.surfaceContainer)
                     .border(1.dp, colors.divider, RoundedCornerShape(20.dp))
@@ -748,7 +791,7 @@ fun UpdateDialogView() {
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) { /* prevent dismissal on dialog card click */ }
-                    .padding(20.dp)
+                    .padding(22.dp)
             ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -758,13 +801,13 @@ fun UpdateDialogView() {
                 ) {
                     Text(
                         text = "App Update",
-                        fontSize = 18.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary
                     )
                     IconButton(
                         onClick = { UpdateManager.dismissDialog() },
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(26.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Close,
@@ -798,38 +841,49 @@ fun UpdateDialogView() {
                     is UpdateState.Available -> {
                         Text(
                             text = "New Version ${current.info.tagName} Available!",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
                             color = colors.primary
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        Box(
+                        val changelogScrollState = rememberScrollState()
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 160.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .heightIn(min = 180.dp, max = 340.dp)
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(colors.surfaceContainerLow)
-                                .border(1.dp, colors.divider, RoundedCornerShape(8.dp))
-                                .padding(10.dp)
+                                .border(1.dp, colors.divider, RoundedCornerShape(12.dp))
+                                .padding(14.dp)
+                                .verticalScroll(changelogScrollState)
                         ) {
                             Text(
-                                text = current.info.releaseNotes,
-                                fontSize = 12.sp,
+                                text = "What's New in ${current.info.tagName}",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = current.info.releaseNotes.ifBlank { "Performance improvements and bug fixes." },
+                                fontSize = 13.sp,
                                 color = colors.textSecondary,
-                                lineHeight = 16.sp
+                                lineHeight = 19.sp
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         Button(
                             onClick = { UpdateManager.startDownload(context, current.info) },
                             colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(46.dp)
                         ) {
-                            Text(text = "Update Now", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(text = "Update Now", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         }
                     }
 
@@ -960,9 +1014,7 @@ fun CinemoraDialog(
             dismissOnClickOutside = true
         )
     ) {
-        (LocalView.current.parent as? DialogWindowProvider)?.window?.let { window ->
-            window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
-        }
+        DialogTransparentBackground()
 
         Box(
             modifier = Modifier
