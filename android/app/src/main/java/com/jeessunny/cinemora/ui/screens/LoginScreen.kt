@@ -1,8 +1,10 @@
 package com.jeessunny.cinemora.ui.screens
 
+import android.graphics.drawable.ColorDrawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -13,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Refresh
@@ -24,11 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.jeessunny.cinemora.data.CatalogData
@@ -42,6 +48,7 @@ fun LoginScreen(
     onComplete: () -> Unit
 ) {
     val colors = LocalCinemoraColors.current
+    val isEditing = prefs.getIsOnboarded()
     var name by remember { mutableStateOf(prefs.getUserName()) }
     var seed by remember { mutableStateOf(Random.nextInt(1000, 9999)) }
     var avatarUrl by remember {
@@ -65,20 +72,44 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Spacer(modifier = Modifier.height(32.dp))
+            if (isEditing) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onComplete) {
+                        Icon(
+                            imageVector = Icons.Rounded.ArrowBack,
+                            contentDescription = "Back",
+                            tint = colors.textPrimary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Edit Profile",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = colors.textPrimary
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = "Welcome to Cinemora",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "Personalize your movie universe",
-                fontSize = 14.sp,
-                color = colors.textSecondary
-            )
+                Text(
+                    text = "Welcome to Cinemora",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Personalize your movie universe",
+                    fontSize = 14.sp,
+                    color = colors.textSecondary
+                )
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -254,7 +285,7 @@ fun LoginScreen(
                     .height(50.dp)
             ) {
                 Text(
-                    text = "Get Started",
+                    text = if (isEditing) "Save Changes" else "Get Started",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -272,88 +303,114 @@ fun LoginScreen(
             it.label.contains(query, ignoreCase = true) || it.value.contains(query, ignoreCase = true)
         }
 
-        Dialog(onDismissRequest = { showLanguageDialog = false }) {
+        Dialog(
+            onDismissRequest = { showLanguageDialog = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            (LocalView.current.parent as? DialogWindowProvider)?.window?.let { window ->
+                window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+            }
+
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.95f)
-                    .fillMaxHeight(0.75f)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(colors.surfaceContainer)
-                    .border(1.dp, colors.divider, RoundedCornerShape(20.dp))
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.65f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { showLanguageDialog = false },
+                contentAlignment = Alignment.Center
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Choose Languages",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-                        IconButton(onClick = { showLanguageDialog = false }) {
-                            Icon(Icons.Rounded.Close, contentDescription = "Close", tint = colors.textSecondary)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.90f)
+                        .fillMaxHeight(0.75f)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(colors.surfaceContainer)
+                        .border(1.dp, colors.divider, RoundedCornerShape(20.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { /* prevent backdrop dismiss */ }
+                        .padding(18.dp)
+                ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Choose Languages",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary
+                            )
+                            IconButton(onClick = { showLanguageDialog = false }) {
+                                Icon(Icons.Rounded.Close, contentDescription = "Close", tint = colors.textSecondary)
+                            }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = { query = it },
-                        placeholder = { Text("Search languages...", color = colors.textSecondary) },
-                        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null, tint = colors.textSecondary) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        OutlinedTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            placeholder = { Text("Search languages...", color = colors.textSecondary) },
+                            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null, tint = colors.textSecondary) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(filtered) { lang ->
-                            val selected = selectedLanguages.contains(lang.value)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        if (selected) selectedLanguages.remove(lang.value)
-                                        else selectedLanguages.add(lang.value)
-                                    }
-                                    .padding(vertical = 12.dp, horizontal = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = lang.label,
-                                    fontSize = 14.sp,
-                                    color = if (selected) colors.primary else colors.textPrimary,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-                                )
-                                if (selected) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Check,
-                                        contentDescription = "Selected",
-                                        tint = colors.primary,
-                                        modifier = Modifier.size(20.dp)
+                        LazyColumn(modifier = Modifier.weight(1f)) {
+                            items(filtered) { lang ->
+                                val selected = selectedLanguages.contains(lang.value)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            if (selected) selectedLanguages.remove(lang.value)
+                                            else selectedLanguages.add(lang.value)
+                                        }
+                                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = lang.label,
+                                        fontSize = 14.sp,
+                                        color = if (selected) colors.primary else colors.textPrimary,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                                     )
+                                    if (selected) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Check,
+                                            contentDescription = "Selected",
+                                            tint = colors.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    Button(
-                        onClick = { showLanguageDialog = false },
-                        colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Done", color = Color.White, fontWeight = FontWeight.Bold)
+                        Button(
+                            onClick = { showLanguageDialog = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Done", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }

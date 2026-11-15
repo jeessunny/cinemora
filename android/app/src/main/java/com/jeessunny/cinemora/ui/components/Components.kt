@@ -1,8 +1,10 @@
 package com.jeessunny.cinemora.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -73,24 +75,32 @@ fun CinemoraNavBar(
     )
     val tabs = if (showSettingsTab) allTabs else allTabs.filter { it.first != "settings" }
 
-    val navShape = if (floating) RoundedCornerShape(32.dp) else RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+    val animSpec = spring<androidx.compose.ui.unit.Dp>(dampingRatio = 0.8f, stiffness = 350f)
+    val horizontalPadding by animateDpAsState(targetValue = if (floating) 20.dp else 0.dp, animationSpec = animSpec, label = "nav_h_pad")
+    val bottomPadding by animateDpAsState(targetValue = if (floating) 14.dp else 0.dp, animationSpec = animSpec, label = "nav_b_pad")
+    val navHeight by animateDpAsState(targetValue = if (floating) 64.dp else 72.dp, animationSpec = animSpec, label = "nav_height")
+    val elevation by animateDpAsState(targetValue = if (floating) 12.dp else 0.dp, animationSpec = animSpec, label = "nav_elevation")
+    val topRadius by animateDpAsState(targetValue = if (floating) 32.dp else 16.dp, animationSpec = animSpec, label = "nav_top_radius")
+    val bottomRadius by animateDpAsState(targetValue = if (floating) 32.dp else 0.dp, animationSpec = animSpec, label = "nav_bottom_radius")
+
+    val navShape = RoundedCornerShape(
+        topStart = topRadius,
+        topEnd = topRadius,
+        bottomStart = bottomRadius,
+        bottomEnd = bottomRadius
+    )
     val navBg = if (colors.isPitchBlack) Color(0xFF000000) else colors.surfaceContainer
-    val paddingModifier = if (floating) {
-        Modifier
-            .padding(horizontal = 20.dp, vertical = 14.dp)
-            .shadow(elevation = 12.dp, shape = navShape)
-    } else {
-        Modifier.fillMaxWidth()
-    }
 
     Box(
         modifier = modifier
-            .then(paddingModifier)
+            .fillMaxWidth()
+            .padding(horizontal = horizontalPadding)
+            .padding(bottom = bottomPadding)
+            .shadow(elevation = elevation, shape = navShape)
             .clip(navShape)
             .background(navBg)
             .border(1.dp, colors.divider, navShape)
-            .height(if (floating) 64.dp else 72.dp)
-            .fillMaxWidth()
+            .height(navHeight)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -110,7 +120,10 @@ fun CinemoraNavBar(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clickable { onNavigate(route) }
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onNavigate(route) }
                 ) {
                     Icon(
                         imageVector = icon,
@@ -519,33 +532,60 @@ fun SegmentedButton(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalCinemoraColors.current
+    val rawIndex = options.indexOfFirst { it.second == selectedValue }
+    val selectedIndex = if (rawIndex >= 0) rawIndex else 0
 
-    Row(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
             .background(colors.surfaceContainerLow)
             .border(1.dp, colors.divider, RoundedCornerShape(28.dp))
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(4.dp)
     ) {
-        options.forEach { (label, value) ->
-            val selected = selectedValue == value
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(if (selected) colors.primary else Color.Transparent)
-                    .clickable { onSelect(value) }
-                    .padding(vertical = 9.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = label,
-                    fontSize = 14.sp,
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (selected) Color.White else colors.textSecondary
-                )
+        val count = options.size.coerceAtLeast(1)
+        val tabWidth = maxWidth / count
+        val indicatorOffset by animateDpAsState(
+            targetValue = tabWidth * selectedIndex,
+            animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f),
+            label = "segmented_indicator_offset"
+        )
+
+        // Sliding indicator pill
+        Box(
+            modifier = Modifier
+                .offset(x = indicatorOffset)
+                .width(tabWidth)
+                .matchParentSize()
+                .clip(RoundedCornerShape(24.dp))
+                .background(colors.primary)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            options.forEachIndexed { index, (label, value) ->
+                val selected = index == selectedIndex
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(24.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onSelect(value) }
+                        .padding(vertical = 9.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = label,
+                        fontSize = 14.sp,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (selected) Color.White else colors.textSecondary
+                    )
+                }
             }
         }
     }
@@ -890,4 +930,147 @@ fun UpdateDialogView() {
         }
     }
 }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 10. Themed Optimized Cinemora Dialog
+// ═══════════════════════════════════════════════════════════════════════════
+@Composable
+fun CinemoraDialog(
+    onDismissRequest: () -> Unit,
+    title: String,
+    message: String,
+    icon: ImageVector? = null,
+    iconTint: Color? = null,
+    confirmText: String = "Confirm",
+    confirmColor: Color? = null,
+    onConfirm: () -> Unit,
+    dismissText: String = "Cancel",
+    onDismiss: () -> Unit = onDismissRequest
+) {
+    val colors = LocalCinemoraColors.current
+    val effectiveConfirmColor = confirmColor ?: colors.primary
+    val effectiveIconTint = iconTint ?: colors.primary
+
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    ) {
+        (LocalView.current.parent as? DialogWindowProvider)?.window?.let { window ->
+            window.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.65f))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onDismissRequest() },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.88f)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(colors.surfaceContainer)
+                    .border(1.dp, colors.divider, RoundedCornerShape(20.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { /* prevent backdrop dismiss */ }
+                    .padding(22.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (icon != null) {
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(CircleShape)
+                                .background(effectiveIconTint.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = effectiveIconTint,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                    }
+
+                    Text(
+                        text = title,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = message,
+                        fontSize = 14.sp,
+                        color = colors.textSecondary,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(22.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, colors.divider),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = colors.textPrimary
+                            )
+                        ) {
+                            Text(
+                                text = dismissText,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.textSecondary
+                            )
+                        }
+
+                        Button(
+                            onClick = onConfirm,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = effectiveConfirmColor
+                            )
+                        ) {
+                            Text(
+                                text = confirmText,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -2,6 +2,8 @@ package com.jeessunny.cinemora.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -35,10 +38,12 @@ import com.jeessunny.cinemora.BuildConfig
 import com.jeessunny.cinemora.data.PreferencesManager
 import com.jeessunny.cinemora.data.RecommendationEngine
 import com.jeessunny.cinemora.service.UpdateManager
+import com.jeessunny.cinemora.ui.components.CinemoraDialog
 import com.jeessunny.cinemora.ui.components.SegmentedButton
 import com.jeessunny.cinemora.ui.theme.ACCENT_COLORS
 import com.jeessunny.cinemora.ui.theme.LocalCinemoraColors
 import com.jeessunny.cinemora.ui.theme.parseColor
+import kotlin.math.roundToInt
 
 @Composable
 fun SettingsScreen(
@@ -77,8 +82,7 @@ fun SettingsScreen(
 
     var showClearHistoryDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
-    var showDeleteAccountDialog by remember { mutableStateOf(false) }
-    var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteProfileDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier
@@ -133,37 +137,13 @@ fun SettingsScreen(
                         maxLines = 1
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Edit Profile",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.primary,
-                            modifier = Modifier.clickable { onEditProfile() }
-                        )
-                        Text(text = "•", color = colors.textSecondary)
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.clickable { showLogoutDialog = true }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Logout,
-                                contentDescription = null,
-                                tint = Color(0xFFE50914),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = "Log Out",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFFE50914)
-                            )
-                        }
-                    }
+                    Text(
+                        text = "Edit Profile",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.primary,
+                        modifier = Modifier.clickable { onEditProfile() }
+                    )
                 }
             }
 
@@ -459,37 +439,67 @@ fun SettingsScreen(
                     .background(colors.surfaceContainer)
                     .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
             ) {
+                val rowHeightPx = with(density) { 56.dp.toPx() }
+                val activeDragIdx = draggingIndex
+                val targetDropIdx = if (activeDragIdx != null) {
+                    val slots = (dragOffsetY / rowHeightPx).roundToInt()
+                    (activeDragIdx + slots).coerceIn(0, localSections.lastIndex)
+                } else null
+
                 localSections.forEachIndexed { index, section ->
-                    val isDraggingThis = draggingIndex == index
+                    val isDraggingThis = activeDragIdx == index
+
+                    val targetShiftY = when {
+                        isDraggingThis -> dragOffsetY
+                        activeDragIdx != null && targetDropIdx != null -> {
+                            if (activeDragIdx < targetDropIdx && index > activeDragIdx && index <= targetDropIdx) {
+                                -rowHeightPx
+                            } else if (activeDragIdx > targetDropIdx && index < activeDragIdx && index >= targetDropIdx) {
+                                rowHeightPx
+                            } else {
+                                0f
+                            }
+                        }
+                        else -> 0f
+                    }
+
+                    val animatedShiftY by animateFloatAsState(
+                        targetValue = if (isDraggingThis) dragOffsetY else targetShiftY,
+                        animationSpec = if (isDraggingThis) spring(stiffness = 2000f) else spring(dampingRatio = 0.8f, stiffness = 450f),
+                        label = "section_reorder_shift_$index"
+                    )
+
                     val dragModifier = if (isDraggingThis) {
                         Modifier
                             .zIndex(10f)
-                            .graphicsLayer { translationY = dragOffsetY }
-                            .shadow(6.dp, RoundedCornerShape(8.dp))
-                            .background(colors.surfaceContainerHigh)
+                            .graphicsLayer { translationY = animatedShiftY }
+                            .shadow(8.dp, RoundedCornerShape(12.dp))
+                            .background(colors.surfaceContainerHighest)
                     } else {
-                        Modifier.zIndex(1f)
+                        Modifier
+                            .zIndex(1f)
+                            .graphicsLayer { translationY = animatedShiftY }
                     }
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .then(dragModifier)
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
                             modifier = Modifier.weight(1f)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .pointerInput(section.id) {
-                                        val rowHeightPx = with(density) { 54.dp.toPx() }
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isDraggingThis) colors.primary.copy(alpha = 0.15f) else Color.Transparent)
+                                    .pointerInput(Unit) {
                                         detectDragGestures(
                                             onDragStart = {
                                                 draggingIndex = index
@@ -498,29 +508,23 @@ fun SettingsScreen(
                                             onDrag = { change, dragAmount ->
                                                 change.consume()
                                                 dragOffsetY += dragAmount.y
-                                                val currentIdx = draggingIndex ?: return@detectDragGestures
-                                                val steps = (dragOffsetY / rowHeightPx).toInt()
-                                                if (steps != 0) {
-                                                    val targetIdx = (currentIdx + steps).coerceIn(0, localSections.lastIndex)
-                                                    if (targetIdx != currentIdx) {
-                                                        val list = localSections.toMutableList()
-                                                        val item = list.removeAt(currentIdx)
-                                                        list.add(targetIdx, item)
-                                                        localSections = list
-                                                        draggingIndex = targetIdx
-                                                        dragOffsetY -= steps * rowHeightPx
-                                                    }
-                                                }
                                             },
                                             onDragEnd = {
+                                                val from = draggingIndex
+                                                val to = targetDropIdx
+                                                if (from != null && to != null && from != to) {
+                                                    val list = localSections.toMutableList()
+                                                    val item = list.removeAt(from)
+                                                    list.add(to, item)
+                                                    localSections = list
+                                                    prefs.saveHomeSections(list)
+                                                }
                                                 draggingIndex = null
                                                 dragOffsetY = 0f
-                                                prefs.saveHomeSections(localSections)
                                             },
                                             onDragCancel = {
                                                 draggingIndex = null
                                                 dragOffsetY = 0f
-                                                localSections = homeSections
                                             }
                                         )
                                     },
@@ -543,25 +547,79 @@ fun SettingsScreen(
                                 text = displayLabel,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = colors.textPrimary
+                                color = colors.textPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
                             )
                         }
 
-                        IconButton(
-                            onClick = {
-                                val updated = localSections.map {
-                                    if (it.id == section.id) it.copy(enabled = !it.enabled) else it
-                                }
-                                localSections = updated
-                                prefs.saveHomeSections(updated)
-                            },
-                            modifier = Modifier.size(28.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Icon(
-                                imageVector = if (section.enabled) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
-                                contentDescription = "Toggle",
-                                tint = if (section.enabled) colors.primary else colors.textSecondary.copy(alpha = 0.5f)
-                            )
+                            // Quick Reorder Arrows
+                            if (index > 0) {
+                                IconButton(
+                                    onClick = {
+                                        val list = localSections.toMutableList()
+                                        val item = list.removeAt(index)
+                                        list.add(index - 1, item)
+                                        localSections = list
+                                        prefs.saveHomeSections(list)
+                                    },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.KeyboardArrowUp,
+                                        contentDescription = "Move Up",
+                                        tint = colors.textSecondary.copy(alpha = 0.7f),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.size(28.dp))
+                            }
+
+                            if (index < localSections.size - 1) {
+                                IconButton(
+                                    onClick = {
+                                        val list = localSections.toMutableList()
+                                        val item = list.removeAt(index)
+                                        list.add(index + 1, item)
+                                        localSections = list
+                                        prefs.saveHomeSections(list)
+                                    },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.KeyboardArrowDown,
+                                        contentDescription = "Move Down",
+                                        tint = colors.textSecondary.copy(alpha = 0.7f),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.size(28.dp))
+                            }
+
+                            // Visibility Toggle
+                            IconButton(
+                                onClick = {
+                                    val updated = localSections.map {
+                                        if (it.id == section.id) it.copy(enabled = !it.enabled) else it
+                                    }
+                                    localSections = updated
+                                    prefs.saveHomeSections(updated)
+                                },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (section.enabled) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
+                                    contentDescription = "Toggle",
+                                    tint = if (section.enabled) colors.primary else colors.textSecondary.copy(alpha = 0.5f)
+                                )
+                            }
                         }
                     }
                     if (index < localSections.size - 1) {
@@ -598,13 +656,13 @@ fun SettingsScreen(
                     onClick = { showResetDialog = true }
                 )
                 HorizontalDivider(color = colors.divider)
-                // Delete Account
+                // Delete Profile
                 SettingsActionRow(
                     icon = Icons.Rounded.DeleteForever,
                     iconTint = Color(0xFFE50914),
-                    title = "Delete Account",
+                    title = "Delete Profile",
                     textColor = Color(0xFFE50914),
-                    onClick = { showDeleteAccountDialog = true }
+                    onClick = { showDeleteProfileDialog = true }
                 )
             }
 
@@ -710,90 +768,53 @@ fun SettingsScreen(
 
     // Clear History Dialog
     if (showClearHistoryDialog) {
-        AlertDialog(
+        CinemoraDialog(
             onDismissRequest = { showClearHistoryDialog = false },
-            title = { Text("Clear Watch History?", fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to clear your entire watch history? This cannot be undone.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    prefs.clearHistory()
-                    showClearHistoryDialog = false
-                }) {
-                    Text("Clear", color = Color(0xFFE50914), fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearHistoryDialog = false }) {
-                    Text("Cancel", color = colors.textSecondary)
-                }
+            title = "Clear Watch History?",
+            message = "Are you sure you want to clear your entire watch history? This cannot be undone.",
+            icon = Icons.Rounded.DeleteSweep,
+            iconTint = Color(0xFFE50914),
+            confirmText = "Clear",
+            confirmColor = Color(0xFFE50914),
+            onConfirm = {
+                prefs.clearHistory()
+                showClearHistoryDialog = false
             }
         )
     }
 
     // Reset Recommendations Dialog
     if (showResetDialog) {
-        AlertDialog(
+        CinemoraDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("Reset Recommendations?", fontWeight = FontWeight.Bold) },
-            text = { Text("This will clear your genres, watchlist, favorites, and history. You will be taken back to the onboarding screen.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    prefs.clearAllData()
-                    showResetDialog = false
-                    onLogout()
-                }) {
-                    Text("Reset", color = colors.primary, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text("Cancel", color = colors.textSecondary)
-                }
+            title = "Reset Recommendations?",
+            message = "This will clear your genres, watchlist, favorites, and history. You will be taken back to the profile setup screen.",
+            icon = Icons.Rounded.RestartAlt,
+            iconTint = colors.primary,
+            confirmText = "Reset",
+            confirmColor = colors.primary,
+            onConfirm = {
+                prefs.clearAllData()
+                showResetDialog = false
+                onLogout()
             }
         )
     }
 
-    // Delete Account Dialog
-    if (showDeleteAccountDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteAccountDialog = false },
-            title = { Text("Delete Account?", fontWeight = FontWeight.Bold) },
-            text = { Text("This will permanently delete all your data, including watch history, favorites, and profile. This action cannot be undone.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    prefs.clearAllData()
-                    showDeleteAccountDialog = false
-                    onLogout()
-                }) {
-                    Text("Delete", color = Color(0xFFE50914), fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteAccountDialog = false }) {
-                    Text("Cancel", color = colors.textSecondary)
-                }
-            }
-        )
-    }
-
-    // Logout Dialog
-    if (showLogoutDialog) {
-        AlertDialog(
-            onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Log Out?", fontWeight = FontWeight.Bold) },
-            text = { Text("Are you sure you want to log out?") },
-            confirmButton = {
-                TextButton(onClick = {
-                    showLogoutDialog = false
-                    onLogout()
-                }) {
-                    Text("Log Out", color = Color(0xFFE50914), fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel", color = colors.textSecondary)
-                }
+    // Delete Profile Dialog
+    if (showDeleteProfileDialog) {
+        CinemoraDialog(
+            onDismissRequest = { showDeleteProfileDialog = false },
+            title = "Delete Profile?",
+            message = "This will permanently delete your profile, saved watchlist, favorites, and preferences. This action cannot be undone.",
+            icon = Icons.Rounded.DeleteForever,
+            iconTint = Color(0xFFE50914),
+            confirmText = "Delete",
+            confirmColor = Color(0xFFE50914),
+            onConfirm = {
+                prefs.clearAllData()
+                showDeleteProfileDialog = false
+                onLogout()
             }
         )
     }

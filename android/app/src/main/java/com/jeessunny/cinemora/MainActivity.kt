@@ -14,9 +14,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -119,6 +125,7 @@ fun CinemoraApp(prefs: PreferencesManager) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: "home"
+    var homeScrollToTopTrigger by remember { mutableStateOf(0) }
 
     val floatingNavBar by prefs.floatingNavBar.collectAsState()
     val navSettingsEnabled by prefs.navSettingsEnabled.collectAsState()
@@ -156,14 +163,70 @@ fun CinemoraApp(prefs: PreferencesManager) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            enterTransition = {
+                val fromRoute = initialState.destination.route
+                val toRoute = targetState.destination.route
+                val topRoutes = setOf("home", "search", "library", "settings")
+                if (fromRoute in topRoutes && toRoute in topRoutes) {
+                    fadeIn(animationSpec = tween(250))
+                } else {
+                    fadeIn(animationSpec = tween(300)) + slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                    )
+                }
+            },
+            exitTransition = {
+                val fromRoute = initialState.destination.route
+                val toRoute = targetState.destination.route
+                val topRoutes = setOf("home", "search", "library", "settings")
+                if (fromRoute in topRoutes && toRoute in topRoutes) {
+                    fadeOut(animationSpec = tween(200))
+                } else {
+                    fadeOut(animationSpec = tween(250)) + slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(250, easing = FastOutSlowInEasing)
+                    )
+                }
+            },
+            popEnterTransition = {
+                val fromRoute = initialState.destination.route
+                val toRoute = targetState.destination.route
+                val topRoutes = setOf("home", "search", "library", "settings")
+                if (fromRoute in topRoutes && toRoute in topRoutes) {
+                    fadeIn(animationSpec = tween(250))
+                } else {
+                    fadeIn(animationSpec = tween(300)) + slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                    )
+                }
+            },
+            popExitTransition = {
+                val fromRoute = initialState.destination.route
+                val toRoute = targetState.destination.route
+                val topRoutes = setOf("home", "search", "library", "settings")
+                if (fromRoute in topRoutes && toRoute in topRoutes) {
+                    fadeOut(animationSpec = tween(200))
+                } else {
+                    fadeOut(animationSpec = tween(250)) + slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(250, easing = FastOutSlowInEasing)
+                    )
+                }
+            }
         ) {
             composable("login") {
                 LoginScreen(
                     prefs = prefs,
                     onComplete = {
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
+                        if (navController.previousBackStackEntry != null) {
+                            navController.popBackStack()
+                        } else {
+                            navController.navigate("home") {
+                                popUpTo("login") { inclusive = true }
+                            }
                         }
                     }
                 )
@@ -172,6 +235,7 @@ fun CinemoraApp(prefs: PreferencesManager) {
             composable("home") {
                 HomeScreen(
                     prefs = prefs,
+                    scrollToTopTrigger = homeScrollToTopTrigger,
                     onMovieClick = { movie ->
                         val route = if (movie.type == "tv") "series/${movie.id}" else "movie/${movie.id}"
                         navController.navigate(route)
@@ -253,9 +317,25 @@ fun CinemoraApp(prefs: PreferencesManager) {
             CinemoraNavBar(
                 currentRoute = currentRoute,
                 onNavigate = { route ->
-                    if (route != currentRoute) {
+                    if (route == "home") {
+                        if (currentRoute != "home") {
+                            val popped = navController.popBackStack("home", inclusive = false)
+                            if (!popped) {
+                                navController.navigate("home") {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = false
+                                    }
+                                    launchSingleTop = true
+                                }
+                            }
+                        } else {
+                            homeScrollToTopTrigger++
+                        }
+                    } else if (route != currentRoute) {
                         navController.navigate(route) {
-                            popUpTo("home") { saveState = true }
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
                             launchSingleTop = true
                             restoreState = true
                         }

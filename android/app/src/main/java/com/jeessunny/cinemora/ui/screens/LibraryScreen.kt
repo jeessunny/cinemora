@@ -1,8 +1,10 @@
 package com.jeessunny.cinemora.ui.screens
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -127,16 +129,19 @@ fun LibraryScreen(
 
             chips.forEach { (label, value, _) ->
                 val selected = selectedCategory == value
+                val chipBg by animateColorAsState(if (selected) colors.primary else colors.surfaceContainerLow, label = "chip_bg")
+                val chipBorder by animateColorAsState(if (selected) colors.primary else colors.divider, label = "chip_border")
+                val chipTextColor by animateColorAsState(if (selected) Color.White else colors.textSecondary, label = "chip_text")
+
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
-                        .background(if (selected) colors.primary else colors.surfaceContainerLow)
-                        .border(
-                            1.dp,
-                            if (selected) colors.primary else colors.divider,
-                            RoundedCornerShape(16.dp)
-                        )
-                        .clickable { selectedCategory = value }
+                        .background(chipBg)
+                        .border(1.dp, chipBorder, RoundedCornerShape(16.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { selectedCategory = value }
                         .padding(horizontal = 16.dp, vertical = 7.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -144,7 +149,7 @@ fun LibraryScreen(
                         text = label,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (selected) Color.White else colors.textSecondary
+                        color = chipTextColor
                     )
                 }
             }

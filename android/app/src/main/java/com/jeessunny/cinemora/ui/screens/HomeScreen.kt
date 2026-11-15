@@ -1,10 +1,12 @@
 package com.jeessunny.cinemora.ui.screens
 
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -31,9 +33,18 @@ fun HomeScreen(
     prefs: PreferencesManager,
     onMovieClick: (Movie) -> Unit,
     onAvatarClick: () -> Unit,
+    scrollToTopTrigger: Int = 0,
     modifier: Modifier = Modifier
 ) {
     val colors = LocalCinemoraColors.current
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(scrollToTopTrigger) {
+        if (scrollToTopTrigger > 0) {
+            listState.animateScrollToItem(0)
+        }
+    }
+
     val userName by prefs.userName.collectAsState()
     val avatar by prefs.avatar.collectAsState()
     val homeSections by prefs.homeSections.collectAsState()
@@ -66,6 +77,7 @@ fun HomeScreen(
     val heroMovie = remember { CatalogData.LOCAL_CATALOG.firstOrNull() }
 
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .background(colors.background),
@@ -132,74 +144,77 @@ fun HomeScreen(
         }
 
         // Dynamic Rails
+        val railAnimSpec = spring<androidx.compose.ui.unit.IntOffset>(dampingRatio = 0.8f, stiffness = 400f)
         homeSections.filter { it.enabled }.forEach { section ->
             item(key = section.id) {
-                when (section.id) {
-                    "recommended" -> {
-                        ScrollRail(
-                            title = "Recommended For You",
-                            movies = CatalogData.getRecommended(listOf(g1Id, g2Id)),
-                            watchlistIds = watchlistIds,
-                            favoriteIds = favoriteIds,
-                            historyIds = historyIds,
-                            onMovieClick = onMovieClick,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    "genre1" -> {
-                        ScrollRail(
-                            title = "Because You Like $g1",
-                            movies = CatalogData.getMoviesByGenreId(g1Id),
-                            watchlistIds = watchlistIds,
-                            favoriteIds = favoriteIds,
-                            historyIds = historyIds,
-                            onMovieClick = onMovieClick,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    "genre2" -> {
-                        ScrollRail(
-                            title = "More $g2",
-                            movies = CatalogData.getMoviesByGenreId(g2Id),
-                            watchlistIds = watchlistIds,
-                            favoriteIds = favoriteIds,
-                            historyIds = historyIds,
-                            onMovieClick = onMovieClick,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    "trending" -> {
-                        ScrollRail(
-                            title = "Trending Now",
-                            movies = CatalogData.getTrending(),
-                            watchlistIds = watchlistIds,
-                            favoriteIds = favoriteIds,
-                            historyIds = historyIds,
-                            onMovieClick = onMovieClick,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    "popular" -> {
-                        ScrollRail(
-                            title = "Popular in Your Taste",
-                            movies = CatalogData.getPopular(),
-                            watchlistIds = watchlistIds,
-                            favoriteIds = favoriteIds,
-                            historyIds = historyIds,
-                            onMovieClick = onMovieClick,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    "newReleases" -> {
-                        ScrollRail(
-                            title = "New Releases",
-                            movies = CatalogData.getNewReleases(),
-                            watchlistIds = watchlistIds,
-                            favoriteIds = favoriteIds,
-                            historyIds = historyIds,
-                            onMovieClick = onMovieClick,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                Box(modifier = Modifier.animateItemPlacement(railAnimSpec)) {
+                    when (section.id) {
+                        "recommended" -> {
+                            ScrollRail(
+                                title = "Recommended For You",
+                                movies = CatalogData.getRecommended(listOf(g1Id, g2Id)),
+                                watchlistIds = watchlistIds,
+                                favoriteIds = favoriteIds,
+                                historyIds = historyIds,
+                                onMovieClick = onMovieClick,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        "genre1" -> {
+                            ScrollRail(
+                                title = "Because You Like $g1",
+                                movies = CatalogData.getMoviesByGenreId(g1Id),
+                                watchlistIds = watchlistIds,
+                                favoriteIds = favoriteIds,
+                                historyIds = historyIds,
+                                onMovieClick = onMovieClick,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        "genre2" -> {
+                            ScrollRail(
+                                title = "More $g2",
+                                movies = CatalogData.getMoviesByGenreId(g2Id),
+                                watchlistIds = watchlistIds,
+                                favoriteIds = favoriteIds,
+                                historyIds = historyIds,
+                                onMovieClick = onMovieClick,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        "trending" -> {
+                            ScrollRail(
+                                title = "Trending Now",
+                                movies = CatalogData.getTrending(),
+                                watchlistIds = watchlistIds,
+                                favoriteIds = favoriteIds,
+                                historyIds = historyIds,
+                                onMovieClick = onMovieClick,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        "popular" -> {
+                            ScrollRail(
+                                title = "Popular in Your Taste",
+                                movies = CatalogData.getPopular(),
+                                watchlistIds = watchlistIds,
+                                favoriteIds = favoriteIds,
+                                historyIds = historyIds,
+                                onMovieClick = onMovieClick,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                        "newReleases" -> {
+                            ScrollRail(
+                                title = "New Releases",
+                                movies = CatalogData.getNewReleases(),
+                                watchlistIds = watchlistIds,
+                                favoriteIds = favoriteIds,
+                                historyIds = historyIds,
+                                onMovieClick = onMovieClick,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
                     }
                 }
             }
