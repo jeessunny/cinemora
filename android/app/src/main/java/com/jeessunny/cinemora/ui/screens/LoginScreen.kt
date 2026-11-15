@@ -59,8 +59,16 @@ fun LoginScreen(
         )
     }
 
-    val selectedGenres = remember { mutableStateListOf<String>().apply { addAll(prefs.getSelectedGenres()) } }
-    val selectedLanguages = remember { mutableStateListOf<String>().apply { addAll(prefs.getSelectedLanguages()) } }
+    val selectedGenres = remember {
+        mutableStateListOf<String>().apply {
+            if (isEditing) addAll(prefs.getSelectedGenres())
+        }
+    }
+    val selectedLanguages = remember {
+        mutableStateListOf<String>().apply {
+            if (isEditing) addAll(prefs.getSelectedLanguages())
+        }
+    }
     var showLanguageDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -180,12 +188,22 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             // Genres Section
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = "Select Preferred Genres",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary
+                )
+                Text(
+                    text = "${selectedGenres.size}/3 required",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (selectedGenres.size >= 3) colors.primary else colors.textSecondary
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -247,14 +265,25 @@ fun LoginScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Preferred Languages",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textPrimary
+                        )
+                        Text(
+                            text = "(${selectedLanguages.size}/2 required)",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (selectedLanguages.size >= 2) colors.primary else colors.textSecondary
+                        )
+                    }
                     Text(
-                        text = "Preferred Languages",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textPrimary
-                    )
-                    Text(
-                        text = if (selectedLanguages.isEmpty()) "English" else selectedLanguages.joinToString(", ").uppercase(),
+                        text = if (selectedLanguages.isEmpty()) "Tap to choose at least 2 languages" else selectedLanguages.joinToString(", ").uppercase(),
                         fontSize = 12.sp,
                         color = colors.textSecondary
                     )
@@ -269,27 +298,46 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
 
+            // Validation logic: at least 3 genres and 2 languages
+            val isGenresValid = selectedGenres.size >= 3
+            val isLanguagesValid = selectedLanguages.size >= 2
+            val isNameValid = name.isNotBlank()
+            val isValid = isGenresValid && isLanguagesValid && isNameValid
+
             // Continue Button
             Button(
                 onClick = {
-                    prefs.setUserName(if (name.isBlank()) "Movie Lover" else name)
-                    prefs.setAvatar(avatarUrl)
-                    prefs.setSelectedGenres(if (selectedGenres.isEmpty()) setOf("Action", "Sci-Fi") else selectedGenres.toSet())
-                    prefs.setSelectedLanguages(if (selectedLanguages.isEmpty()) setOf("en") else selectedLanguages.toSet())
-                    prefs.setOnboarded(true)
-                    onComplete()
+                    if (isValid) {
+                        prefs.setUserName(name.trim())
+                        prefs.setAvatar(avatarUrl)
+                        prefs.setSelectedGenres(selectedGenres.toSet())
+                        prefs.setSelectedLanguages(selectedLanguages.toSet())
+                        prefs.setOnboarded(true)
+                        onComplete()
+                    }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                enabled = isValid,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.primary,
+                    disabledContainerColor = colors.surfaceContainerHighest
+                ),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
+                val buttonText = when {
+                    !isNameValid -> "Enter Your Name"
+                    !isGenresValid -> "Select at least 3 Genres (${selectedGenres.size}/3)"
+                    !isLanguagesValid -> "Select at least 2 Languages (${selectedLanguages.size}/2)"
+                    isEditing -> "Save Changes"
+                    else -> "Get Started"
+                }
                 Text(
-                    text = if (isEditing) "Save Changes" else "Get Started",
-                    fontSize = 16.sp,
+                    text = buttonText,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = if (isValid) Color.White else colors.textSecondary
                 )
             }
 

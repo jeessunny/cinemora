@@ -91,13 +91,13 @@ class PreferencesManager(context: Context) {
     }
 
     fun getSelectedGenres(): Set<String> =
-        prefs.getStringSet("selected_genres", setOf("Action", "Sci-Fi", "Drama")) ?: setOf("Action", "Sci-Fi", "Drama")
+        prefs.getStringSet("selected_genres", emptySet()) ?: emptySet()
     fun setSelectedGenres(genres: Set<String>) {
         prefs.edit().putStringSet("selected_genres", genres).apply()
     }
 
     fun getSelectedLanguages(): Set<String> =
-        prefs.getStringSet("selected_languages", setOf("en")) ?: setOf("en")
+        prefs.getStringSet("selected_languages", emptySet()) ?: emptySet()
     fun setSelectedLanguages(langs: Set<String>) {
         prefs.edit().putStringSet("selected_languages", langs).apply()
     }
@@ -140,7 +140,7 @@ class PreferencesManager(context: Context) {
         _navSettingsEnabled.value = enabled
     }
 
-    fun getShowStatusBar(): Boolean = prefs.getBoolean("show_status_bar", false)
+    fun getShowStatusBar(): Boolean = prefs.getBoolean("show_status_bar", true)
     fun setShowStatusBar(enabled: Boolean) {
         prefs.edit().putBoolean("show_status_bar", enabled).apply()
         _showStatusBar.value = enabled
@@ -290,7 +290,7 @@ class PreferencesManager(context: Context) {
         _floatingNavBar.value = true
         _animationsEnabled.value = true
         _navSettingsEnabled.value = true
-        _showStatusBar.value = false
+        _showStatusBar.value = true
         _homeSections.value = defaultSections
     }
 }

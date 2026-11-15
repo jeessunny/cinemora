@@ -1,7 +1,6 @@
-### What's New in Cinemora v2.3.10 🎬
+### What's New in Cinemora v2.3.11 🎬
 
-- 🔴 **Fixed Segmented Toggle Indicator**: Resolved indicator pill sizing in `SegmentedButton` so only the single active tab is highlighted, eliminating the issue where the entire toggle filled red.
-- 📐 **Clean Home Screen Reordering**: Removed extra arrow icons from the Home Screen sections list in Settings, restoring the sleek and clean drag-and-drop design.
-- 🛡️ **Settings Crash Fix**: Fixed crashes when changing settings by safely clamping animated elevation/paddings and adding safe wrappers for window and status bar color changes.
-- 📜 **Larger Scrollable Update Popup**: Expanded the App Update modal with a scrollable changelog view, enabling users to easily read full release notes.
-- 🪟 **Current Screen Background for Popups**: Completely eliminated white backgrounds on dialogs. All popups now cleanly display the current screen behind a dark translucent scrim with transparent window backdrops.
+- 📱 **Default Status Bar Enabled with Smooth Animations**: The status bar is now enabled by default across all themes and seamlessly blends with the app colors. Added fluid alpha and layout animations when toggling status bar visibility.
+- 🧭 **Fluid Navigation Bar Settings Tab Animation**: Added smooth expandable weight, alpha, and scale animations when showing or hiding the Settings tab in the bottom capsule navigation bar.
+- 🎭 **Clean Profile Setup**: When creating a new profile, pre-selected genres have been removed so the user starts with a completely fresh selection.
+- 🔒 **Interactive Profile Validation**: Users are now required to select at least 3 genres and at least 2 languages (with a name) before generating a profile, complete with real-time requirement progress counters and dynamic button feedback.

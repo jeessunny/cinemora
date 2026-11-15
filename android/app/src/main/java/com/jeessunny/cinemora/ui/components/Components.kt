@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -71,13 +72,36 @@ fun CinemoraNavBar(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalCinemoraColors.current
-    val allTabs = listOf(
+    val primaryTabs = listOf(
         Triple("home", "Home", Icons.Rounded.Home),
         Triple("search", "Search", Icons.Rounded.Search),
-        Triple("library", "Library", Icons.Rounded.VideoLibrary),
-        Triple("settings", "Settings", Icons.Rounded.Settings)
+        Triple("library", "Library", Icons.Rounded.VideoLibrary)
     )
-    val tabs = if (showSettingsTab) allTabs else allTabs.filter { it.first != "settings" }
+
+    val settingsWeight by animateFloatAsState(
+        targetValue = if (showSettingsTab) 1f else 0.0001f,
+        animationSpec = androidx.compose.animation.core.tween(
+            durationMillis = 300,
+            easing = androidx.compose.animation.core.FastOutSlowInEasing
+        ),
+        label = "nav_settings_weight"
+    )
+    val settingsAlpha by animateFloatAsState(
+        targetValue = if (showSettingsTab) 1f else 0f,
+        animationSpec = androidx.compose.animation.core.tween(
+            durationMillis = 250,
+            easing = androidx.compose.animation.core.FastOutSlowInEasing
+        ),
+        label = "nav_settings_alpha"
+    )
+    val settingsScale by animateFloatAsState(
+        targetValue = if (showSettingsTab) 1f else 0.4f,
+        animationSpec = androidx.compose.animation.core.tween(
+            durationMillis = 300,
+            easing = androidx.compose.animation.core.FastOutSlowInEasing
+        ),
+        label = "nav_settings_scale"
+    )
 
     val animSpec = androidx.compose.animation.core.tween<androidx.compose.ui.unit.Dp>(
         durationMillis = 280,
@@ -120,11 +144,12 @@ fun CinemoraNavBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            tabs.forEach { (route, label, icon) ->
+            primaryTabs.forEach { (route, label, icon) ->
                 val selected = currentRoute == route
                 val scale by animateFloatAsState(
                     targetValue = if (selected) 1.1f else 1.0f,
-                    animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f)
+                    animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+                    label = "nav_item_scale_$route"
                 )
 
                 Column(
@@ -152,6 +177,53 @@ fun CinemoraNavBar(
                         fontSize = if (selected) 12.sp else 11.sp,
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
                         color = if (selected) colors.primary else colors.textSecondary.copy(alpha = 0.85f)
+                    )
+                }
+            }
+
+            // Settings Tab with smooth expandable weight, alpha and scale animation
+            if (showSettingsTab || settingsWeight > 0.005f) {
+                val selected = currentRoute == "settings"
+                val scale by animateFloatAsState(
+                    targetValue = if (selected) 1.1f else 1.0f,
+                    animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+                    label = "nav_item_scale_settings"
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .weight(settingsWeight.coerceAtLeast(0.0001f))
+                        .fillMaxHeight()
+                        .graphicsLayer {
+                            alpha = settingsAlpha
+                            scaleX = settingsScale
+                            scaleY = settingsScale
+                            clip = true
+                        }
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            enabled = showSettingsTab && settingsAlpha > 0.5f
+                        ) { onNavigate("settings") }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Settings,
+                        contentDescription = "Settings",
+                        tint = if (selected) colors.primary else colors.textSecondary.copy(alpha = 0.85f),
+                        modifier = Modifier
+                            .size(25.dp)
+                            .scale(scale)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Settings",
+                        fontSize = if (selected) 12.sp else 11.sp,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                        color = if (selected) colors.primary else colors.textSecondary.copy(alpha = 0.85f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip
                     )
                 }
             }

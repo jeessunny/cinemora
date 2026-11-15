@@ -10,15 +10,16 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -141,7 +142,16 @@ fun CinemoraApp(prefs: PreferencesManager) {
     val colors = LocalCinemoraColors.current
     val view = LocalView.current
 
-    DisposableEffect(showStatusBar, colors.background, colors.isDark) {
+    val statusBarAlpha by animateFloatAsState(
+        targetValue = if (showStatusBar) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = FastOutSlowInEasing
+        ),
+        label = "status_bar_alpha"
+    )
+
+    LaunchedEffect(showStatusBar, colors.background, colors.isDark) {
         try {
             var ctx: Context? = view.context
             var act: Activity? = null
@@ -164,15 +174,17 @@ fun CinemoraApp(prefs: PreferencesManager) {
                         insetsController.isAppearanceLightStatusBars = !colors.isDark
                     } catch (ignored: Throwable) {}
                 } else {
-                    insetsController.hide(WindowInsetsCompat.Type.statusBars())
-                    insetsController.systemBarsBehavior =
-                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    kotlinx.coroutines.delay(280)
+                    if (!showStatusBar) {
+                        insetsController.hide(WindowInsetsCompat.Type.statusBars())
+                        insetsController.systemBarsBehavior =
+                            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
                 }
             }
         } catch (ignored: Throwable) {
             // Safe fallback preventing any settings crash
         }
-        onDispose {}
     }
 
     Box(
@@ -369,5 +381,19 @@ fun CinemoraApp(prefs: PreferencesManager) {
 
         // Global Update Modal Dialog
         UpdateDialogView()
+
+        // Status bar overlay for smooth animated color blend
+        if (statusBarAlpha > 0.005f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .windowInsetsTopHeight(WindowInsets.statusBars)
+                    .graphicsLayer {
+                        alpha = statusBarAlpha
+                    }
+                    .background(colors.background)
+                    .align(Alignment.TopCenter)
+            )
+        }
     }
 }
