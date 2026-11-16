@@ -109,12 +109,8 @@ fun CinemoraNavBar(
         durationMillis = 280,
         easing = androidx.compose.animation.core.FastOutSlowInEasing
     )
-    val floatAnimSpec = androidx.compose.animation.core.tween<Float>(
-        durationMillis = 280,
-        easing = androidx.compose.animation.core.FastOutSlowInEasing
-    )
 
-    val targetBottomPadding = if (floating) (16.dp + navBarInset) else 0.dp
+    val targetBottomPadding = if (floating) (14.dp + (if (navBarInset > 0.dp) navBarInset else 0.dp)) else 0.dp
     val targetNavHeight = if (floating) 64.dp else (64.dp + navBarInset)
 
     val horizontalPadding by animateDpAsState(
@@ -132,11 +128,6 @@ fun CinemoraNavBar(
         animationSpec = animSpec,
         label = "nav_height"
     )
-    val elevation by animateDpAsState(
-        targetValue = if (floating) 6.dp else 0.dp,
-        animationSpec = animSpec,
-        label = "nav_elevation"
-    )
     val topRadius by animateDpAsState(
         targetValue = if (floating) 32.dp else 0.dp,
         animationSpec = animSpec,
@@ -147,13 +138,7 @@ fun CinemoraNavBar(
         animationSpec = animSpec,
         label = "nav_bottom_radius"
     )
-    val borderAlpha by animateFloatAsState(
-        targetValue = if (floating) 1f else 0f,
-        animationSpec = floatAnimSpec,
-        label = "nav_border_alpha"
-    )
 
-    val safeElevation = elevation.coerceAtLeast(0.dp)
     val safeTopRadius = topRadius.coerceAtLeast(0.dp)
     val safeBottomRadius = bottomRadius.coerceAtLeast(0.dp)
     val safeHorizontalPadding = horizontalPadding.coerceAtLeast(0.dp)
@@ -173,26 +158,9 @@ fun CinemoraNavBar(
             .padding(horizontal = safeHorizontalPadding)
             .padding(bottom = safeBottomPadding)
             .height(navHeight)
-            .shadow(elevation = safeElevation, shape = navShape, clip = false)
             .clip(navShape)
             .background(navBg)
-            .then(
-                if (borderAlpha > 0.01f) {
-                    Modifier.border(1.dp, colors.divider.copy(alpha = borderAlpha), navShape)
-                } else Modifier
-            )
     ) {
-        // Crisp top divider line when docked static (smoothly fades out as floating nav activates)
-        if (borderAlpha < 0.99f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(colors.divider.copy(alpha = 1f - borderAlpha))
-                    .align(Alignment.TopCenter)
-            )
-        }
-
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -560,22 +528,22 @@ fun ScrollRail(
     if (movies.isEmpty()) return
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 18.dp)
+        modifier = modifier.fillMaxWidth()
     ) {
         Text(
             text = title,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.ExtraBold,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
             color = colors.textPrimary,
             letterSpacing = (-0.3).sp,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         LazyRow(
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             items(movies, key = { it.id }) { movie ->
                 PosterCard(

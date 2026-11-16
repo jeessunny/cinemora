@@ -89,7 +89,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -134,7 +134,7 @@ fun HomeScreen(
         // Hero Card
         if (heroMovie != null) {
             item {
-                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)) {
+                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp)) {
                     HeroCard(
                         movie = heroMovie,
                         onClick = { onMovieClick(heroMovie) }
@@ -147,7 +147,11 @@ fun HomeScreen(
         val railAnimSpec = spring<androidx.compose.ui.unit.IntOffset>(dampingRatio = 0.8f, stiffness = 400f)
         homeSections.filter { it.enabled }.forEach { section ->
             item(key = section.id) {
-                Box(modifier = Modifier.animateItemPlacement(railAnimSpec)) {
+                Box(
+                    modifier = Modifier
+                        .animateItemPlacement(railAnimSpec)
+                        .padding(vertical = 10.dp)
+                ) {
                     when (section.id) {
                         "recommended" -> {
                             ScrollRail(
@@ -156,8 +160,7 @@ fun HomeScreen(
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
-                                onMovieClick = onMovieClick,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                onMovieClick = onMovieClick
                             )
                         }
                         "genre1" -> {
@@ -167,8 +170,7 @@ fun HomeScreen(
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
-                                onMovieClick = onMovieClick,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                onMovieClick = onMovieClick
                             )
                         }
                         "genre2" -> {
@@ -178,8 +180,7 @@ fun HomeScreen(
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
-                                onMovieClick = onMovieClick,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                onMovieClick = onMovieClick
                             )
                         }
                         "trending" -> {
@@ -189,8 +190,7 @@ fun HomeScreen(
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
-                                onMovieClick = onMovieClick,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                onMovieClick = onMovieClick
                             )
                         }
                         "popular" -> {
@@ -200,8 +200,7 @@ fun HomeScreen(
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
-                                onMovieClick = onMovieClick,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                onMovieClick = onMovieClick
                             )
                         }
                         "newReleases" -> {
@@ -211,8 +210,7 @@ fun HomeScreen(
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
-                                onMovieClick = onMovieClick,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                onMovieClick = onMovieClick
                             )
                         }
                     }
