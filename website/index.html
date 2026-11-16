@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Cinemora — Native Android Movie Discovery</title>
+  <meta name="description" content="Cinemora is a fast, beautiful movie discovery native Android app built with 100% Kotlin & Jetpack Compose. Pitch black OLED mode, smart recommendations, and seamless updates.">
+  <meta name="keywords" content="Cinemora, Android App, Jetpack Compose, Kotlin, Movie Discovery, OLED Dark Mode, Open Source APK, Film Tracker">
+  <meta name="theme-color" content="#08080A">
+
+  <!-- Open Graph / Social Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cinemora-swart.vercel.app/">
+  <meta property="og:title" content="Cinemora — Native Android Movie Discovery">
+  <meta property="og:description" content="100% Kotlin Jetpack Compose Android app with pure OLED dark mode, personalized discovery rails, and seamless in-app updates.">
+  <meta property="og:image" content="/assets/app-icon.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/app-icon.png">
+  <link rel="apple-touch-icon" href="/assets/app-icon.png">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-noir">
+  <!-- Subtle Ambient Glow -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="#" class="brand-link" aria-label="Cinemora Home">
+        <div class="brand-icon-wrapper">
+          <img src="/assets/app-icon.png" alt="Cinemora Icon" class="brand-icon">
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Cinemora</span>
+          <span class="brand-tag">v2.3.15</span>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#download" class="nav-link">Download</a>
+        <a href="#install" class="nav-link">Install Guide</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="https://github.com/jeessunny/cinemora" target="_blank" rel="noopener noreferrer" class="github-btn" title="View Source on GitHub">
+          <svg class="icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span class="github-text">GitHub</span>
+          <span class="star-badge" id="github-stars">★ 30+</span>
+        </a>
+
+        <a href="#download" class="cta-primary-sm">
+          <span>Get APK</span>
+        </a>
+
+        <button class="mobile-menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-drawer" id="mobile-drawer">
+      <a href="#features" class="drawer-link">Features</a>
+      <a href="#experience" class="drawer-link">Interactive Experience</a>
+      <a href="#download" class="drawer-link">Download APK</a>
+      <a href="#install" class="drawer-link">Installation Guide</a>
+      <a href="#faq" class="drawer-link">FAQ</a>
+      <a href="https://github.com/jeessunny/cinemora" target="_blank" rel="noopener noreferrer" class="drawer-link drawer-gh">
+        View on GitHub
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+      <div class="hero-container">
+        <div class="hero-content">
+          <!-- Release Tag Pill -->
+          <div class="release-pill">
+            <span class="pulse-dot"></span>
+            <span class="pill-text">Cinemora v2.3.15 • 100% Native Jetpack Compose</span>
+          </div>
+
+          <h1 class="hero-title">
+            Pure Cinema Discovery.<br>
+            <span class="gradient-text">Zero Lag. Infinite Taste.</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            A high-fidelity native Android movie & TV discovery experience engineered with Jetpack Compose. Enjoy personalized taste curation, pure pitch black OLED mode, and effortless automatic updates.
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="hero-actions">
+            <a href="https://github.com/jeessunny/cinemora/releases/download/v2.3.15/cinemora-release.apk" class="btn-download" id="hero-download-btn">
+              <div class="btn-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </div>
+              <div class="btn-text-group">
+                <span class="btn-label">Download Cinemora APK</span>
+                <span class="btn-meta" id="apk-size-label">v2.3.15 • 15.9 MB • Android 7.0+</span>
+              </div>
+            </a>
+
+            <a href="https://github.com/jeessunny/cinemora/releases/tag/v2.3.15" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>Release Notes</span>
+            </a>
+          </div>
+
+          <!-- SHA256 Verification Bar -->
+          <div class="checksum-box">
+            <span class="checksum-title">SHA256 CHECKSUM</span>
+            <code class="checksum-code" id="checksum-text">cinemora-release.apk (Verified GitHub Build)</code>
+            <button class="btn-copy" id="copy-checksum-btn" title="Copy SHA256 Checksum" aria-label="Copy SHA256 Checksum">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Copy</span>
+            </button>
+          </div>
+
+          <!-- Feature Quick Badges -->
+          <div class="hero-badges">
+            <div class="hero-badge">
+              <span class="badge-dot green"></span>
+              <span>100% Kotlin Compose</span>
+            </div>
+            <div class="hero-badge">
+              <span class="badge-dot red"></span>
+              <span>Pure OLED #000000</span>
+            </div>
+            <div class="hero-badge">
+              <span class="badge-dot purple"></span>
+              <span>Local-First Taste AI</span>
+            </div>
+            <div class="hero-badge">
+              <span class="badge-dot blue"></span>
+              <span>In-App Auto Updater</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Device Mockup -->
+        <div class="hero-device-wrapper">
+          <div class="device-glow"></div>
+          <div class="phone-frame">
+            <!-- Hardware Details -->
+            <div class="phone-speaker"></div>
+            <div class="phone-camera"></div>
+
+            <!-- Screen Viewport -->
+            <div class="phone-screen" id="phone-screen">
+              <!-- Android Status Bar -->
+              <div class="screen-status-bar">
+                <span class="status-time">9:41</span>
+                <div class="status-icons">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/>
+                  </svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+                  </svg>
+                  <div class="battery-icon"><div class="battery-fill"></div></div>
+                </div>
+              </div>
+
+              <!-- Top Bar -->
+              <div class="screen-top-bar">
+                <div class="user-greeting">
+                  <div class="user-name">Movie Lover</div>
+                  <div class="user-sub">Good evening</div>
+                </div>
+                <div class="user-avatar-circle">
+                  <img src="https://api.dicebear.com/7.x/avataaars/png?seed=MovieLover" alt="Avatar">
+                </div>
+              </div>
+
+              <!-- Hero Backdrop Card -->
+              <div class="screen-hero-card">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&q=80" alt="Interstellar" class="hero-card-img">
+                <div class="hero-card-overlay">
+                  <span class="hero-chip">FEATURED</span>
+                  <div class="hero-movie-title">Interstellar</div>
+                  <div class="hero-movie-meta">
+                    <span class="rating-badge">★ 8.7</span>
+                    <span>2014</span>
+                    <span>Sci-Fi</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rail 1 -->
+              <div class="screen-rail-section">
+                <div class="screen-rail-header">
+                  <span class="screen-rail-title">Recommended For You</span>
+                  <span class="screen-rail-more">See all</span>
+                </div>
+                <div class="screen-posters-row">
+                  <div class="screen-poster">
+                    <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&q=80" alt="Inception">
+                    <div class="screen-poster-rating">★ 8.8</div>
+                    <div class="screen-poster-title">Inception</div>
+                  </div>
+                  <div class="screen-poster">
+                    <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&q=80" alt="Dune">
+                    <div class="screen-poster-rating">★ 8.5</div>
+                    <div class="screen-poster-title">Dune: Part Two</div>
+                  </div>
+                  <div class="screen-poster">
+                    <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&q=80" alt="Oppenheimer">
+                    <div class="screen-poster-rating">★ 8.9</div>
+                    <div class="screen-poster-title">Oppenheimer</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Floating Capsule Navigation Bar -->
+              <div class="screen-nav-capsule">
+                <div class="screen-nav-item active">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                  </svg>
+                  <span>Home</span>
+                </div>
+                <div class="screen-nav-item">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                  </svg>
+                  <span>Search</span>
+                </div>
+                <div class="screen-nav-item">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+                  </svg>
+                  <span>Library</span>
+                </div>
+                <div class="screen-nav-item">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                  </svg>
+                  <span>Settings</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Experience Section -->
+    <section class="experience-section" id="experience">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-tag">INTERACTIVE SHOWCASE</span>
+          <h2 class="section-title">Designed for Your Screen. Tuned for Your Taste.</h2>
+          <p class="section-subtitle">
+            Switch views below to experience how Cinemora behaves on real Android hardware with pure pitch black pixels and custom themes.
+          </p>
+        </div>
+
+        <div class="interactive-controller">
+          <button class="mode-tab active" data-mode="home">
+            <span class="mode-icon">🎬</span>
+            <span class="mode-label">Home Discovery</span>
+          </button>
+          <button class="mode-tab" data-mode="pitchblack">
+            <span class="mode-icon">🖤</span>
+            <span class="mode-label">Pitch Black OLED</span>
+          </button>
+          <button class="mode-tab" data-mode="library">
+            <span class="mode-icon">📚</span>
+            <span class="mode-label">Curated Library</span>
+          </button>
+          <button class="mode-tab" data-mode="settings">
+            <span class="mode-icon">⚙️</span>
+            <span class="mode-label">Custom Themes</span>
+          </button>
+        </div>
+
+        <!-- Color Palette Picker for Demo -->
+        <div class="theme-switcher-bar" id="theme-accent-bar">
+          <span class="theme-bar-label">Interactive Accent Color:</span>
+          <div class="color-swatches">
+            <button class="swatch active" data-color="#E50914" title="Cinema Red" style="--swatch-color: #E50914;"></button>
+            <button class="swatch" data-color="#0077FE" title="Electric Blue" style="--swatch-color: #0077FE;"></button>
+            <button class="swatch" data-color="#9D4EDD" title="Cyberpunk Purple" style="--swatch-color: #9D4EDD;"></button>
+            <button class="swatch" data-color="#00C853" title="Emerald Green" style="--swatch-color: #00C853;"></button>
+            <button class="swatch" data-color="#FFB800" title="Amber Gold" style="--swatch-color: #FFB800;"></button>
+          </div>
+        </div>
+
+        <div class="feature-callout-card" id="mode-description-box">
+          <div class="callout-indicator"></div>
+          <div class="callout-text">
+            <h3 class="callout-title" id="callout-title">Adaptive Discovery Rails</h3>
+            <p class="callout-desc" id="callout-desc">
+              Cinemora generates dynamic horizontal discovery rails based on your watch patterns. Smooth 120Hz physics ensure seamless browsing without frame drops.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Features Grid -->
+    <section class="features-section" id="features">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-tag">NATIVE CAPABILITIES</span>
+          <h2 class="section-title">Built Without Compromise.</h2>
+          <p class="section-subtitle">
+            Every layer of Cinemora is built natively in Kotlin to deliver true mobile responsiveness that webviews simply cannot match.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <!-- Card 1 -->
+          <div class="feature-card highlight-card">
+            <div class="feature-icon-box red">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+            <h3 class="feature-title">100% Native Jetpack Compose</h3>
+            <p class="feature-desc">
+              No web container, no Chromium memory overhead, no hybrid bridge latency. Cinemora compiles directly into lean Android bytecode for lightning-quick 120Hz fluid scrolling.
+            </p>
+            <div class="feature-metric">
+              <span class="metric-val">15.9 MB</span>
+              <span class="metric-label">Lean APK Size</span>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="feature-card">
+            <div class="feature-icon-box dark">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">Pure Pitch Black OLED Mode</h3>
+            <p class="feature-desc">
+              Engineered specifically for OLED & AMOLED panels with authentic <code class="inline-code">#000000</code> black backgrounds. Saves battery life while cinema posters glow with infinite contrast.
+            </p>
+            <div class="feature-tag">True #000000 Pixels Off</div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="feature-card">
+            <div class="feature-icon-box blue">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">On-Device Taste Engine</h3>
+            <p class="feature-desc">
+              Your bookmarks, ratings, and viewing history are scored locally using an embedded algorithmic weighting system. Zero external telemetry, 100% privacy-respecting.
+            </p>
+            <div class="feature-tag">100% Private & Offline First</div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="feature-card">
+            <div class="feature-icon-box purple">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">In-App Auto Updater</h3>
+            <p class="feature-desc">
+              Checks GitHub Releases quietly in the background. Downloads new APK updates with live byte progress and launches Android's native package installer securely via FileProvider.
+            </p>
+            <div class="feature-tag">Studyio Architecture</div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="feature-card">
+            <div class="feature-icon-box amber">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </div>
+            <h3 class="feature-title">Floating Capsule Navigation</h3>
+            <p class="feature-desc">
+              Toggle between a floating pill with a matching subtle grey border or a docked static bottom bar. Full edge-to-edge support with custom animated status bar blending.
+            </p>
+            <div class="feature-tag">Full Gesture Support</div>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="feature-card">
+            <div class="feature-icon-box green">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">Open Source & Reproducible</h3>
+            <p class="feature-desc">
+              All builds are automated via public GitHub Actions workflows with SHA-256 checksums. Transparent code with zero hidden trackers, ads, or telemetry.
+            </p>
+            <div class="feature-tag">MIT Licensed</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download Hub Section -->
+    <section class="download-section" id="download">
+      <div class="section-container">
+        <div class="download-card">
+          <div class="download-card-content">
+            <div class="download-badge">
+              <span class="pulse-dot"></span>
+              <span>LATEST STABLE RELEASE</span>
+            </div>
+
+            <h2 class="download-title">Ready for Better Cinema Discovery?</h2>
+            <p class="download-subtitle">
+              Install Cinemora directly on any Android device running Android 7.0 or newer. Free forever, open source, and with direct in-app updates.
+            </p>
+
+            <div class="download-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Version</span>
+                <span class="meta-val" id="release-version">v2.3.15</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Package Size</span>
+                <span class="meta-val" id="release-size">15.9 MB</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Target SDK</span>
+                <span class="meta-val">Android 14 (API 34)</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">License</span>
+                <span class="meta-val">MIT Open Source</span>
+              </div>
+            </div>
+
+            <div class="download-buttons-row">
+              <a href="https://github.com/jeessunny/cinemora/releases/download/v2.3.15/cinemora-release.apk" class="btn-download-large" id="main-download-btn">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <div class="btn-text-wrap">
+                  <span class="main-txt">Download APK File</span>
+                  <span class="sub-txt">cinemora-release.apk (v2.3.15)</span>
+                </div>
+              </a>
+
+              <a href="https://github.com/jeessunny/cinemora/releases/tag/v2.3.15" target="_blank" rel="noopener noreferrer" class="btn-gh-release">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                <span>View GitHub Release</span>
+              </a>
+            </div>
+
+            <div class="checksum-bar-inline">
+              <span class="cs-label">SHA256:</span>
+              <span class="cs-hash" id="release-sha256-display">Loading latest build hash...</span>
+              <button class="cs-copy-btn" id="copy-hash-btn" aria-label="Copy Hash">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation Walkthrough -->
+    <section class="install-section" id="install">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-tag">HOW TO INSTALL</span>
+          <h2 class="section-title">Up and Running in 3 Steps.</h2>
+          <p class="section-subtitle">
+            Because Cinemora is an open-source app distributed directly from GitHub Releases, installation takes less than a minute.
+          </p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3 class="step-title">Download APK</h3>
+            <p class="step-desc">
+              Tap the download button above or grab <code class="inline-code">cinemora-release.apk</code> directly on your phone.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3 class="step-title">Allow Unknown Sources</h3>
+            <p class="step-desc">
+              When prompted by Android, tap "Settings" and toggle "Allow from this source" for your browser or file manager.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3 class="step-title">Launch & Enjoy</h3>
+            <p class="step-desc">
+              Open Cinemora! Pick your favorite genres and languages, and future releases update seamlessly with one tap from Settings.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+      <div class="section-container">
+        <div class="section-header">
+          <span class="section-tag">FREQUENTLY ASKED QUESTIONS</span>
+          <h2 class="section-title">Everything You Need to Know.</h2>
+        </div>
+
+        <div class="faq-accordion">
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Why is Cinemora distributed as an APK instead of Google Play?</span>
+              <span class="faq-chevron">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Direct APK distribution allows us to ship instant updates, avoid arbitrary store review delays, and maintain 100% open-source purity without proprietary Google Play billing libraries or analytics SDKs bundled into your app.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Is Cinemora completely safe to install?</span>
+              <span class="faq-chevron">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Yes. Every release APK is compiled and cryptographically signed on clean GitHub Actions virtual runners. The entire source code is public under the MIT License, and we publish SHA-256 checksums alongside every release so you can verify binary integrity.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Does Cinemora host or pirate streaming videos?</span>
+              <span class="faq-chevron">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                No. Cinemora is a client for film and television discovery, metadata exploration, and personalized library tracking. It does not host, upload, or distribute pirated media files.
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>How do future updates work if I install via APK?</span>
+              <span class="faq-chevron">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Cinemora features an integrated In-App Auto Updater. The app silently queries the GitHub Releases API on launch. When a new version is available, a prompt appears showing release highlights and allows you to download and install the update right inside the app!
+              </p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Can I customize the app's appearance and colors?</span>
+              <span class="faq-chevron">+</span>
+            </button>
+            <div class="faq-answer">
+              <p>
+                Yes! Cinemora includes a pure OLED Pitch Black mode (<code class="inline-code">#000000</code>), 10 dynamic accent colors, customizable home screen discovery rails, and options to toggle between floating and docked navigation bars.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="brand-link">
+          <img src="/assets/app-icon.png" alt="Cinemora" class="brand-icon">
+          <span class="brand-name">Cinemora</span>
+        </div>
+        <p class="footer-copy">
+          The ultimate movie & series discovery companion for Android. 100% native, open source, and built for film lovers.
+        </p>
+      </div>
+
+      <div class="footer-links-group">
+        <div class="footer-column">
+          <span class="footer-heading">Navigation</span>
+          <a href="#features">Features</a>
+          <a href="#experience">Showcase</a>
+          <a href="#download">Download APK</a>
+          <a href="#install">Install Guide</a>
+          <a href="#faq">FAQ</a>
+        </div>
+
+        <div class="footer-column">
+          <span class="footer-heading">Open Source</span>
+          <a href="https://github.com/jeessunny/cinemora" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+          <a href="https://github.com/jeessunny/cinemora/releases" target="_blank" rel="noopener noreferrer">All Releases</a>
+          <a href="https://github.com/jeessunny/cinemora/blob/main/RELEASE_NOTES.md" target="_blank" rel="noopener noreferrer">Release Notes</a>
+          <a href="https://github.com/jeessunny/cinemora/issues" target="_blank" rel="noopener noreferrer">Report an Issue</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom-container">
+        <span>Released under the MIT License • Built with Jetpack Compose</span>
+        <span>© 2024–2026 Cinemora Project</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification for Checksum Copy -->
+  <div class="toast" id="copy-toast" role="status" aria-live="polite">
+    <span>SHA256 Checksum copied to clipboard!</span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

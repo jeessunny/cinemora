@@ -2,6 +2,7 @@
 
 [![Android Release](https://img.shields.io/github/v/release/jeessunny/cinemora?label=Android%20APK&color=E50914&logo=android)](https://github.com/jeessunny/cinemora/releases)
 [![Build & Release Android APK](https://github.com/jeessunny/cinemora/actions/workflows/build-apk.yml/badge.svg)](https://github.com/jeessunny/cinemora/actions/workflows/build-apk.yml)
+[![Website](https://img.shields.io/badge/Website-cinemora--swart.vercel.app-E50914?logo=vercel)](https://cinemora-swart.vercel.app/)
 [![Platform](https://img.shields.io/badge/Platform-100%25%20Kotlin%20Compose-purple?logo=android)](https://github.com/jeessunny/cinemora)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
@@ -85,6 +86,12 @@ cinemora/
 │   ├── gradle/wrapper/                   # Gradle wrapper distribution
 │   ├── build.gradle                      # Root project build configuration
 │   └── settings.gradle                   # Gradle settings
+├── website/                              # Official Cinemora Showcase Website
+│   ├── assets/                           # High-res app icons and preview assets
+│   ├── index.html                        # Semantic, responsive showcase page
+│   ├── styles.css                        # Cinema noir design system & typography
+│   └── script.js                         # Interactive phone mockup & release telemetry
+├── vercel.json                           # Vercel deployment configuration
 └── RELEASE_NOTES.md                      # Changelog for GitHub Releases
 ```
 
