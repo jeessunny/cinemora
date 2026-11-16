@@ -59,7 +59,6 @@ fun SettingsScreen(
     val amoledBlack by prefs.amoledBlack.collectAsState()
     val accentColor by prefs.accentColor.collectAsState()
     val floatingNavBar by prefs.floatingNavBar.collectAsState()
-    val animationsEnabled by prefs.animationsEnabled.collectAsState()
     val navSettingsEnabled by prefs.navSettingsEnabled.collectAsState()
     val showStatusBar by prefs.showStatusBar.collectAsState()
     val homeSections by prefs.homeSections.collectAsState()
@@ -357,46 +356,6 @@ fun SettingsScreen(
                     Switch(
                         checked = showStatusBar,
                         onCheckedChange = { prefs.setShowStatusBar(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = colors.primary
-                        )
-                    )
-                }
-            }
-
-            // ═══════ ANIMATION ═══════
-            SectionHeader(title = "ANIMATION")
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(colors.surfaceContainer)
-                    .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(Icons.Rounded.Animation, contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
-                        Column {
-                            Text(text = "All Animations", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(text = "Page transitions, entrance effects", fontSize = 12.sp, color = colors.textSecondary)
-                        }
-                    }
-
-                    Switch(
-                        checked = animationsEnabled,
-                        onCheckedChange = { prefs.setAnimationsEnabled(it) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
                             checkedTrackColor = colors.primary

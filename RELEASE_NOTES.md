@@ -1,4 +1,4 @@
-### What's New in Cinemora v2.3.13 🎬
+### What's New in Cinemora v2.3.14 🎬
 
-- 🧭 **Clean Borderless Navigation Bar**: Completely removed the dark outline, ambient shadow rings, and border strokes from the navigation bar, ensuring a clean, seamless, and modern surface appearance across light, dark, and AMOLED modes.
-- 📐 **Symmetrical Home Screen Spacing**: Harmonized vertical spacing across all sections on the Home screen. Removed compounding gaps to establish a consistent, balanced 20dp breathing room between all rails and cards, with symmetrical 10dp gaps between section titles and poster rails.
+- 🎨 **Dynamic Theme-Tinted Navigation Bar Outline**: Added a sleek, small (1dp) light shade outline around the navigation bar that dynamically inherits the active theme color. Changing accent colors in Settings (Red, Blue, Purple, Gold, Green, etc.) immediately changes the navigation bar outline to match the selected theme.
+- ⚙️ **Streamlined Settings Menu**: Removed the Animation toggle section from Settings to keep the preferences clean, elegant, and clutter-free.

@@ -138,6 +138,17 @@ fun CinemoraNavBar(
         animationSpec = animSpec,
         label = "nav_bottom_radius"
     )
+    val borderAlpha by animateFloatAsState(
+        targetValue = if (floating) 1f else 0f,
+        animationSpec = androidx.compose.animation.core.tween(
+            durationMillis = 280,
+            easing = androidx.compose.animation.core.FastOutSlowInEasing
+        ),
+        label = "nav_border_alpha"
+    )
+
+    // Dynamic small light shade outline derived from active theme color
+    val themeOutlineColor = colors.primary.copy(alpha = 0.25f)
 
     val safeTopRadius = topRadius.coerceAtLeast(0.dp)
     val safeBottomRadius = bottomRadius.coerceAtLeast(0.dp)
@@ -160,7 +171,23 @@ fun CinemoraNavBar(
             .height(navHeight)
             .clip(navShape)
             .background(navBg)
+            .then(
+                if (borderAlpha > 0.01f) {
+                    Modifier.border(1.dp, themeOutlineColor.copy(alpha = themeOutlineColor.alpha * borderAlpha), navShape)
+                } else Modifier
+            )
     ) {
+        // Subtle top light shade outline in theme color when docked static (smoothly cross-fades with floating capsule outline)
+        if (borderAlpha < 0.99f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(themeOutlineColor.copy(alpha = themeOutlineColor.alpha * (1f - borderAlpha)))
+                    .align(Alignment.TopCenter)
+            )
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxSize()
