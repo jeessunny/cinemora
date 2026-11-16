@@ -198,10 +198,12 @@ fun LibraryScreen(
                 },
                 onAction = when (currentTab) {
                     "watchlist" -> onFindMovies
-                    "favorites" -> onFindMovies // Navigates to find/discover
+                    "favorites" -> onFindMovies // Navigates to home
                     else -> null
                 },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(bottom = 60.dp)
             )
         } else {
             LazyVerticalGrid(

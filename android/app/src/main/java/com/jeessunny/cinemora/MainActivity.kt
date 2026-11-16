@@ -293,7 +293,17 @@ fun CinemoraApp(prefs: PreferencesManager) {
                         val route = if (movie.type == "tv") "series/${movie.id}" else "movie/${movie.id}"
                         navController.navigate(route)
                     },
-                    onFindMovies = { navController.navigate("search") }
+                    onFindMovies = {
+                        val popped = navController.popBackStack("home", inclusive = false)
+                        if (!popped) {
+                            navController.navigate("home") {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = false
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+                    }
                 )
             }
 

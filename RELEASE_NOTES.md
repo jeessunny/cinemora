@@ -1,4 +1,7 @@
-### What's New in Cinemora v2.3.14 🎬
+### What's New in Cinemora v2.3.15 🎬
 
-- 🎨 **Dynamic Theme-Tinted Navigation Bar Outline**: Added a sleek, small (1dp) light shade outline around the navigation bar that dynamically inherits the active theme color. Changing accent colors in Settings (Red, Blue, Purple, Gold, Green, etc.) immediately changes the navigation bar outline to match the selected theme.
-- ⚙️ **Streamlined Settings Menu**: Removed the Animation toggle section from Settings to keep the preferences clean, elegant, and clutter-free.
+- 🚀 **100% Native Kotlin Compose Architecture**: Completely purged all legacy web code, Capacitor plugins, and Node artifacts. The codebase is now strictly focused on the ultra-fast native Android APK with zero bloat.
+- 🎨 **Unified Navigation Bar Grey Border**: Styled the navigation bar border outline to perfectly match the sleek grey border color used on settings tiles and cards (`colors.divider`).
+- 🏠 **Enhanced Library Empty State Action**: Tapping "Find Movies" or "Discover" in the empty Watchlist or Favorites screen now smoothly takes you back to the Home discovery rails.
+- 🏷️ **Clean Settings Version Display**: Removed "(Native)" from the Settings footer version display, showing a clean `"Cinemora v2.3.15"`.
+- 🧹 **Complete Codebase Cleanup**: Comprehensive cleanup of orphaned configs, boilerplate tests, and dead files with added Kotlin unit tests.

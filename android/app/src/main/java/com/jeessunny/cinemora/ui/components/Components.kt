@@ -147,8 +147,8 @@ fun CinemoraNavBar(
         label = "nav_border_alpha"
     )
 
-    // Dynamic small light shade outline derived from active theme color
-    val themeOutlineColor = colors.primary.copy(alpha = 0.25f)
+    // Subtle grey border outline matching settings tile border (colors.divider)
+    val navOutlineColor = colors.divider
 
     val safeTopRadius = topRadius.coerceAtLeast(0.dp)
     val safeBottomRadius = bottomRadius.coerceAtLeast(0.dp)
@@ -173,17 +173,17 @@ fun CinemoraNavBar(
             .background(navBg)
             .then(
                 if (borderAlpha > 0.01f) {
-                    Modifier.border(1.dp, themeOutlineColor.copy(alpha = themeOutlineColor.alpha * borderAlpha), navShape)
+                    Modifier.border(1.dp, navOutlineColor.copy(alpha = navOutlineColor.alpha * borderAlpha), navShape)
                 } else Modifier
             )
     ) {
-        // Subtle top light shade outline in theme color when docked static (smoothly cross-fades with floating capsule outline)
+        // Subtle top outline matching settings tile border when docked static (smoothly cross-fades with floating capsule outline)
         if (borderAlpha < 0.99f) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(themeOutlineColor.copy(alpha = themeOutlineColor.alpha * (1f - borderAlpha)))
+                    .background(navOutlineColor.copy(alpha = navOutlineColor.alpha * (1f - borderAlpha)))
                     .align(Alignment.TopCenter)
             )
         }

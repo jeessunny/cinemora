@@ -622,7 +622,7 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Native Movie Discovery • GitHub Release",
+                            text = "Movie Discovery • GitHub Release",
                             fontSize = 12.sp,
                             color = colors.textSecondary
                         )
@@ -639,7 +639,7 @@ fun SettingsScreen(
             // Footer Version Text
             Spacer(modifier = Modifier.height(28.dp))
             Text(
-                text = "Cinemora v${BuildConfig.APP_VERSION} (Native)",
+                text = "Cinemora v${BuildConfig.APP_VERSION}",
                 fontSize = 12.sp,
                 color = colors.textSecondary.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center,
