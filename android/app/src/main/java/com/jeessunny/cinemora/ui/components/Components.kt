@@ -103,16 +103,55 @@ fun CinemoraNavBar(
         label = "nav_settings_scale"
     )
 
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
     val animSpec = androidx.compose.animation.core.tween<androidx.compose.ui.unit.Dp>(
         durationMillis = 280,
         easing = androidx.compose.animation.core.FastOutSlowInEasing
     )
-    val horizontalPadding by animateDpAsState(targetValue = if (floating) 20.dp else 0.dp, animationSpec = animSpec, label = "nav_h_pad")
-    val bottomPadding by animateDpAsState(targetValue = if (floating) 14.dp else 0.dp, animationSpec = animSpec, label = "nav_b_pad")
-    val navHeight by animateDpAsState(targetValue = if (floating) 64.dp else 72.dp, animationSpec = animSpec, label = "nav_height")
-    val elevation by animateDpAsState(targetValue = if (floating) 12.dp else 0.dp, animationSpec = animSpec, label = "nav_elevation")
-    val topRadius by animateDpAsState(targetValue = if (floating) 32.dp else 16.dp, animationSpec = animSpec, label = "nav_top_radius")
-    val bottomRadius by animateDpAsState(targetValue = if (floating) 32.dp else 0.dp, animationSpec = animSpec, label = "nav_bottom_radius")
+    val floatAnimSpec = androidx.compose.animation.core.tween<Float>(
+        durationMillis = 280,
+        easing = androidx.compose.animation.core.FastOutSlowInEasing
+    )
+
+    val targetBottomPadding = if (floating) (16.dp + navBarInset) else 0.dp
+    val targetNavHeight = if (floating) 64.dp else (64.dp + navBarInset)
+
+    val horizontalPadding by animateDpAsState(
+        targetValue = if (floating) 20.dp else 0.dp,
+        animationSpec = animSpec,
+        label = "nav_h_pad"
+    )
+    val bottomPadding by animateDpAsState(
+        targetValue = targetBottomPadding,
+        animationSpec = animSpec,
+        label = "nav_b_pad"
+    )
+    val navHeight by animateDpAsState(
+        targetValue = targetNavHeight,
+        animationSpec = animSpec,
+        label = "nav_height"
+    )
+    val elevation by animateDpAsState(
+        targetValue = if (floating) 6.dp else 0.dp,
+        animationSpec = animSpec,
+        label = "nav_elevation"
+    )
+    val topRadius by animateDpAsState(
+        targetValue = if (floating) 32.dp else 0.dp,
+        animationSpec = animSpec,
+        label = "nav_top_radius"
+    )
+    val bottomRadius by animateDpAsState(
+        targetValue = if (floating) 32.dp else 0.dp,
+        animationSpec = animSpec,
+        label = "nav_bottom_radius"
+    )
+    val borderAlpha by animateFloatAsState(
+        targetValue = if (floating) 1f else 0f,
+        animationSpec = floatAnimSpec,
+        label = "nav_border_alpha"
+    )
 
     val safeElevation = elevation.coerceAtLeast(0.dp)
     val safeTopRadius = topRadius.coerceAtLeast(0.dp)
@@ -133,14 +172,31 @@ fun CinemoraNavBar(
             .fillMaxWidth()
             .padding(horizontal = safeHorizontalPadding)
             .padding(bottom = safeBottomPadding)
-            .shadow(elevation = safeElevation, shape = navShape)
+            .height(navHeight)
+            .shadow(elevation = safeElevation, shape = navShape, clip = false)
             .clip(navShape)
             .background(navBg)
-            .border(1.dp, colors.divider, navShape)
-            .height(navHeight)
+            .then(
+                if (borderAlpha > 0.01f) {
+                    Modifier.border(1.dp, colors.divider.copy(alpha = borderAlpha), navShape)
+                } else Modifier
+            )
     ) {
+        // Crisp top divider line when docked static (smoothly fades out as floating nav activates)
+        if (borderAlpha < 0.99f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(colors.divider.copy(alpha = 1f - borderAlpha))
+                    .align(Alignment.TopCenter)
+            )
+        }
+
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = if (!floating) navBarInset else 0.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {

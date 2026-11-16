@@ -210,7 +210,7 @@ fun SettingsScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Pure #000000 black surfaces for OLED battery saving",
+                                text = "Pure #000000 black for OLED",
                                 fontSize = 12.sp,
                                 color = colors.textSecondary
                             )
