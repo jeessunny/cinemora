@@ -68,6 +68,10 @@ fun SettingsScreen(
     val history by prefs.history.collectAsState()
 
     var localSections by remember(homeSections) { mutableStateOf(homeSections) }
+    val visibleSections = remember(localSections, disableSeries) {
+        if (disableSeries) localSections.filter { it.id != "trendingSeries" && it.id != "popularSeries" }
+        else localSections
+    }
     var draggingIndex by remember { mutableStateOf<Int?>(null) }
     var dragOffsetY by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
@@ -439,10 +443,6 @@ fun SettingsScreen(
                     .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
             ) {
                 val rowHeightPx = with(density) { 56.dp.toPx() }
-                val visibleSections = remember(localSections, disableSeries) {
-                    if (disableSeries) localSections.filter { it.id != "trendingSeries" && it.id != "popularSeries" }
-                    else localSections
-                }
 
                 visibleSections.forEachIndexed { index, section ->
                     val isDraggingThis = draggingIndex == index

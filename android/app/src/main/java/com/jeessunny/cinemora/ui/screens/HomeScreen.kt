@@ -76,6 +76,10 @@ fun HomeScreen(
     }
 
     val heroMovie = remember(disableSeries) { CatalogData.getHeroItem(allowSeries = !disableSeries) }
+    val activeSections = remember(homeSections, disableSeries) {
+        homeSections.filter { it.enabled && (!disableSeries || (it.id != "trendingSeries" && it.id != "popularSeries")) }
+    }
+    val railAnimSpec = remember { spring<androidx.compose.ui.unit.IntOffset>(dampingRatio = 0.8f, stiffness = 400f) }
 
     LazyColumn(
         state = listState,
@@ -145,10 +149,6 @@ fun HomeScreen(
         }
 
         // Dynamic Rails
-        val railAnimSpec = spring<androidx.compose.ui.unit.IntOffset>(dampingRatio = 0.8f, stiffness = 400f)
-        val activeSections = remember(homeSections, disableSeries) {
-            homeSections.filter { it.enabled && (!disableSeries || (it.id != "trendingSeries" && it.id != "popularSeries")) }
-        }
         activeSections.forEach { section ->
             item(key = section.id) {
                 Box(
