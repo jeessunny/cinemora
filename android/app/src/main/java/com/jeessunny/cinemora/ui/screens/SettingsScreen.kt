@@ -61,6 +61,7 @@ fun SettingsScreen(
     val floatingNavBar by prefs.floatingNavBar.collectAsState()
     val navSettingsEnabled by prefs.navSettingsEnabled.collectAsState()
     val showStatusBar by prefs.showStatusBar.collectAsState()
+    val disableSeries by prefs.disableSeries.collectAsState()
     val homeSections by prefs.homeSections.collectAsState()
     val watchlist by prefs.watchlist.collectAsState()
     val favorites by prefs.favorites.collectAsState()
@@ -364,6 +365,47 @@ fun SettingsScreen(
                 }
             }
 
+            // ═══════ CONTENT ═══════
+            SectionHeader(title = "CONTENT")
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(colors.surfaceContainer)
+                    .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Rounded.Movie, contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
+                        Column {
+                            Text(text = "Disable Series", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colors.textPrimary)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(text = "Movies only mode • Hides all series across Cinemora", fontSize = 12.sp, color = colors.textSecondary)
+                        }
+                    }
+
+                    Switch(
+                        checked = disableSeries,
+                        onCheckedChange = { prefs.setDisableSeries(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = colors.primary
+                        )
+                    )
+                }
+            }
+
             // ═══════ HOME SCREEN SECTIONS ═══════
             Row(
                 modifier = Modifier
@@ -397,8 +439,12 @@ fun SettingsScreen(
                     .border(1.dp, colors.divider, RoundedCornerShape(16.dp))
             ) {
                 val rowHeightPx = with(density) { 56.dp.toPx() }
+                val visibleSections = remember(localSections, disableSeries) {
+                    if (disableSeries) localSections.filter { it.id != "trendingSeries" && it.id != "popularSeries" }
+                    else localSections
+                }
 
-                localSections.forEachIndexed { index, section ->
+                visibleSections.forEachIndexed { index, section ->
                     val isDraggingThis = draggingIndex == index
 
                     val dragModifier = if (isDraggingThis) {
@@ -441,15 +487,21 @@ fun SettingsScreen(
                                             },
                                             onDragEnd = {
                                                 val from = draggingIndex
-                                                if (from != null && localSections.isNotEmpty()) {
+                                                if (from != null && visibleSections.isNotEmpty()) {
                                                     val slots = (dragOffsetY / rowHeightPx).roundToInt()
-                                                    val to = (from + slots).coerceIn(0, localSections.lastIndex)
-                                                    if (from != to && from in localSections.indices && to in localSections.indices) {
-                                                        val list = localSections.toMutableList()
-                                                        val item = list.removeAt(from)
-                                                        list.add(to, item)
-                                                        localSections = list
-                                                        prefs.saveHomeSections(list)
+                                                    val to = (from + slots).coerceIn(0, visibleSections.lastIndex)
+                                                    if (from != to && from in visibleSections.indices && to in visibleSections.indices) {
+                                                        val fromItem = visibleSections[from]
+                                                        val toItem = visibleSections[to]
+                                                        val fromIdx = localSections.indexOfFirst { it.id == fromItem.id }
+                                                        val toIdx = localSections.indexOfFirst { it.id == toItem.id }
+                                                        if (fromIdx != -1 && toIdx != -1) {
+                                                            val list = localSections.toMutableList()
+                                                            val item = list.removeAt(fromIdx)
+                                                            list.add(toIdx, item)
+                                                            localSections = list
+                                                            prefs.saveHomeSections(list)
+                                                        }
                                                     }
                                                 }
                                                 draggingIndex = null
@@ -505,7 +557,7 @@ fun SettingsScreen(
                             )
                         }
                     }
-                    if (index < localSections.size - 1) {
+                    if (index < visibleSections.size - 1) {
                         HorizontalDivider(color = colors.divider)
                     }
                 }

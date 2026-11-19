@@ -193,7 +193,7 @@ object CatalogData {
             title = "Chronicles of Silicon",
             year = 2024,
             rating = 9.1f,
-            runtime = "8 Episodes",
+            runtime = "2 Seasons",
             genres = listOf("Drama", "Sci-Fi"),
             genreIds = listOf(18, 878),
             originalLanguage = "en",
@@ -228,33 +228,373 @@ object CatalogData {
                 CastMember("Hugh Jackman", "Robert Angier", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"),
                 CastMember("Christian Bale", "Alfred Borden", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80")
             )
+        ),
+        Movie(
+            id = 201,
+            type = "tv",
+            title = "Stranger Shadows",
+            year = 2024,
+            rating = 9.2f,
+            runtime = "4 Seasons",
+            genres = listOf("Sci-Fi", "Drama", "Mystery"),
+            genreIds = listOf(878, 18, 9648),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&q=80",
+            synopsis = "When a young boy vanishes from a tranquil Midwestern town, a secret laboratory and alternate dimension tear open secrets buried deep beneath the town.",
+            matchPercentage = 98,
+            numberOfSeasons = 4,
+            numberOfEpisodes = 34,
+            status = "Returning Series",
+            networks = listOf("Netflix"),
+            seasons = listOf(
+                Season(101, 1, "Season 1", 8, "2021-07-15"),
+                Season(102, 2, "Season 2", 9, "2022-10-27"),
+                Season(103, 3, "Season 3", 8, "2023-07-04"),
+                Season(104, 4, "Season 4", 9, "2024-05-27")
+            ),
+            cast = listOf(
+                CastMember("Millie Brown", "Eleven", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80"),
+                CastMember("David Harbour", "Jim Hopper", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 202,
+            type = "tv",
+            title = "Breaking Bad: Chemist's Fall",
+            year = 2023,
+            rating = 9.5f,
+            runtime = "5 Seasons",
+            genres = listOf("Crime", "Drama", "Thriller"),
+            genreIds = listOf(80, 18, 53),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&q=80",
+            synopsis = "A high school chemistry teacher diagnosed with terminal lung cancer transforms into a ruthless empire mastermind to secure his family's financial future.",
+            matchPercentage = 99,
+            numberOfSeasons = 5,
+            numberOfEpisodes = 62,
+            status = "Ended",
+            networks = listOf("AMC"),
+            seasons = listOf(
+                Season(201, 1, "Season 1", 7, "2019-01-20"),
+                Season(202, 2, "Season 2", 13, "2020-03-08"),
+                Season(203, 3, "Season 3", 13, "2021-03-21"),
+                Season(204, 4, "Season 4", 13, "2022-07-17"),
+                Season(205, 5, "Season 5", 16, "2023-08-11")
+            ),
+            cast = listOf(
+                CastMember("Bryan Cranston", "Walter White", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80"),
+                CastMember("Aaron Paul", "Jesse Pinkman", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 203,
+            type = "tv",
+            title = "The Last Frontier",
+            year = 2024,
+            rating = 9.2f,
+            runtime = "2 Seasons",
+            genres = listOf("Action", "Adventure", "Drama"),
+            genreIds = listOf(28, 12, 18),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1200&q=80",
+            synopsis = "Twenty years after modern civilization was destroyed, a hardened survivor is hired to smuggle a 14-year-old girl out of an oppressive quarantine zone.",
+            matchPercentage = 97,
+            numberOfSeasons = 2,
+            numberOfEpisodes = 18,
+            status = "Returning Series",
+            networks = listOf("HBO"),
+            seasons = listOf(
+                Season(301, 1, "Season 1", 9, "2023-01-15"),
+                Season(302, 2, "Season 2", 9, "2024-04-20")
+            ),
+            cast = listOf(
+                CastMember("Pedro Pascal", "Joel", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"),
+                CastMember("Bella Ramsey", "Ellie", "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 204,
+            type = "tv",
+            title = "Dynasty of Silicon",
+            year = 2024,
+            rating = 8.9f,
+            runtime = "4 Seasons",
+            genres = listOf("Drama"),
+            genreIds = listOf(18),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80",
+            synopsis = "The Roy family is known for controlling the biggest media and entertainment company in the world. However, their world will change when their aging father steps down.",
+            matchPercentage = 95,
+            numberOfSeasons = 4,
+            numberOfEpisodes = 39,
+            status = "Ended",
+            networks = listOf("HBO"),
+            seasons = listOf(
+                Season(401, 1, "Season 1", 10, "2021-06-03"),
+                Season(402, 2, "Season 2", 10, "2022-08-11"),
+                Season(403, 3, "Season 3", 9, "2023-10-17"),
+                Season(404, 4, "Season 4", 10, "2024-03-26")
+            ),
+            cast = listOf(
+                CastMember("Brian Cox", "Logan Roy", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80"),
+                CastMember("Jeremy Strong", "Kendall Roy", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 205,
+            type = "tv",
+            title = "Severance: Lumon Files",
+            year = 2024,
+            rating = 9.3f,
+            runtime = "2 Seasons",
+            genres = listOf("Sci-Fi", "Mystery", "Thriller"),
+            genreIds = listOf(878, 9648, 53),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?w=1200&q=80",
+            synopsis = "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives until a mysterious colleague reveals the dark truth.",
+            matchPercentage = 98,
+            numberOfSeasons = 2,
+            numberOfEpisodes = 19,
+            status = "Returning Series",
+            networks = listOf("Apple TV+"),
+            seasons = listOf(
+                Season(501, 1, "Season 1", 9, "2023-02-18"),
+                Season(502, 2, "Season 2", 10, "2024-06-12")
+            ),
+            cast = listOf(
+                CastMember("Adam Scott", "Mark Scout", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"),
+                CastMember("Patricia Arquette", "Harmony Cobel", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 206,
+            type = "tv",
+            title = "Dark: Cycles of Winden",
+            year = 2023,
+            rating = 9.3f,
+            runtime = "3 Seasons",
+            genres = listOf("Sci-Fi", "Mystery", "Drama"),
+            genreIds = listOf(878, 9648, 18),
+            originalLanguage = "de",
+            posterUrl = "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&q=80",
+            synopsis = "A family saga with a supernatural twist set in a German town, where the disappearance of two young children exposes relationships across three generations.",
+            matchPercentage = 96,
+            numberOfSeasons = 3,
+            numberOfEpisodes = 26,
+            status = "Ended",
+            networks = listOf("Netflix"),
+            seasons = listOf(
+                Season(601, 1, "Season 1", 10, "2021-12-01"),
+                Season(602, 2, "Season 2", 8, "2022-06-21"),
+                Season(603, 3, "Season 3", 8, "2023-06-27")
+            ),
+            cast = listOf(
+                CastMember("Louis Hofmann", "Jonas Kahnwald", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 207,
+            type = "tv",
+            title = "Arcane: Twin Cities",
+            year = 2024,
+            rating = 9.4f,
+            runtime = "2 Seasons",
+            genres = listOf("Animation", "Action", "Fantasy"),
+            genreIds = listOf(16, 28, 14),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&q=80",
+            synopsis = "Set in the utopian region of Piltover and the oppressed underground of Zaun, the story follows the origins of two iconic champions and the power that tears them apart.",
+            matchPercentage = 99,
+            numberOfSeasons = 2,
+            numberOfEpisodes = 18,
+            status = "Ended",
+            networks = listOf("Netflix"),
+            seasons = listOf(
+                Season(701, 1, "Season 1", 9, "2022-11-06"),
+                Season(702, 2, "Season 2", 9, "2024-11-09")
+            ),
+            cast = listOf(
+                CastMember("Hailee Steinfeld", "Vi", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80"),
+                CastMember("Ella Purnell", "Jinx", "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 208,
+            type = "tv",
+            title = "Peaky Syndicate",
+            year = 2023,
+            rating = 9.0f,
+            runtime = "6 Seasons",
+            genres = listOf("Crime", "Drama", "History"),
+            genreIds = listOf(80, 18, 36),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&q=80",
+            synopsis = "An epic gangster family saga set in Birmingham, England, centered on a gang who sew razor blades in the peaks of their caps, and their fierce boss Tommy Shelby.",
+            matchPercentage = 95,
+            numberOfSeasons = 6,
+            numberOfEpisodes = 36,
+            status = "Ended",
+            networks = listOf("BBC"),
+            seasons = listOf(
+                Season(801, 1, "Season 1", 6, "2018-09-12"),
+                Season(802, 2, "Season 2", 6, "2019-10-02"),
+                Season(803, 3, "Season 3", 6, "2020-05-05"),
+                Season(804, 4, "Season 4", 6, "2021-11-15"),
+                Season(805, 5, "Season 5", 6, "2022-08-25"),
+                Season(806, 6, "Season 6", 6, "2023-02-27")
+            ),
+            cast = listOf(
+                CastMember("Cillian Murphy", "Thomas Shelby", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"),
+                CastMember("Paul Anderson", "Arthur Shelby", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 209,
+            type = "tv",
+            title = "The Culinary Order",
+            year = 2024,
+            rating = 8.9f,
+            runtime = "3 Seasons",
+            genres = listOf("Drama", "Comedy"),
+            genreIds = listOf(18, 35),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=1200&q=80",
+            synopsis = "A young fine-dining chef comes home to Chicago to run his family Italian beef sandwich shop after a heartbreaking death, battling kitchen chaos and personal trauma.",
+            matchPercentage = 94,
+            numberOfSeasons = 3,
+            numberOfEpisodes = 28,
+            status = "Returning Series",
+            networks = listOf("FX"),
+            seasons = listOf(
+                Season(901, 1, "Season 1", 8, "2022-06-23"),
+                Season(902, 2, "Season 2", 10, "2023-06-22"),
+                Season(903, 3, "Season 3", 10, "2024-06-27")
+            ),
+            cast = listOf(
+                CastMember("Jeremy Allen White", "Carmy", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80"),
+                CastMember("Ayo Edebiri", "Sydney", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 210,
+            type = "tv",
+            title = "Chernobyl: Hour Zero",
+            year = 2023,
+            rating = 9.4f,
+            runtime = "1 Season",
+            genres = listOf("Drama", "History", "Thriller"),
+            genreIds = listOf(18, 36, 53),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1200&q=80",
+            synopsis = "In April 1986, an explosion at the Chernobyl nuclear power plant becomes one of the world's worst man-made catastrophes, telling the untold stories of heroic sacrifices.",
+            matchPercentage = 98,
+            numberOfSeasons = 1,
+            numberOfEpisodes = 5,
+            status = "Miniseries",
+            networks = listOf("HBO"),
+            seasons = listOf(
+                Season(1001, 1, "Miniseries", 5, "2023-05-06")
+            ),
+            cast = listOf(
+                CastMember("Jared Harris", "Valery Legasov", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80"),
+                CastMember("Stellan Skarsgård", "Boris Shcherbina", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80")
+            )
+        ),
+        Movie(
+            id = 211,
+            type = "tv",
+            title = "Better Call Saul: Albuquerque Law",
+            year = 2023,
+            rating = 9.1f,
+            runtime = "6 Seasons",
+            genres = listOf("Crime", "Drama"),
+            genreIds = listOf(80, 18),
+            originalLanguage = "en",
+            posterUrl = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80",
+            backdropUrl = "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80",
+            synopsis = "The trials and tribulations of criminal defense attorney Jimmy McGill in the years prior to his fateful encounter with Walter White.",
+            matchPercentage = 96,
+            numberOfSeasons = 6,
+            numberOfEpisodes = 63,
+            status = "Ended",
+            networks = listOf("AMC"),
+            seasons = listOf(
+                Season(1101, 1, "Season 1", 10, "2018-02-08"),
+                Season(1102, 2, "Season 2", 10, "2019-02-15"),
+                Season(1103, 3, "Season 3", 10, "2020-04-10"),
+                Season(1104, 4, "Season 4", 10, "2021-08-06"),
+                Season(1105, 5, "Season 5", 10, "2022-02-23"),
+                Season(1106, 6, "Season 6", 13, "2023-04-18")
+            ),
+            cast = listOf(
+                CastMember("Bob Odenkirk", "Jimmy McGill", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80"),
+                CastMember("Rhea Seehorn", "Kim Wexler", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80")
+            )
         )
     )
 
-    fun getTrending(): List<Movie> = LOCAL_CATALOG
+    fun getMoviesOnly(): List<Movie> = LOCAL_CATALOG.filter { it.type == "movie" }
 
-    fun getNewReleases(): List<Movie> = LOCAL_CATALOG.reversed()
+    fun getSeries(): List<Movie> = LOCAL_CATALOG.filter { it.type == "tv" }
 
-    fun getPopular(): List<Movie> = LOCAL_CATALOG.sortedByDescending { it.rating }
+    fun getTrendingSeries(): List<Movie> = getSeries()
 
-    fun getRecommended(genreIds: List<Int>): List<Movie> {
-        if (genreIds.isEmpty()) return LOCAL_CATALOG
-        val filtered = LOCAL_CATALOG.filter { movie ->
+    fun getPopularSeries(): List<Movie> = getSeries().sortedByDescending { it.rating }
+
+    fun getTrendingMovies(): List<Movie> = getMoviesOnly()
+
+    fun getPopularMovies(): List<Movie> = getMoviesOnly().sortedByDescending { it.rating }
+
+    fun getNewReleaseMovies(): List<Movie> = getMoviesOnly().reversed()
+
+    fun getTrending(allowSeries: Boolean = true): List<Movie> =
+        if (allowSeries) LOCAL_CATALOG else getMoviesOnly()
+
+    fun getNewReleases(allowSeries: Boolean = true): List<Movie> =
+        if (allowSeries) LOCAL_CATALOG.reversed() else getNewReleaseMovies()
+
+    fun getPopular(allowSeries: Boolean = true): List<Movie> =
+        if (allowSeries) LOCAL_CATALOG.sortedByDescending { it.rating } else getPopularMovies()
+
+    fun getRecommended(genreIds: List<Int>, allowSeries: Boolean = true): List<Movie> {
+        val base = if (allowSeries) LOCAL_CATALOG else getMoviesOnly()
+        if (genreIds.isEmpty()) return base
+        val filtered = base.filter { movie ->
             movie.genreIds.any { gid -> genreIds.contains(gid) }
         }
-        return if (filtered.isNotEmpty()) filtered else LOCAL_CATALOG
+        return if (filtered.isNotEmpty()) filtered else base
     }
 
-    fun getMoviesByGenreId(genreId: Int): List<Movie> {
-        val filtered = LOCAL_CATALOG.filter { it.genreIds.contains(genreId) }
-        return if (filtered.isNotEmpty()) filtered else LOCAL_CATALOG
+    fun getMoviesByGenreId(genreId: Int, allowSeries: Boolean = true): List<Movie> {
+        val base = if (allowSeries) LOCAL_CATALOG else getMoviesOnly()
+        val filtered = base.filter { it.genreIds.contains(genreId) }
+        return if (filtered.isNotEmpty()) filtered else base
+    }
+
+    fun getHeroItem(allowSeries: Boolean = true): Movie? {
+        val base = if (allowSeries) LOCAL_CATALOG else getMoviesOnly()
+        return base.firstOrNull()
     }
 
     fun searchMovies(query: String, type: String = "movies"): List<Movie> {
         if (query.isBlank()) return emptyList()
         val q = query.trim().lowercase()
         return LOCAL_CATALOG.filter { movie ->
-            val matchType = if (type == "tv") movie.type == "tv" else movie.type == "movie"
+            val matchType = when (type) {
+                "tv" -> movie.type == "tv"
+                "all" -> true
+                else -> movie.type == "movie"
+            }
             val matchText = movie.title.lowercase().contains(q) ||
                     movie.genres.any { it.lowercase().contains(q) } ||
                     movie.synopsis.lowercase().contains(q)
@@ -263,8 +603,10 @@ object CatalogData {
     }
 
     fun getMovieDetails(id: Int): Movie {
-        val found = LOCAL_CATALOG.find { it.id == id } ?: LOCAL_CATALOG[0]
-        val similar = LOCAL_CATALOG.filter { it.id != found.id }.take(4)
+        val found = LOCAL_CATALOG.find { it.id == id && it.type == "movie" }
+            ?: LOCAL_CATALOG.find { it.type == "movie" }
+            ?: LOCAL_CATALOG[0]
+        val similar = LOCAL_CATALOG.filter { it.id != found.id && it.type == "movie" }.take(4)
         return found.copy(similar = similar)
     }
 
@@ -272,17 +614,17 @@ object CatalogData {
         val found = LOCAL_CATALOG.find { it.id == id && it.type == "tv" }
             ?: LOCAL_CATALOG.find { it.type == "tv" }
             ?: LOCAL_CATALOG[0]
-        val similar = LOCAL_CATALOG.filter { it.id != found.id }.take(4)
+        val similar = LOCAL_CATALOG.filter { it.id != found.id && it.type == "tv" }.take(4)
         return found.copy(similar = similar)
     }
 
     fun getEpisodesForSeason(seasonNumber: Int): List<Episode> {
         return List(8) { i ->
             Episode(
-                id = 500 + i,
+                id = (seasonNumber * 100) + (i + 1),
                 episodeNumber = i + 1,
-                name = "Episode ${i + 1}: The Turning Point",
-                overview = "A pivotal moment shifts the balance of power as unexpected secrets emerge.",
+                name = "Episode ${i + 1}: The Convergence",
+                overview = "A pivotal event shifts the balance of power as unexpected consequences surface.",
                 airDate = "2024-01-15",
                 runtime = 52,
                 rating = 8.8f,

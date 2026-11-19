@@ -48,6 +48,7 @@ fun HomeScreen(
     val userName by prefs.userName.collectAsState()
     val avatar by prefs.avatar.collectAsState()
     val homeSections by prefs.homeSections.collectAsState()
+    val disableSeries by prefs.disableSeries.collectAsState()
     val watchlist by prefs.watchlist.collectAsState()
     val favorites by prefs.favorites.collectAsState()
     val history by prefs.history.collectAsState()
@@ -74,7 +75,7 @@ fun HomeScreen(
         }
     }
 
-    val heroMovie = remember { CatalogData.LOCAL_CATALOG.firstOrNull() }
+    val heroMovie = remember(disableSeries) { CatalogData.getHeroItem(allowSeries = !disableSeries) }
 
     LazyColumn(
         state = listState,
@@ -145,7 +146,10 @@ fun HomeScreen(
 
         // Dynamic Rails
         val railAnimSpec = spring<androidx.compose.ui.unit.IntOffset>(dampingRatio = 0.8f, stiffness = 400f)
-        homeSections.filter { it.enabled }.forEach { section ->
+        val activeSections = remember(homeSections, disableSeries) {
+            homeSections.filter { it.enabled && (!disableSeries || (it.id != "trendingSeries" && it.id != "popularSeries")) }
+        }
+        activeSections.forEach { section ->
             item(key = section.id) {
                 Box(
                     modifier = Modifier
@@ -156,27 +160,51 @@ fun HomeScreen(
                         "recommended" -> {
                             ScrollRail(
                                 title = "Recommended For You",
-                                movies = CatalogData.getRecommended(listOf(g1Id, g2Id)),
+                                movies = CatalogData.getRecommended(listOf(g1Id, g2Id), allowSeries = !disableSeries),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
                                 onMovieClick = onMovieClick
                             )
+                        }
+                        "trendingSeries" -> {
+                            if (!disableSeries) {
+                                ScrollRail(
+                                    title = "Trending Series",
+                                    movies = CatalogData.getTrendingSeries(),
+                                    watchlistIds = watchlistIds,
+                                    favoriteIds = favoriteIds,
+                                    historyIds = historyIds,
+                                    onMovieClick = onMovieClick
+                                )
+                            }
                         }
                         "genre1" -> {
                             ScrollRail(
                                 title = "Because You Like $g1",
-                                movies = CatalogData.getMoviesByGenreId(g1Id),
+                                movies = CatalogData.getMoviesByGenreId(g1Id, allowSeries = !disableSeries),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
                                 onMovieClick = onMovieClick
                             )
                         }
+                        "popularSeries" -> {
+                            if (!disableSeries) {
+                                ScrollRail(
+                                    title = "Binge-Worthy Series",
+                                    movies = CatalogData.getPopularSeries(),
+                                    watchlistIds = watchlistIds,
+                                    favoriteIds = favoriteIds,
+                                    historyIds = historyIds,
+                                    onMovieClick = onMovieClick
+                                )
+                            }
+                        }
                         "genre2" -> {
                             ScrollRail(
                                 title = "More $g2",
-                                movies = CatalogData.getMoviesByGenreId(g2Id),
+                                movies = CatalogData.getMoviesByGenreId(g2Id, allowSeries = !disableSeries),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
@@ -185,8 +213,8 @@ fun HomeScreen(
                         }
                         "trending" -> {
                             ScrollRail(
-                                title = "Trending Now",
-                                movies = CatalogData.getTrending(),
+                                title = if (disableSeries) "Trending Movies" else "Trending Now",
+                                movies = CatalogData.getTrending(allowSeries = !disableSeries),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
@@ -196,7 +224,7 @@ fun HomeScreen(
                         "popular" -> {
                             ScrollRail(
                                 title = "Popular in Your Taste",
-                                movies = CatalogData.getPopular(),
+                                movies = CatalogData.getPopular(allowSeries = !disableSeries),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
@@ -206,7 +234,7 @@ fun HomeScreen(
                         "newReleases" -> {
                             ScrollRail(
                                 title = "New Releases",
-                                movies = CatalogData.getNewReleases(),
+                                movies = CatalogData.getNewReleases(allowSeries = !disableSeries),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,

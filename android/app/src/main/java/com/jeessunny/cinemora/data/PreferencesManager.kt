@@ -18,9 +18,11 @@ class PreferencesManager(context: Context) {
 
     private val defaultSections = listOf(
         HomeSection("recommended", "Recommended For You", true),
+        HomeSection("trendingSeries", "Trending Series", true),
         HomeSection("genre1", "Because You Like Action", true),
+        HomeSection("popularSeries", "Binge-Worthy Series", true),
         HomeSection("genre2", "More Sci-Fi", true),
-        HomeSection("trending", "Trending Now", true),
+        HomeSection("trending", "Trending Movies", true),
         HomeSection("popular", "Popular in Your Taste", true),
         HomeSection("newReleases", "New Releases", true)
     )
@@ -46,6 +48,9 @@ class PreferencesManager(context: Context) {
 
     private val _showStatusBar = MutableStateFlow(getShowStatusBar())
     val showStatusBar: StateFlow<Boolean> = _showStatusBar.asStateFlow()
+
+    private val _disableSeries = MutableStateFlow(getDisableSeries())
+    val disableSeries: StateFlow<Boolean> = _disableSeries.asStateFlow()
 
     private val _isOnboarded = MutableStateFlow(getIsOnboarded())
     val isOnboarded: StateFlow<Boolean> = _isOnboarded.asStateFlow()
@@ -146,6 +151,12 @@ class PreferencesManager(context: Context) {
         _showStatusBar.value = enabled
     }
 
+    fun getDisableSeries(): Boolean = prefs.getBoolean("disable_series", false)
+    fun setDisableSeries(disabled: Boolean) {
+        prefs.edit().putBoolean("disable_series", disabled).apply()
+        _disableSeries.value = disabled
+    }
+
     // --- Collections (Watchlist, Favorites, History) ---
     private fun getMovieList(key: String): List<Movie> {
         val json = prefs.getString(key, null) ?: return emptyList()
@@ -244,7 +255,16 @@ class PreferencesManager(context: Context) {
         val json = prefs.getString("home_sections", null) ?: return defaultSections
         return try {
             val type = object : TypeToken<List<HomeSection>>() {}.type
-            gson.fromJson(json, type) ?: defaultSections
+            val saved: List<HomeSection> = gson.fromJson(json, type) ?: return defaultSections
+            val existingIds = saved.map { it.id }.toSet()
+            val missing = defaultSections.filter { !existingIds.contains(it.id) }
+            if (missing.isNotEmpty()) {
+                val merged = saved + missing
+                saveHomeSections(merged)
+                merged
+            } else {
+                saved
+            }
         } catch (e: Exception) {
             defaultSections
         }
@@ -291,6 +311,7 @@ class PreferencesManager(context: Context) {
         _animationsEnabled.value = true
         _navSettingsEnabled.value = true
         _showStatusBar.value = true
+        _disableSeries.value = false
         _homeSections.value = defaultSections
     }
 }

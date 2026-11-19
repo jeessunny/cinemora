@@ -47,6 +47,9 @@ fun SearchScreen(
     var query by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("movies") } // "movies" or "tv"
 
+    val disableSeries by prefs.disableSeries.collectAsState()
+    val effectiveType = if (disableSeries) "movies" else selectedType
+
     val recentSearches by prefs.recentSearches.collectAsState()
     val watchlist by prefs.watchlist.collectAsState()
     val favorites by prefs.favorites.collectAsState()
@@ -56,9 +59,9 @@ fun SearchScreen(
     val favoriteIds = remember(favorites) { favorites.map { it.id }.toSet() }
     val historyIds = remember(history) { history.map { it.id }.toSet() }
 
-    val results = remember(query, selectedType) {
+    val results = remember(query, effectiveType) {
         if (query.isBlank()) emptyList()
-        else CatalogData.searchMovies(query, selectedType)
+        else CatalogData.searchMovies(query, effectiveType)
     }
 
     Column(
@@ -82,20 +85,22 @@ fun SearchScreen(
         SearchBar(
             query = query,
             onQueryChange = { query = it },
-            placeholder = "Search movies, genres...",
+            placeholder = if (disableSeries) "Search movies, genres..." else "Search movies, series, genres...",
             onSubmit = {
                 if (query.isNotBlank()) prefs.addRecentSearch(query.trim())
             },
             onClear = { query = "" }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        if (!disableSeries) {
+            Spacer(modifier = Modifier.height(12.dp))
 
-        SegmentedButton(
-            options = listOf("Movies" to "movies", "TV Shows" to "tv"),
-            selectedValue = selectedType,
-            onSelect = { selectedType = it }
-        )
+            SegmentedButton(
+                options = listOf("Movies" to "movies", "Series" to "tv"),
+                selectedValue = selectedType,
+                onSelect = { selectedType = it }
+            )
+        }
 
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -104,8 +109,8 @@ fun SearchScreen(
                 EmptyState(
                     icon = Icons.Rounded.SearchOff,
                     title = "No results found",
-                    subtitle = if (selectedType == "tv")
-                        "No TV shows match your search. Try switching to Movies."
+                    subtitle = if (!disableSeries && effectiveType == "tv")
+                        "No series match your search. Try switching to Movies."
                     else "Try adjusting your search to find what you're looking for.",
                     modifier = Modifier.weight(1f)
                 )

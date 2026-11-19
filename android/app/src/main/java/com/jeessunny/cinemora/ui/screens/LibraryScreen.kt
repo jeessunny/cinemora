@@ -16,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.HistoryToggleOff
+import androidx.compose.material.icons.rounded.Movie
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,9 +43,11 @@ fun LibraryScreen(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalCinemoraColors.current
+    val disableSeries by prefs.disableSeries.collectAsState()
+
     var currentTab by remember { mutableStateOf("watchlist") } // "watchlist", "favorites", "history"
     var selectedCategory by remember { mutableStateOf("all") } // "all", "movie", "tv"
-    var historySearch by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf("") }
 
     val watchlist by prefs.watchlist.collectAsState()
     val favorites by prefs.favorites.collectAsState()
@@ -59,24 +63,30 @@ fun LibraryScreen(
         else -> watchlist
     }
 
-    val categoryFiltered = remember(rawList, selectedCategory) {
-        if (selectedCategory == "all") rawList
-        else rawList.filter { it.type == selectedCategory }
+    // Filter out series if disableSeries is active
+    val baseList = remember(rawList, disableSeries) {
+        if (disableSeries) rawList.filter { it.type == "movie" }
+        else rawList
     }
 
-    val displayedList = remember(categoryFiltered, currentTab, historySearch) {
-        if (currentTab == "history" && historySearch.isNotBlank()) {
-            val q = historySearch.trim().lowercase()
+    val categoryFiltered = remember(baseList, selectedCategory, disableSeries) {
+        if (disableSeries || selectedCategory == "all") baseList
+        else baseList.filter { it.type == selectedCategory }
+    }
+
+    val displayedList = remember(categoryFiltered, searchQuery) {
+        if (searchQuery.isNotBlank()) {
+            val q = searchQuery.trim().lowercase()
             categoryFiltered.filter { it.title.lowercase().contains(q) }
         } else {
             categoryFiltered
         }
     }
 
-    val counts = remember(rawList) {
-        val allCount = rawList.size
-        val movieCount = rawList.count { it.type == "movie" }
-        val tvCount = rawList.count { it.type == "tv" }
+    val counts = remember(baseList) {
+        val allCount = baseList.size
+        val movieCount = baseList.count { it.type == "movie" }
+        val tvCount = baseList.count { it.type == "tv" }
         Triple(allCount, movieCount, tvCount)
     }
 
@@ -108,64 +118,121 @@ fun LibraryScreen(
             onSelect = {
                 currentTab = it
                 selectedCategory = "all"
-                historySearch = ""
+                searchQuery = ""
             }
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Category Filter Chips (All, Movies, Series)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val chips = listOf(
-                Triple("All (${counts.first})", "all", counts.first),
-                Triple("Movies (${counts.second})", "movie", counts.second),
-                Triple("Series (${counts.third})", "tv", counts.third)
-            )
-
-            chips.forEach { (label, value, _) ->
-                val selected = selectedCategory == value
-                val chipBg by animateColorAsState(if (selected) colors.primary else colors.surfaceContainerLow, label = "chip_bg")
-                val chipBorder by animateColorAsState(if (selected) colors.primary else colors.divider, label = "chip_border")
-                val chipTextColor by animateColorAsState(if (selected) Color.White else colors.textSecondary, label = "chip_text")
-
+        if (disableSeries) {
+            // Enhanced UI/UX for Movies Only Mode
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(colors.surfaceContainerLow)
+                    .border(1.dp, colors.divider, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Movie,
+                        contentDescription = null,
+                        tint = colors.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Movies Collection",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary
+                    )
+                }
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(chipBg)
-                        .border(1.dp, chipBorder, RoundedCornerShape(16.dp))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { selectedCategory = value }
-                        .padding(horizontal = 16.dp, vertical = 7.dp),
-                    contentAlignment = Alignment.Center
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(colors.primary.copy(alpha = 0.15f))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text = label,
-                        fontSize = 12.sp,
+                        text = "${baseList.size} Saved",
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = chipTextColor
+                        color = colors.primary
                     )
                 }
             }
-        }
 
-        // History Search Bar (full standard 52dp thickness matching other elements)
-        if (currentTab == "history" && history.isNotEmpty()) {
-            SearchBar(
-                query = historySearch,
-                onQueryChange = { historySearch = it },
-                placeholder = "Search history...",
-                onClear = { historySearch = "" },
+            if (baseList.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholder = "Search ${currentTab.replaceFirstChar { it.uppercase() }} movies...",
+                    onClear = { searchQuery = "" },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        } else {
+            // Category Filter Chips (All, Movies, Series)
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val chips = listOf(
+                    Triple("All (${counts.first})", "all", counts.first),
+                    Triple("Movies (${counts.second})", "movie", counts.second),
+                    Triple("Series (${counts.third})", "tv", counts.third)
+                )
+
+                chips.forEach { (label, value, _) ->
+                    val selected = selectedCategory == value
+                    val chipBg by animateColorAsState(if (selected) colors.primary else colors.surfaceContainerLow, label = "chip_bg")
+                    val chipBorder by animateColorAsState(if (selected) colors.primary else colors.divider, label = "chip_border")
+                    val chipTextColor by animateColorAsState(if (selected) Color.White else colors.textSecondary, label = "chip_text")
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(chipBg)
+                            .border(1.dp, chipBorder, RoundedCornerShape(16.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { selectedCategory = value }
+                            .padding(horizontal = 16.dp, vertical = 7.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = label,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = chipTextColor
+                        )
+                    }
+                }
+            }
+
+            // History Search Bar when on history tab
+            if (currentTab == "history" && history.isNotEmpty()) {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholder = "Search history...",
+                    onClear = { searchQuery = "" },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+            }
         }
 
         if (displayedList.isEmpty()) {
@@ -173,17 +240,20 @@ fun LibraryScreen(
                 "favorites" -> Triple(
                     Icons.Outlined.FavoriteBorder,
                     "No favorites yet",
-                    "Heart the movies you love to see them here."
+                    if (disableSeries) "Heart the movies you love to see them here."
+                    else "Heart the titles you love to see them here."
                 )
                 "history" -> Triple(
                     Icons.Outlined.HistoryToggleOff,
                     "No watch history",
-                    "Movies you mark as watched will appear here."
+                    if (disableSeries) "Movies you mark as watched will appear here."
+                    else "Titles you mark as watched will appear here."
                 )
                 else -> Triple(
                     Icons.Outlined.BookmarkBorder,
                     "Your watchlist is empty",
-                    "Save movies you want to watch later."
+                    if (disableSeries) "Save movies you want to watch later."
+                    else "Save movies & series you want to watch later."
                 )
             }
 
@@ -191,10 +261,18 @@ fun LibraryScreen(
                 icon = emptyInfo.first,
                 title = emptyInfo.second,
                 subtitle = emptyInfo.third,
-                actionLabel = when (currentTab) {
-                    "watchlist" -> "Find Movies"
-                    "favorites" -> "Discover"
-                    else -> null
+                actionLabel = if (disableSeries) {
+                    when (currentTab) {
+                        "watchlist" -> "Find Movies"
+                        "favorites" -> "Discover"
+                        else -> null
+                    }
+                } else {
+                    when (currentTab) {
+                        "watchlist" -> "Find Titles"
+                        "favorites" -> "Discover"
+                        else -> null
+                    }
                 },
                 onAction = when (currentTab) {
                     "watchlist" -> onFindMovies
