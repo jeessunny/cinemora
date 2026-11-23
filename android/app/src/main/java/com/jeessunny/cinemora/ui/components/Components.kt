@@ -316,27 +316,6 @@ fun PosterCard(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Series badge at top left
-        if (movie.type == "tv") {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Color(0xD9000000))
-                    .border(0.5.dp, Color(0x33FFFFFF), RoundedCornerShape(6.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = "SERIES",
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.White,
-                    letterSpacing = 0.5.sp
-                )
-            }
-        }
-
         // Gradient Scrim Overlay at the bottom (65% height)
         Box(
             modifier = Modifier
@@ -1009,8 +988,18 @@ fun UpdateDialogView() {
                                 color = colors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(6.dp))
+                            val cleanChangelog = remember(current.info.releaseNotes) {
+                                current.info.releaseNotes
+                                    .replace(Regex("^#{1,6}\\s*", RegexOption.MULTILINE), "")
+                                    .replace(Regex("\\*\\*(.*?)\\*\\*"), "$1")
+                                    .replace(Regex("\\*(.*?)\\*"), "$1")
+                                    .replace(Regex("`([^`]+)`"), "$1")
+                                    .replace(Regex("^-{3,}\\s*", RegexOption.MULTILINE), "\n")
+                                    .trim()
+                                    .ifBlank { "Performance improvements and bug fixes." }
+                            }
                             Text(
-                                text = current.info.releaseNotes.ifBlank { "Performance improvements and bug fixes." },
+                                text = cleanChangelog,
                                 fontSize = 13.sp,
                                 color = colors.textSecondary,
                                 lineHeight = 19.sp

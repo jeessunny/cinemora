@@ -59,4 +59,29 @@ class CatalogDataTest {
         assertTrue(allItems.any { it.type == "tv" })
         assertTrue(moviesOnly.none { it.type == "tv" })
     }
+
+    @Test
+    fun testHeroItemsHasBothMoviesAndSeries() {
+        val heroItems = CatalogData.getHeroItems(allowSeries = true)
+        assertTrue(heroItems.any { it.type == "movie" })
+        assertTrue(heroItems.any { it.type == "tv" })
+    }
+
+    @Test
+    fun testHeroItemsMoviesOnly() {
+        val heroItems = CatalogData.getHeroItems(allowSeries = false)
+        assertTrue(heroItems.isNotEmpty())
+        assertTrue(heroItems.all { it.type == "movie" })
+    }
+
+    @Test
+    fun testEpisodesChangeAcrossSeasons() {
+        val season1 = CatalogData.getEpisodesForSeason(201, 1)
+        val season2 = CatalogData.getEpisodesForSeason(201, 2)
+        assertTrue(season1.isNotEmpty())
+        assertTrue(season2.isNotEmpty())
+        // Titles and IDs must differ
+        assertFalse(season1.first().name == season2.first().name)
+        assertFalse(season1.first().id == season2.first().id)
+    }
 }

@@ -17,14 +17,14 @@ class PreferencesManager(context: Context) {
     private val gson = Gson()
 
     private val defaultSections = listOf(
-        HomeSection("recommended", "Recommended For You", true),
-        HomeSection("trendingSeries", "Trending Series", true),
-        HomeSection("genre1", "Because You Like Action", true),
-        HomeSection("popularSeries", "Binge-Worthy Series", true),
-        HomeSection("genre2", "More Sci-Fi", true),
         HomeSection("trending", "Trending Movies", true),
-        HomeSection("popular", "Popular in Your Taste", true),
-        HomeSection("newReleases", "New Releases", true)
+        HomeSection("trendingSeries", "Trending Series", true),
+        HomeSection("popular", "Popular Movies", true),
+        HomeSection("popularSeries", "Popular Series", true),
+        HomeSection("recommended", "Recommended Movies", true),
+        HomeSection("genre1", "Because You Like Action", true),
+        HomeSection("newReleases", "New Movie Releases", true),
+        HomeSection("genre2", "More Sci-Fi", true)
     )
 
     // Flow states for reactive Compose observation
@@ -256,15 +256,17 @@ class PreferencesManager(context: Context) {
         return try {
             val type = object : TypeToken<List<HomeSection>>() {}.type
             val saved: List<HomeSection> = gson.fromJson(json, type) ?: return defaultSections
-            val existingIds = saved.map { it.id }.toSet()
-            val missing = defaultSections.filter { !existingIds.contains(it.id) }
-            if (missing.isNotEmpty()) {
-                val merged = saved + missing
-                saveHomeSections(merged)
-                merged
-            } else {
-                saved
+            val labelMap = defaultSections.associate { it.id to it.label }
+            val updated = saved.map { sec ->
+                labelMap[sec.id]?.let { sec.copy(label = it) } ?: sec
             }
+            val existingIds = updated.map { it.id }.toSet()
+            val missing = defaultSections.filter { !existingIds.contains(it.id) }
+            val finalSections = if (missing.isNotEmpty()) updated + missing else updated
+            if (finalSections != saved) {
+                saveHomeSections(finalSections)
+            }
+            finalSections
         } catch (e: Exception) {
             defaultSections
         }

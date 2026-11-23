@@ -1,18 +1,21 @@
-### What's New in Cinemora v2.3.16 🎬
+WHAT'S NEW IN CINEMORA v2.3.17
 
-- 📺 **Unified "Series" Terminology Across Cinemora**: Consistent use of "Series" instead of "TV Show" across Search, Library, and Details, fixing all spelling and naming discrepancies.
-- 🍿 **Dedicated Series Discovery Rails on Home**: Added new "Trending Series" and "Binge-Worthy Series" rails to the Home Screen so you can seamlessly explore both blockbuster movies and captivating multi-season series.
-- 🌟 **Extensive Series Catalog**: Expanded mock data with 11+ acclaimed, high-rating series (Stranger Shadows, Breaking Bad, The Last Frontier, Severance, Dark, Arcane, Peaky Syndicate, The Culinary Order, Chernobyl, Better Call Saul, and more) complete with episode breakdowns, cast, and high-res backdrops.
-- ⚙️ **"Disable Series" Toggle (Movies-Only Mode)**: Added a new `CONTENT` section in Settings allowing you to completely hide all TV series across Home, Search, and Library.
-- 📚 **Tailored Library UI/UX in Movies-Only Mode**: When "Disable Series" is active, Library transitions to a specialized Movies-only layout with an instant collection search bar and collection badge, hiding the redundant category filter chips.
-- 🏷️ **Sleek "SERIES" Badge on Poster Cards**: Visual badge indicators on poster cards for quick distinction between standalone movies and episodic series.
+  • Strict Separation of Movie and Series Rails on Home Screen
+    Trending Movies, Popular Movies, Recommended Movies, and genre rails strictly contain movies only.
+    Trending Series and Popular Series rails strictly contain series only. No mixed rails.
 
----
+  • Hero Main Card Features Both Movies and Series
+    The top featured card section now showcases top blockbuster movies and popular series with smooth swiping and indicators.
 
-### What's New in Cinemora v2.3.15 🎬
+  • Clean Poster Cards Without Series Tags
+    Removed the series badge tag from poster cards for a clean and uncluttered look since all rails are clearly separated.
 
-- 🚀 **100% Native Kotlin Compose Architecture**: Completely purged all legacy web code, Capacitor plugins, and Node artifacts. The codebase is now strictly focused on the ultra-fast native Android APK with zero bloat.
-- 🎨 **Unified Navigation Bar Grey Border**: Styled the navigation bar border outline to perfectly match the sleek grey border color used on settings tiles and cards (`colors.divider`).
-- 🏠 **Enhanced Library Empty State Action**: Tapping "Find Movies" or "Discover" in the empty Watchlist or Favorites screen now smoothly takes you back to the Home discovery rails.
-- 🏷️ **Clean Settings Version Display**: Removed "(Native)" from the Settings footer version display, showing a clean `"Cinemora v2.3.15"`.
-- 🧹 **Complete Codebase Cleanup**: Comprehensive cleanup of orphaned configs, boilerplate tests, and dead files with added Kotlin unit tests.
+  • Dynamic Episode Switching Across Seasons
+    Changing from Season 1 to Season 2 and beyond now dynamically updates all episode names, numbers, overviews, runtimes, and ratings.
+
+  • Realigned Series Details Screen
+    Cast rail is now prominently placed at the top directly beneath the synopsis, matching the movie details layout.
+    More Like This similar series rail is included at the bottom.
+
+  • Clean Plaintext Update Notes
+    Changelog is aligned with spaces and clean spacing without markup formatting.

@@ -1,5 +1,7 @@
 package com.jeessunny.cinemora.ui.screens
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -75,7 +79,8 @@ fun HomeScreen(
         }
     }
 
-    val heroMovie = remember(disableSeries) { CatalogData.getHeroItem(allowSeries = !disableSeries) }
+    val heroItems = remember(disableSeries) { CatalogData.getHeroItems(allowSeries = !disableSeries) }
+    val heroPagerState = rememberPagerState(pageCount = { heroItems.size })
     val activeSections = remember(homeSections, disableSeries) {
         homeSections.filter { it.enabled && (!disableSeries || (it.id != "trendingSeries" && it.id != "popularSeries")) }
     }
@@ -136,19 +141,60 @@ fun HomeScreen(
             }
         }
 
-        // Hero Card
-        if (heroMovie != null) {
+        // Hero Card Pager (features both movies and series when enabled)
+        if (heroItems.isNotEmpty()) {
             item {
-                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp)) {
-                    HeroCard(
-                        movie = heroMovie,
-                        onClick = { onMovieClick(heroMovie) }
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 12.dp)
+                ) {
+                    HorizontalPager(
+                        state = heroPagerState,
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        pageSpacing = 12.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { page ->
+                        val item = heroItems[page]
+                        HeroCard(
+                            movie = item,
+                            onClick = { onMovieClick(item) }
+                        )
+                    }
+
+                    if (heroItems.size > 1) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            repeat(heroItems.size) { index ->
+                                val isSelected = heroPagerState.currentPage == index
+                                val indicatorWidth by animateDpAsState(
+                                    targetValue = if (isSelected) 22.dp else 6.dp,
+                                    label = "hero_dot_w"
+                                )
+                                val indicatorColor by animateColorAsState(
+                                    targetValue = if (isSelected) colors.primary else colors.divider,
+                                    label = "hero_dot_c"
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .padding(horizontal = 3.dp)
+                                        .height(6.dp)
+                                        .width(indicatorWidth)
+                                        .clip(CircleShape)
+                                        .background(indicatorColor)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        // Dynamic Rails
+        // Dynamic Rails (Strict separation: movie rails only movies, series rails only series)
         activeSections.forEach { section ->
             item(key = section.id) {
                 Box(
@@ -157,10 +203,10 @@ fun HomeScreen(
                         .padding(vertical = 10.dp)
                 ) {
                     when (section.id) {
-                        "recommended" -> {
+                        "trending" -> {
                             ScrollRail(
-                                title = "Recommended For You",
-                                movies = CatalogData.getRecommended(listOf(g1Id, g2Id), allowSeries = !disableSeries),
+                                title = "Trending Movies",
+                                movies = CatalogData.getTrendingMovies(),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
@@ -179,10 +225,10 @@ fun HomeScreen(
                                 )
                             }
                         }
-                        "genre1" -> {
+                        "popular" -> {
                             ScrollRail(
-                                title = "Because You Like $g1",
-                                movies = CatalogData.getMoviesByGenreId(g1Id, allowSeries = !disableSeries),
+                                title = "Popular Movies",
+                                movies = CatalogData.getPopularMovies(),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
@@ -192,7 +238,7 @@ fun HomeScreen(
                         "popularSeries" -> {
                             if (!disableSeries) {
                                 ScrollRail(
-                                    title = "Binge-Worthy Series",
+                                    title = "Popular Series",
                                     movies = CatalogData.getPopularSeries(),
                                     watchlistIds = watchlistIds,
                                     favoriteIds = favoriteIds,
@@ -201,30 +247,20 @@ fun HomeScreen(
                                 )
                             }
                         }
-                        "genre2" -> {
+                        "recommended" -> {
                             ScrollRail(
-                                title = "More $g2",
-                                movies = CatalogData.getMoviesByGenreId(g2Id, allowSeries = !disableSeries),
+                                title = "Recommended Movies",
+                                movies = CatalogData.getRecommended(listOf(g1Id, g2Id), allowSeries = false),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
                                 onMovieClick = onMovieClick
                             )
                         }
-                        "trending" -> {
+                        "genre1" -> {
                             ScrollRail(
-                                title = if (disableSeries) "Trending Movies" else "Trending Now",
-                                movies = CatalogData.getTrending(allowSeries = !disableSeries),
-                                watchlistIds = watchlistIds,
-                                favoriteIds = favoriteIds,
-                                historyIds = historyIds,
-                                onMovieClick = onMovieClick
-                            )
-                        }
-                        "popular" -> {
-                            ScrollRail(
-                                title = "Popular in Your Taste",
-                                movies = CatalogData.getPopular(allowSeries = !disableSeries),
+                                title = "Because You Like $g1",
+                                movies = CatalogData.getMoviesByGenreId(g1Id, allowSeries = false),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,
@@ -233,8 +269,18 @@ fun HomeScreen(
                         }
                         "newReleases" -> {
                             ScrollRail(
-                                title = "New Releases",
-                                movies = CatalogData.getNewReleases(allowSeries = !disableSeries),
+                                title = "New Movie Releases",
+                                movies = CatalogData.getNewReleaseMovies(),
+                                watchlistIds = watchlistIds,
+                                favoriteIds = favoriteIds,
+                                historyIds = historyIds,
+                                onMovieClick = onMovieClick
+                            )
+                        }
+                        "genre2" -> {
+                            ScrollRail(
+                                title = "More $g2",
+                                movies = CatalogData.getMoviesByGenreId(g2Id, allowSeries = false),
                                 watchlistIds = watchlistIds,
                                 favoriteIds = favoriteIds,
                                 historyIds = historyIds,

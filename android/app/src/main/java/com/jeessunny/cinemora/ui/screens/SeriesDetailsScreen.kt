@@ -67,8 +67,8 @@ fun SeriesDetailsScreen(
     val historyIds = remember(history) { history.map { it.id }.toSet() }
 
     var selectedSeasonNumber by remember { mutableStateOf(1) }
-    val episodes = remember(selectedSeasonNumber) {
-        CatalogData.getEpisodesForSeason(selectedSeasonNumber)
+    val episodes = remember(series.id, selectedSeasonNumber) {
+        CatalogData.getEpisodesForSeason(series.id, selectedSeasonNumber)
     }
 
     val scrimColor = when {
@@ -297,6 +297,66 @@ fun SeriesDetailsScreen(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
+        // Cast Rail (placed prominently at top, matching MovieDetailsScreen)
+        if (series.cast.isNotEmpty()) {
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Cast",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        items(series.cast) { member ->
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.width(90.dp)
+                            ) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(member.photoUrl)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = member.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .background(colors.surfaceContainerHigh)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = member.name,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = member.character,
+                                    fontSize = 11.sp,
+                                    color = colors.textSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+
         // Seasons Tab Selector
         item {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -402,66 +462,6 @@ fun SeriesDetailsScreen(
 
         item {
             Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        // Cast Rail
-        if (series.cast.isNotEmpty()) {
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Cast",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        items(series.cast) { member ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.width(90.dp)
-                            ) {
-                                AsyncImage(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(member.photoUrl)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = member.name,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .size(64.dp)
-                                        .clip(CircleShape)
-                                        .background(colors.surfaceContainerHigh)
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = member.name,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.textPrimary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = member.character,
-                                    fontSize = 11.sp,
-                                    color = colors.textSecondary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-            }
         }
 
         // Similar Series

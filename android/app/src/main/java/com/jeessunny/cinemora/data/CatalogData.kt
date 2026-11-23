@@ -582,8 +582,24 @@ object CatalogData {
     }
 
     fun getHeroItem(allowSeries: Boolean = true): Movie? {
-        val base = if (allowSeries) LOCAL_CATALOG else getMoviesOnly()
-        return base.firstOrNull()
+        val items = getHeroItems(allowSeries)
+        return items.firstOrNull()
+    }
+
+    fun getHeroItems(allowSeries: Boolean = true): List<Movie> {
+        val movies = getMoviesOnly()
+        if (!allowSeries) return movies.take(5)
+
+        val series = getSeries()
+        val combined = mutableListOf<Movie>()
+        val topMovies = movies.take(3)
+        val topSeries = series.take(3)
+        val maxLen = maxOf(topMovies.size, topSeries.size)
+        for (i in 0 until maxLen) {
+            if (i < topMovies.size) combined.add(topMovies[i])
+            if (i < topSeries.size) combined.add(topSeries[i])
+        }
+        return combined
     }
 
     fun searchMovies(query: String, type: String = "movies"): List<Movie> {
@@ -606,7 +622,7 @@ object CatalogData {
         val found = LOCAL_CATALOG.find { it.id == id && it.type == "movie" }
             ?: LOCAL_CATALOG.find { it.type == "movie" }
             ?: LOCAL_CATALOG[0]
-        val similar = LOCAL_CATALOG.filter { it.id != found.id && it.type == "movie" }.take(4)
+        val similar = LOCAL_CATALOG.filter { it.id != found.id && it.type == "movie" }.take(6)
         return found.copy(similar = similar)
     }
 
@@ -614,22 +630,130 @@ object CatalogData {
         val found = LOCAL_CATALOG.find { it.id == id && it.type == "tv" }
             ?: LOCAL_CATALOG.find { it.type == "tv" }
             ?: LOCAL_CATALOG[0]
-        val similar = LOCAL_CATALOG.filter { it.id != found.id && it.type == "tv" }.take(4)
+        val similar = LOCAL_CATALOG.filter { it.id != found.id && it.type == "tv" }.take(6)
         return found.copy(similar = similar)
     }
 
-    fun getEpisodesForSeason(seasonNumber: Int): List<Episode> {
-        return List(8) { i ->
+    fun getEpisodesForSeason(seriesId: Int, seasonNumber: Int): List<Episode> {
+        val series = LOCAL_CATALOG.find { it.id == seriesId }
+        val season = series?.seasons?.find { it.seasonNumber == seasonNumber }
+        val count = season?.episodeCount ?: 8
+        val baseYear = series?.year ?: 2024
+        val seasonYear = baseYear - ((series?.numberOfSeasons ?: 1) - seasonNumber).coerceAtLeast(0)
+
+        val season1Titles = listOf(
+            "Pilot: Genesis", "Point of Divergence", "Shadow Protocol",
+            "Threshold of Doubt", "The Blind Spot", "Fallen Vectors",
+            "Critical Mass", "The Singularity", "Aftershocks", "Zero Point"
+        )
+        val season2Titles = listOf(
+            "The Aftermath", "Fragmented Memory", "Architects of Deceit",
+            "Ghosts in the Grid", "Zero-Day Vulnerability", "Subterranean Whispers",
+            "The Quorum Falls", "Convergence", "Fallout", "New Horizon"
+        )
+        val season3Titles = listOf(
+            "New World Order", "The Defector", "Fractured Realities",
+            "Echo Chamber", "A King's Ransom", "Counter-Offensive",
+            "Ashes of the Past", "Resurrection", "Retaliation", "Checkmate"
+        )
+        val season4Titles = listOf(
+            "Ascension", "Sins of the Fathers", "The Long March",
+            "Dark Horizon", "Retribution", "Sanctuary",
+            "The Reckoning", "Finality", "Collateral", "Redemption"
+        )
+        val season5Titles = listOf(
+            "Blood Money", "The Empire Business", "Say My Name",
+            "Gliding Over All", "To'hajiilee", "Ozymandias",
+            "Granite State", "Felina", "Live Free or Die", "Madrigal"
+        )
+        val season6Titles = listOf(
+            "Wine and Roses", "Carrot and Stick", "Rock and Hard Place",
+            "Hit and Run", "Black and Blue", "Plan and Execution",
+            "Point and Shoot", "Saul Gone", "Nippy", "Waterworks"
+        )
+
+        val titles = when (seasonNumber) {
+            1 -> season1Titles
+            2 -> season2Titles
+            3 -> season3Titles
+            4 -> season4Titles
+            5 -> season5Titles
+            6 -> season6Titles
+            else -> season2Titles
+        }
+
+        val overviews = when (seasonNumber) {
+            1 -> listOf(
+                "An unexpected discovery sets events in motion as secrets from the past threaten the present.",
+                "Tensions rise within the inner circle when a routine operation takes a perilous turn.",
+                "An unlikely ally offers critical intelligence, leading down a dangerous rabbit hole.",
+                "A confrontation forces tough choices that test loyalty and moral boundaries.",
+                "Crucial revelations surface, shifting alliances and setting up a dangerous gamble.",
+                "The stakes escalate drastically as hidden enemies step out into the open.",
+                "A daring counter-strike is launched with everything hanging in the balance.",
+                "A dramatic showdown leaves enduring consequences that will alter the future forever."
+            )
+            2 -> listOf(
+                "In the wake of recent catastrophe, a fragmented syndicate struggles to rebuild.",
+                "New evidence exposes deep-seated deception reaching into the upper echelon.",
+                "A desperate race against time begins when an operative disappears without a trace.",
+                "A high-stakes encounter at an isolated summit uncovers a devastating betrayal.",
+                "Power dynamics shift unexpectedly as an ambitious rival makes their move.",
+                "A fragile truce is threatened by an explosive truth buried for a decade.",
+                "Backs against the wall, extreme measures become the only viable option.",
+                "The season reaches a heart-stopping climax where sacrifices must be made."
+            )
+            3 -> listOf(
+                "Rising from the ashes, a new chapter begins with higher stakes and deadlier adversaries.",
+                "Secrets from across the border trigger an international crisis.",
+                "Old grudges resurface as former comrades find themselves on opposite sides.",
+                "A covert extraction mission encounters catastrophic complications.",
+                "The psychological toll takes center stage as trusted bonds begin to splinter.",
+                "A strategic chess move corners their enemies, but at a tremendous price.",
+                "The countdown begins to a point of no return for all involved.",
+                "An unforgettable turning point shatters expectations and alters every destiny."
+            )
+            else -> listOf(
+                "The conflict reaches fever pitch as all lingering accounts must be settled.",
+                "Hidden motives are finally laid bare in a tense confrontation.",
+                "A desperate gambit turns the tide when defeat seemed all but certain.",
+                "A sacrifice is demanded to preserve what remains of the inner circle.",
+                "The final pieces fall into place as judgment day arrives.",
+                "All paths converge in a momentous finale that defines their legacy."
+            )
+        }
+
+        val stills = listOf(
+            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80",
+            "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&q=80",
+            "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&q=80",
+            "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80",
+            "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80",
+            "https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?w=1200&q=80",
+            "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&q=80",
+            "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&q=80"
+        )
+
+        return List(count) { i ->
+            val epNum = i + 1
+            val titleName = titles.getOrElse(i) { "Episode $epNum: The Reckoning" }
+            val epOverview = overviews.getOrElse(i % overviews.size) { "Key events unfold with lasting consequences." }
+            val still = stills[(i + seasonNumber) % stills.size]
+            val runtime = 46 + ((i * 3 + seasonNumber * 2) % 18)
+            val rating = 8.4f + (((i * 7 + seasonNumber * 3) % 14) / 10f)
+
             Episode(
-                id = (seasonNumber * 100) + (i + 1),
-                episodeNumber = i + 1,
-                name = "Episode ${i + 1}: The Convergence",
-                overview = "A pivotal event shifts the balance of power as unexpected consequences surface.",
-                airDate = "2024-01-15",
-                runtime = 52,
-                rating = 8.8f,
-                stillUrl = "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80"
+                id = (seriesId * 1000) + (seasonNumber * 100) + epNum,
+                episodeNumber = epNum,
+                name = "S${seasonNumber}E${epNum}: $titleName",
+                overview = epOverview,
+                airDate = "$seasonYear-${(seasonNumber * 2 + i / 4).coerceIn(1, 12).toString().padStart(2, '0')}-${((i * 3 + 4) % 28 + 1).toString().padStart(2, '0')}",
+                runtime = runtime,
+                rating = ((rating * 10).toInt() / 10f).coerceIn(8.0f, 9.9f),
+                stillUrl = still
             )
         }
     }
+
+    fun getEpisodesForSeason(seasonNumber: Int): List<Episode> = getEpisodesForSeason(107, seasonNumber)
 }
