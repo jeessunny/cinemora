@@ -28,7 +28,7 @@
   - Customizable home screen rails with smooth spring animations.
   - Configurable system status bar visibility with smooth animated transition.
 - 💾 **Local-First Reliability**: Pure local state persistence via SharedPreferences and Kotlin Coroutines StateFlow. Zero startup crashes, instant screen rendering, and full offline accessibility.
-- 🚀 **Automated GitHub Actions CI/CD**: Automatic signed release APK compilation, SHA256 checksumming, and GitHub Release deployment on tag push (`v*.*.*`).
+- 🚀 **Reproducible Build & Offline Release Signing**: GitHub Actions compiles clean unsigned release artifacts while production APK signing and `apksigner` verification remain strictly offline under private developer custody.
 
 ---
 
@@ -104,32 +104,35 @@ cinemora/
 - Java 17 (JDK)
 - Android Studio Hedgehog / Iguana / Jellyfish (or Android SDK 34)
 
-### Building the Native APK
+### Building & Signing the Native APK
+
+See the complete **[Release Signing & Publishing Guide](docs/RELEASE_SIGNING.md)** for full keystore setup, Gradle configuration, and release instructions.
 
 ```bash
 # Clone the repository
 git clone https://github.com/jeessunny/cinemora.git
-cd cinemora/android
+cd cinemora
 
-# Build release APK with Gradle
-./gradlew assembleRelease
+# Build, sign locally (using android/keystore.properties or env vars), and verify with apksigner
+./scripts/release.sh
+
+# Or sign an unsigned APK artifact downloaded from GitHub Actions
+./scripts/release.sh --input path/to/cinemora-release-unsigned.apk
 ```
 
-The compiled APK will be generated at:
-`android/app/build/outputs/apk/release/cinemora-release.apk`.
+The signed, verified APK and SHA-256 checksum will be output to `releases/cinemora-release.apk`.
 
 ---
 
 ## 🤖 GitHub Actions Workflow
 
-When a new version tag (e.g. `v2.3.15`) is pushed to GitHub:
+When a new version tag (e.g. `v2.3.17`) is pushed to GitHub:
 
-1. GitHub Actions checks out the repository.
+1. GitHub Actions checks out the repository without any signing secrets or private keys.
 2. Sets up JDK 17 and Gradle.
-3. Decodes the release signing keystore.
-4. Compiles the native release APK (`./gradlew assembleRelease`).
-5. Generates the SHA256 checksum file.
-6. Publishes an official GitHub Release with `cinemora-release.apk` and `cinemora-release.apk.sha256` attached automatically.
+3. Compiles the **unsigned** native release APK (`./gradlew assembleRelease`).
+4. Uploads `cinemora-release-unsigned.apk` and its SHA-256 checksum as a workflow artifact and creates a **Draft** GitHub Release.
+5. The release engineer downloads the unsigned artifact, signs and verifies it locally via `./scripts/release.sh --input ...`, and publishes the signed `cinemora-release.apk`.
 
 ---
 

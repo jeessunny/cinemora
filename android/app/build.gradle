@@ -43,34 +43,48 @@ android {
         ]
     }
 
+    // Load release signing credentials from environment variables or untracked local properties file.
+    // Never hardcode credentials or fall back to the debug keystore for release builds.
+    def keystoreProps = new Properties()
+    def localKeystorePropsFile = rootProject.file("keystore.properties")
+    def userKeystorePropsFile = new File(System.getProperty("user.home"), ".cinemora-signing/keystore.properties")
+    if (localKeystorePropsFile.exists()) {
+        localKeystorePropsFile.withInputStream { keystoreProps.load(it) }
+    } else if (userKeystorePropsFile.exists()) {
+        userKeystorePropsFile.withInputStream { keystoreProps.load(it) }
+    }
+
+    def releaseKeystorePath = System.getenv("KEYSTORE_FILE") ?: keystoreProps.getProperty("storeFile")
+    def releaseStorePassword = System.getenv("STORE_PASSWORD") ?: keystoreProps.getProperty("storePassword")
+    def releaseKeyAlias = System.getenv("KEY_ALIAS") ?: keystoreProps.getProperty("keyAlias")
+    def releaseKeyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProps.getProperty("keyPassword")
+
+    def releaseKeystoreFile = releaseKeystorePath ? file(releaseKeystorePath) : null
+    def hasReleaseSigning = releaseKeystoreFile != null &&
+            releaseKeystoreFile.exists() &&
+            releaseStorePassword &&
+            releaseKeyAlias &&
+            releaseKeyPassword
+
     signingConfigs {
         release {
-            def envKeystorePath = System.getenv("KEYSTORE_FILE") ?: "keystore/release.jks"
-            def envKeyAlias = System.getenv("KEY_ALIAS") ?: "cinemora"
-            def envKeyPassword = System.getenv("KEY_PASSWORD") ?: "cinemora_release_pass"
-            def envStorePassword = System.getenv("STORE_PASSWORD") ?: "cinemora_release_pass"
-
-            def keystoreFile = file(envKeystorePath)
-            if (keystoreFile.exists()) {
-                storeFile = keystoreFile
-                storePassword = envStorePassword
-                keyAlias = envKeyAlias
-                keyPassword = envKeyPassword
-            } else {
-                storeFile = signingConfigs.debug.storeFile
-                storePassword = signingConfigs.debug.storePassword
-                keyAlias = signingConfigs.debug.keyAlias
-                keyPassword = signingConfigs.debug.keyPassword
+            if (hasReleaseSigning) {
+                storeFile = releaseKeystoreFile
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                enableV1Signing = true
+                enableV2Signing = true
             }
-            v1SigningEnabled true
-            v2SigningEnabled true
         }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.release
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

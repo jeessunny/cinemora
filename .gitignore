@@ -7,7 +7,24 @@
 logs/
 *.log
 release_output/
+releases/
+dist/
 *.local
+
+# Keystores & Release Signing Credentials
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.pk8
+*.key
+keystore/
+**/keystore/
+keystore.properties
+signing.properties
+*.signing.properties
+.cinemora-signing/
 
 # Environment
 .env
