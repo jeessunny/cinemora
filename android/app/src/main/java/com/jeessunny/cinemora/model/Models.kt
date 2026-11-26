@@ -63,16 +63,13 @@ data class UpdateInfo(
     val version: String,
     val tagName: String,
     val releaseNotes: String,
-    val downloadUrl: String,
-    val fileSize: Long
+    val releaseUrl: String
 )
 
 sealed class UpdateState {
     object Idle : UpdateState()
     object Checking : UpdateState()
     data class Available(val info: UpdateInfo) : UpdateState()
-    data class Downloading(val progressPercent: Int, val bytesDownloaded: Long, val totalBytes: Long) : UpdateState()
-    data class Ready(val apkFile: java.io.File, val info: UpdateInfo) : UpdateState()
     object UpToDate : UpdateState()
     data class Error(val message: String) : UpdateState()
 }

@@ -1009,57 +1009,14 @@ fun UpdateDialogView() {
                         Spacer(modifier = Modifier.height(18.dp))
 
                         Button(
-                            onClick = { UpdateManager.startDownload(context, current.info) },
+                            onClick = { UpdateManager.openReleasePage(context, current.info.releaseUrl) },
                             colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(46.dp)
                         ) {
-                            Text(text = "Update Now", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        }
-                    }
-
-                    is UpdateState.Downloading -> {
-                        Text(
-                            text = "Downloading Update... ${current.progressPercent}%",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = colors.textPrimary
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        LinearProgressIndicator(
-                            progress = current.progressPercent / 100f,
-                            color = colors.primary,
-                            trackColor = colors.surfaceContainerHighest,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                        )
-                    }
-
-                    is UpdateState.Ready -> {
-                        Text(
-                            text = "Update Downloaded!",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF46D369)
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "Ready to install Cinemora ${current.info.tagName}.",
-                            fontSize = 13.sp,
-                            color = colors.textSecondary
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { UpdateManager.installApk(context, current.apkFile) },
-                            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = "Install Now", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(text = "Download on GitHub", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         }
                     }
 

@@ -36,10 +36,10 @@ jobs:
       - name: Make gradlew Executable
         run: chmod +x android/gradlew
 
-      - name: Build Unsigned Release APK
+      - name: Run Unit Tests & Build Unsigned Release APK
         run: |
           cd android
-          ./gradlew assembleRelease --stacktrace
+          ./gradlew testReleaseUnitTest assembleRelease --stacktrace
 
       - name: Locate & Rename Unsigned Release APK
         id: prepare_apk

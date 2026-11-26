@@ -17,11 +17,10 @@
 - 🖤 **Pure Pitch Black (AMOLED Mode)**: True `#000000` pitch black background and container styling engineered for OLED displays and battery efficiency.
 - 🔲 **Edge-to-Edge Immersive Fullscreen**: True edge-to-edge layout supporting Android gesture navigation and camera cutouts with transparent system bars.
 - 📚 **Media Library**: Dedicated Library tab with categorized movie and TV discovery, fast local filtering, and search history.
-- 🔄 **In-App Updater**:
-  - Automated GitHub Releases checking via `api.github.com`.
-  - Background streaming APK download with live percentage and MB progress indicators.
-  - Native Android Package Installer integration using `FileProvider` with unknown-sources permission validation.
-  - Silent update checks on startup + manual "Check for Updates" button in Settings.
+- 🔄 **Release Update Checker**:
+  - Automated HTTPS GitHub Releases checking via `api.github.com` with strict TLS and URL validation.
+  - Clean changelog viewer in Settings and on startup when a newer release tag is published.
+  - Safe browser handoff directly to the verified GitHub Releases page for manual installation (no `REQUEST_INSTALL_PACKAGES` permission).
 - 🎨 **Material 3 Customization**:
   - 10 accent color palettes (Netflix Red, Electric Blue, Emerald Green, Cyberpunk Purple, Amber, and more).
   - Floating pill or fixed bottom navigation bar with matching theme border outline.
