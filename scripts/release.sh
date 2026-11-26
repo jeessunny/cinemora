@@ -147,8 +147,8 @@ if [ -z "$APKSIGNER_BIN" ]; then
 fi
 ZIPALIGN_BIN="$(find_sdk_tool zipalign || true)"
 
-# Extract versionName from android/app/build.gradle
-VERSION_NAME="$(grep -E '^[[:space:]]*versionName[[:space:]]+"' "$APP_GRADLE" | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')"
+# Extract versionName from android/app/build.gradle (supports literal versionName "..." or def appVersionName = "...")
+VERSION_NAME="$(grep -E '^[[:space:]]*(def[[:space:]]+appVersionName[[:space:]]*=[[:space:]]*|versionName[[:space:]]+)"' "$APP_GRADLE" | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')"
 [ -z "$VERSION_NAME" ] && VERSION_NAME="unknown"
 
 mkdir -p "$RELEASE_DIR"
