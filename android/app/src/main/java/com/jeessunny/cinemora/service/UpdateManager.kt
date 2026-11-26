@@ -103,9 +103,21 @@ object UpdateManager {
         return c.isPreRelease && !l.isPreRelease
     }
 
+    internal data class ApkAssetCandidate(
+        val name: String,
+        val downloadUrl: String,
+        val size: Long
+    )
+
+    internal fun isStableRelease(draft: Boolean, prerelease: Boolean): Boolean {
+        return !draft && !prerelease
+    }
+
     internal fun isStableRelease(releaseJson: JSONObject): Boolean {
-        return !releaseJson.optBoolean("draft", false) &&
-            !releaseJson.optBoolean("prerelease", false)
+        return isStableRelease(
+            draft = releaseJson.optBoolean("draft", false),
+            prerelease = releaseJson.optBoolean("prerelease", false)
+        )
     }
 
     internal fun isTrustedDownloadUrl(candidateUrl: String): Boolean {
@@ -145,22 +157,30 @@ object UpdateManager {
         }
     }
 
+    internal fun selectApkAsset(candidates: List<ApkAssetCandidate>): Pair<String, Long>? {
+        val valid = candidates.filter {
+            it.name.endsWith(".apk", ignoreCase = true) && isTrustedDownloadUrl(it.downloadUrl)
+        }
+        val preferred = valid.firstOrNull { it.name.equals("cinemora-release.apk", ignoreCase = true) }
+            ?: valid.firstOrNull { it.name.contains("cinemora", ignoreCase = true) && !it.name.contains("unsigned", ignoreCase = true) }
+            ?: valid.firstOrNull { !it.name.contains("unsigned", ignoreCase = true) }
+        return preferred?.let { Pair(it.downloadUrl, it.size) }
+    }
+
     internal fun selectApkAsset(releaseJson: JSONObject): Pair<String, Long>? {
         val assets = releaseJson.optJSONArray("assets") ?: return null
-        val candidates = mutableListOf<Triple<String, String, Long>>()
+        val candidates = mutableListOf<ApkAssetCandidate>()
         for (i in 0 until assets.length()) {
             val asset = assets.optJSONObject(i) ?: continue
-            val name = asset.optString("name", "")
-            val url = asset.optString("browser_download_url", "")
-            val size = asset.optLong("size", 0L)
-            if (name.endsWith(".apk", ignoreCase = true) && isTrustedDownloadUrl(url)) {
-                candidates.add(Triple(name, url, size))
-            }
+            candidates.add(
+                ApkAssetCandidate(
+                    name = asset.optString("name", ""),
+                    downloadUrl = asset.optString("browser_download_url", ""),
+                    size = asset.optLong("size", 0L)
+                )
+            )
         }
-        val preferred = candidates.firstOrNull { it.first.equals("cinemora-release.apk", ignoreCase = true) }
-            ?: candidates.firstOrNull { it.first.contains("cinemora", ignoreCase = true) && !it.first.contains("unsigned", ignoreCase = true) }
-            ?: candidates.firstOrNull { !it.first.contains("unsigned", ignoreCase = true) }
-        return preferred?.let { Pair(it.second, it.third) }
+        return selectApkAsset(candidates)
     }
 
     internal fun sha256Hex(bytes: ByteArray): String {

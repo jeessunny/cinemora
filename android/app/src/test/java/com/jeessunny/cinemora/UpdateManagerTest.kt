@@ -1,8 +1,7 @@
 package com.jeessunny.cinemora
 
 import com.jeessunny.cinemora.service.UpdateManager
-import org.json.JSONArray
-import org.json.JSONObject
+import com.jeessunny.cinemora.service.UpdateManager.ApkAssetCandidate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -25,24 +24,33 @@ class UpdateManagerTest {
 
     @Test
     fun testStableReleaseFilteringIgnoresDraftsAndPrereleases() {
-        val stable = JSONObject().put("draft", false).put("prerelease", false)
-        val draft = JSONObject().put("draft", true).put("prerelease", false)
-        val prerelease = JSONObject().put("draft", false).put("prerelease", true)
-
-        assertTrue(UpdateManager.isStableRelease(stable))
-        assertFalse(UpdateManager.isStableRelease(draft))
-        assertFalse(UpdateManager.isStableRelease(prerelease))
+        assertTrue(UpdateManager.isStableRelease(draft = false, prerelease = false))
+        assertFalse(UpdateManager.isStableRelease(draft = true, prerelease = false))
+        assertFalse(UpdateManager.isStableRelease(draft = false, prerelease = true))
+        assertFalse(UpdateManager.isStableRelease(draft = true, prerelease = true))
     }
 
     @Test
     fun testApkAssetSelectionPrefersSignedReleaseApk() {
-        val assets = JSONArray()
-            .put(JSONObject().put("name", "cinemora-release-unsigned.apk").put("browser_download_url", "https://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release-unsigned.apk").put("size", 100L))
-            .put(JSONObject().put("name", "cinemora-release.apk").put("browser_download_url", "https://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release.apk").put("size", 15954534L))
-            .put(JSONObject().put("name", "cinemora-release.apk.sha256").put("browser_download_url", "https://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release.apk.sha256").put("size", 87L))
+        val candidates = listOf(
+            ApkAssetCandidate(
+                name = "cinemora-release-unsigned.apk",
+                downloadUrl = "https://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release-unsigned.apk",
+                size = 100L
+            ),
+            ApkAssetCandidate(
+                name = "cinemora-release.apk",
+                downloadUrl = "https://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release.apk",
+                size = 15954534L
+            ),
+            ApkAssetCandidate(
+                name = "cinemora-release.apk.sha256",
+                downloadUrl = "https://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release.apk.sha256",
+                size = 87L
+            )
+        )
 
-        val release = JSONObject().put("assets", assets)
-        val selected = UpdateManager.selectApkAsset(release)
+        val selected = UpdateManager.selectApkAsset(candidates)
         assertNotNull(selected)
         assertTrue(selected!!.first.endsWith("cinemora-release.apk"))
         assertEquals(15954534L, selected.second)
@@ -50,16 +58,23 @@ class UpdateManagerTest {
 
     @Test
     fun testApkAssetSelectionRejectsCleartextAndUnsignedOnly() {
-        val cleartextOnly = JSONObject().put(
-            "assets",
-            JSONArray().put(
-                JSONObject()
-                    .put("name", "cinemora-release.apk")
-                    .put("browser_download_url", "http://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release.apk")
-                    .put("size", 123L)
+        val cleartextOnly = listOf(
+            ApkAssetCandidate(
+                name = "cinemora-release.apk",
+                downloadUrl = "http://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release.apk",
+                size = 123L
             )
         )
         assertNull(UpdateManager.selectApkAsset(cleartextOnly))
+
+        val unsignedOnly = listOf(
+            ApkAssetCandidate(
+                name = "cinemora-release-unsigned.apk",
+                downloadUrl = "https://github.com/jeessunny/cinemora/releases/download/v2.3.19/cinemora-release-unsigned.apk",
+                size = 123L
+            )
+        )
+        assertNull(UpdateManager.selectApkAsset(unsignedOnly))
     }
 
     @Test
