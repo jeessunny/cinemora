@@ -58,7 +58,7 @@ cp android/keystore.properties.example android/keystore.properties
 chmod 600 android/keystore.properties
 ```
 
-Contents of `android/keystore.properties` (automatically ignored by `.gitignore`):
+Contents of `android/keystore.properties` (automatically ignored by `.gitignore`; for `PKCS12` keystores, `storePassword` and `keyPassword` must be identical):
 
 ```properties
 storeFile=/absolute/path/to/.cinemora-signing/cinemora-release.jks
