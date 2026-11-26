@@ -962,8 +962,11 @@ fun UpdateDialogView() {
                     }
 
                     is UpdateState.Available -> {
+                        val sizeMbText = if (current.info.fileSize > 0) {
+                            String.format(java.util.Locale.US, " • %.1f MB", current.info.fileSize / (1024.0 * 1024.0))
+                        } else ""
                         Text(
-                            text = "New Version ${current.info.tagName} Available!",
+                            text = "New Version ${current.info.tagName} Available!$sizeMbText",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = colors.primary
@@ -1008,15 +1011,174 @@ fun UpdateDialogView() {
 
                         Spacer(modifier = Modifier.height(18.dp))
 
-                        Button(
-                            onClick = { UpdateManager.openReleasePage(context, current.info.releaseUrl) },
-                            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                            shape = RoundedCornerShape(10.dp),
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { UpdateManager.dismissDialog() },
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(1.dp, colors.divider),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp)
+                            ) {
+                                Text(text = "Later", color = colors.textSecondary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                            }
+                            Button(
+                                onClick = { UpdateManager.startDownload(context, current.info) },
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp)
+                            ) {
+                                Text(text = "Update Now", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            }
+                        }
+                    }
+
+                    is UpdateState.Downloading -> {
+                        val downloadedMb = current.bytesDownloaded / (1024.0 * 1024.0)
+                        val totalMb = current.totalBytes / (1024.0 * 1024.0)
+                        val progressText = if (current.totalBytes > 0) {
+                            String.format(java.util.Locale.US, "%.1f / %.1f MB (%d%%)", downloadedMb, totalMb, current.progressPercent)
+                        } else {
+                            "Downloading... ${current.progressPercent}%"
+                        }
+                        Text(
+                            text = "Downloading ${current.info.tagName}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = progressText,
+                            fontSize = 13.sp,
+                            color = colors.textSecondary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        LinearProgressIndicator(
+                            progress = current.progressPercent / 100f,
+                            color = colors.primary,
+                            trackColor = colors.surfaceContainerHighest,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(46.dp)
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedButton(
+                            onClick = { UpdateManager.cancelDownload() },
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, colors.divider),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
                         ) {
-                            Text(text = "Download on GitHub", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text(text = "Cancel Download", color = colors.textSecondary, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+
+                    is UpdateState.Verifying -> {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = colors.primary,
+                                strokeWidth = 2.dp
+                            )
+                            Text(
+                                text = "Verifying package & signing certificate...",
+                                color = colors.textSecondary,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+
+                    is UpdateState.Ready -> {
+                        Text(
+                            text = "Verified & Ready to Install",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF46D369)
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Cinemora ${current.info.tagName} passed signature verification.",
+                            fontSize = 13.sp,
+                            color = colors.textSecondary
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { UpdateManager.dismissDialog() },
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(1.dp, colors.divider),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp)
+                            ) {
+                                Text(text = "Later", color = colors.textSecondary, fontWeight = FontWeight.SemiBold)
+                            }
+                            Button(
+                                onClick = { UpdateManager.installApk(context, current.apkFile, current.info) },
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp)
+                            ) {
+                                Text(text = "Install Now", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    is UpdateState.PermissionRequired -> {
+                        Text(
+                            text = "Install Permission Required",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.primary
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Android requires you to allow \"Install unknown apps\" for Cinemora in Settings before launching the system installer.",
+                            fontSize = 13.sp,
+                            color = colors.textSecondary,
+                            lineHeight = 19.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { UpdateManager.openUnknownAppSourcesSettings(context) },
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(1.dp, colors.divider),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp)
+                            ) {
+                                Text(text = "Open Settings", color = colors.textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                            }
+                            Button(
+                                onClick = { UpdateManager.installApk(context, current.apkFile, current.info) },
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp)
+                            ) {
+                                Text(text = "Install Now", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
                         }
                     }
 
@@ -1046,7 +1208,7 @@ fun UpdateDialogView() {
 
                     is UpdateState.Error -> {
                         Text(
-                            text = "Update Check Failed",
+                            text = "Update Failed",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFE50914)
@@ -1055,16 +1217,36 @@ fun UpdateDialogView() {
                         Text(
                             text = current.message,
                             fontSize = 13.sp,
-                            color = colors.textSecondary
+                            color = colors.textSecondary,
+                            lineHeight = 19.sp
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { UpdateManager.checkForUpdates(context, true) },
-                            colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.fillMaxWidth()
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = "Retry", color = Color.White, fontWeight = FontWeight.Bold)
+                            if (current.releaseUrl != null) {
+                                OutlinedButton(
+                                    onClick = { UpdateManager.openReleasePage(context, current.releaseUrl) },
+                                    shape = RoundedCornerShape(10.dp),
+                                    border = BorderStroke(1.dp, colors.divider),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(44.dp)
+                                ) {
+                                    Text(text = "Open GitHub", color = colors.textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                }
+                            }
+                            Button(
+                                onClick = { UpdateManager.checkForUpdates(context, true) },
+                                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(44.dp)
+                            ) {
+                                Text(text = "Retry", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
                         }
                     }
 

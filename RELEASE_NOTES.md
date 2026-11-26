@@ -1,13 +1,10 @@
-WHAT'S NEW IN CINEMORA v2.3.18
+WHAT'S NEW IN CINEMORA v2.3.19
 
-  • Security Hardening & Manifest Cleanup
-    Removed REQUEST_INSTALL_PACKAGES permission, FileProvider external-storage path exposures, and unused legacy WebView/Cordova layout and configuration artifacts.
+  • Secure In-App Update & Installation System
+    Restored in-app APK update downloading and user-approved native Android installation, showing release notes, APK size, live download progress, and cancel support.
 
-  • Strict HTTPS Network Security
-    Set usesCleartextTraffic to false and added a dedicated Network Security Configuration permitting HTTPS connections with system certificate authorities only.
+  • Mandatory Certificate Pinning & Package Verification
+    Every downloaded APK is independently inspected via Android PackageManager before installation, verifying package ID (com.jeessunny.cinemora), newer version, and exact SHA-256 match against Cinemora's permanent release signing certificate.
 
-  • Verified GitHub Releases Update Checker
-    Synchronized BuildConfig APP_VERSION dynamically with versionName (2.3.18) and updated release checking to open the verified GitHub Releases page safely in the browser instead of downloading APK files in-app.
-
-  • Hardened Backup Configuration
-    Disabled automatic backup extraction (allowBackup=false) for local app preferences.
+  • Strict HTTPS & Private Update Cache Scope
+    All update API calls, redirects, and APK downloads enforce HTTPS-only GitHub hosts, store temporary downloads in private app cache, clean incomplete files on error or cancellation, and restrict FileProvider strictly to the cache updates directory.

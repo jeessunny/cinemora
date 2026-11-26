@@ -5,8 +5,8 @@ android {
     namespace "com.jeessunny.cinemora"
     compileSdk 34
 
-    def appVersionCode = 20318
-    def appVersionName = "2.3.18"
+    def appVersionCode = 20319
+    def appVersionName = "2.3.19"
 
     defaultConfig {
         applicationId "com.jeessunny.cinemora"

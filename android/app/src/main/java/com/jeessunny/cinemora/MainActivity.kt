@@ -59,7 +59,8 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdgeFullscreen()
 
-        // Background update check on launch
+        // Clear leftover update APKs from previous sessions and check for stable updates
+        UpdateManager.clearUpdateCache(this)
         UpdateManager.checkForUpdates(this, isManual = false)
 
         setContent {
