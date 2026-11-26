@@ -120,7 +120,7 @@ cd cinemora
 ./scripts/release.sh --input path/to/cinemora-release-unsigned.apk
 ```
 
-The signed, verified APK and SHA-256 checksum will be output to `releases/cinemora-release.apk`.
+The signed, verified APK and SHA-256 checksum will be output to `/sdcard/AI/Projects/cinemora/cinemora-release.apk` on Android/Termux (or `releases/cinemora-release.apk` on desktop).
 
 ---
 
@@ -132,7 +132,7 @@ When a new version tag (e.g. `v2.3.17`) is pushed to GitHub:
 2. Sets up JDK 17 and Gradle.
 3. Compiles the **unsigned** native release APK (`./gradlew assembleRelease`).
 4. Uploads `cinemora-release-unsigned.apk` and its SHA-256 checksum as a workflow artifact and creates a **Draft** GitHub Release.
-5. The release engineer downloads the unsigned artifact, signs and verifies it locally via `./scripts/release.sh --input ...`, and publishes the signed `cinemora-release.apk`.
+5. The release engineer signs and verifies the APK locally via `./scripts/release.sh --input ...` into `/sdcard/AI/Projects/cinemora/`, tests it on device, and publishes `cinemora-release.apk` only after verification.
 
 ---
 

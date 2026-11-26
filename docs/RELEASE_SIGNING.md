@@ -112,27 +112,27 @@ If you build on GitHub Actions CI (e.g., when developing from a mobile/headless 
 ./scripts/release.sh --input path/to/cinemora-release-unsigned.apk
 ```
 
-Both workflows output verified distributable files to `releases/`:
-- `releases/cinemora-release.apk` (canonical name used by the in-app updater)
-- `releases/cinemora-release.apk.sha256`
-- `releases/cinemora-v<version>-release.apk`
-- `releases/cinemora-v<version>-release.apk.sha256`
+Both workflows output verified distributable files to `/sdcard/AI/Projects/cinemora/` on Android/Termux (or `releases/` on desktop, overridable via `--out <dir>` / `CINEMORA_RELEASE_DIR`):
+- `cinemora-release.apk` (canonical name used by the in-app updater)
+- `cinemora-release.apk.sha256`
+- `cinemora-v<version>-release.apk`
+- `cinemora-v<version>-release.apk.sha256`
 
 ### Signature Verification Checklist
 
 Verify manually at any time with Android SDK `apksigner`:
 
 ```bash
-apksigner verify --verbose --print-certs releases/cinemora-release.apk
+apksigner verify --verbose --print-certs /sdcard/AI/Projects/cinemora/cinemora-release.apk
 ```
 
 Confirm:
-- `Verifies` returns true (`Verified using v1 scheme (JAR signing): true`, `v2 scheme: true`, `v3 scheme: true`).
+- `Verifies` returns true (`Verified using v2 scheme: true`, `v3 scheme: true`; note v1 is optional/skipped on `minSdkVersion 24+`).
 - `Signer #1 certificate SHA-256 digest` matches your permanent release keystore SHA-256 (`031591007721cff3364a0da79c611f26bc89b5e6fb9d4bed9dc251d8465900b8`).
 
 ---
 
-## 4. GitHub Actions & Release Preparation
+## 4. GitHub Actions & Release Preparation (Test-Before-Publish)
 
 When pushing code to `main` or a version tag (`v*.*.*`):
 
@@ -141,7 +141,7 @@ When pushing code to `main` or a version tag (`v*.*.*`):
    - Workflow artifact: `cinemora-release-unsigned-apk` (`cinemora-release-unsigned.apk` + `.sha256`)
    - On tag push (`v*.*.*`): Creates a **Draft** GitHub Release containing the unsigned APK so live users are never served an unsigned update.
 
-2. **Sign & Publish Release Locally**:
+2. **Sign Locally, Test on Device, Then Publish Release**:
    ```bash
    # 1. Tag and push version release (wait for CI build to finish)
    git tag v2.3.18
@@ -150,15 +150,17 @@ When pushing code to `main` or a version tag (`v*.*.*`):
    # 2. Download unsigned APK artifact from the completed CI run
    gh run download --name cinemora-release-unsigned-apk --dir /tmp/cinemora-unsigned
 
-   # 3. Sign and verify locally with your private keystore
+   # 3. Sign and verify locally (outputs directly to /sdcard/AI/Projects/cinemora)
    ./scripts/release.sh --input /tmp/cinemora-unsigned/cinemora-release-unsigned.apk
 
-   # 4. Upload verified signed APK + checksum to the draft release, remove unsigned assets, and publish
+   # 4. Install and test /sdcard/AI/Projects/cinemora/cinemora-release.apk on device BEFORE publishing!
+
+   # 5. Once verified working, upload signed APK + checksum to the draft release & publish
    gh release delete-asset v2.3.18 cinemora-release-unsigned.apk --yes || true
    gh release delete-asset v2.3.18 cinemora-release-unsigned.apk.sha256 --yes || true
    gh release upload v2.3.18 \
-     releases/cinemora-release.apk \
-     releases/cinemora-release.apk.sha256 \
+     /sdcard/AI/Projects/cinemora/cinemora-release.apk \
+     /sdcard/AI/Projects/cinemora/cinemora-release.apk.sha256 \
      --clobber
    gh release edit v2.3.18 --draft=false
    ```

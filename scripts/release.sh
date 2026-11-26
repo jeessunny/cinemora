@@ -19,7 +19,15 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ANDROID_DIR="$REPO_ROOT/android"
 APP_GRADLE="$ANDROID_DIR/app/build.gradle"
-RELEASE_DIR="$REPO_ROOT/releases"
+
+DEFAULT_ANDROID_STORAGE_DIR="/sdcard/AI/Projects/cinemora"
+if [ -n "${CINEMORA_RELEASE_DIR:-}" ]; then
+  RELEASE_DIR="$CINEMORA_RELEASE_DIR"
+elif [ -d "/sdcard/AI/Projects" ] && [ -w "/sdcard/AI/Projects" ]; then
+  RELEASE_DIR="$DEFAULT_ANDROID_STORAGE_DIR"
+else
+  RELEASE_DIR="$REPO_ROOT/releases"
+fi
 
 INPUT_APK=""
 RUN_CLEAN=false
@@ -30,6 +38,7 @@ Usage: $(basename "$0") [OPTIONS]
 
 Options:
   --input, -i <apk>   Sign and verify an existing unsigned APK (e.g. from GitHub Actions)
+  --out,   -o <dir>   Override output directory (default: /sdcard/AI/Projects/cinemora if available, else ./releases)
   --clean, -c         Run Gradle clean before building locally
   --help,  -h         Show this help message
 EOF
@@ -43,6 +52,14 @@ while [ "$#" -gt 0 ]; do
         exit 1
       fi
       INPUT_APK="$2"
+      shift 2
+      ;;
+    --out|-o)
+      if [ "$#" -lt 2 ]; then
+        echo "Error: --out requires a directory path." >&2
+        exit 1
+      fi
+      RELEASE_DIR="$2"
       shift 2
       ;;
     --clean|-c)
